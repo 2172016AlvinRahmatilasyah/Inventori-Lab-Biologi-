@@ -1,13 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Edit Jenis Barang</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-</head>
-<body class="d-flex justify-content-center align-items-center vh-100">
+@extends('layouts.app')
+
+@section('title', 'Edit Jenis Barang')
+
+@section('content')
+<script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('template/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="{{ asset('template/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="{{ asset('template/js/sb-admin-2.min.js') }}"></script>
+
+<script src="{{ asset('template/vendor/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('template/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
+
+<script src="{{ asset('template/js/demo/datatables-demo.js') }}"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
     <div class="container">
         <div class="card mx-auto" style="max-width: 500px;">
             <div class="card-header text-center">Edit Jenis Barang</div>
@@ -17,6 +28,7 @@
             <div class="card-body">
                 <form action="{{ route('EditJenisBarang') }}" method="post">
                     @csrf
+                    @method('PUT')
                     <input type="hidden" name="jenis_barang_id" value="{{ $jenis_barang->id }}">
                     <div class="mb-3">
                         <label for="formGroupExampleInput" class="form-label">Nama Jenis Barang</label>
@@ -37,5 +49,4 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+@endsection

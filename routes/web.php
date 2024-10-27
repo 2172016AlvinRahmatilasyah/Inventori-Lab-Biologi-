@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::post('add-jenis-barang', [JenisBarangController::class, 'AddJenisBarang'])->name('AddJenisBarang');
     Route::get('edit-jenis-barang/{id}', [JenisBarangController::class, 'loadEditForm']);
     Route::get('delete-jenis-barang/{id}', [JenisBarangController::class, 'deleteJenisBarang']);
-    Route::post('edit-jenis-barang', [JenisBarangController::class, 'EditJenisBarang'])->name('EditJenisBarang');
+    Route::put('edit-jenis-barang', [JenisBarangController::class, 'EditJenisBarang'])->name('EditJenisBarang');
     // Route::get('detail-barang/{id}', [JenisBarangController::class, 'show'])->name('barang.detail');
 
     Route::get('kelola-barang', [BarangController::class, 'loadAllBarangs'])->name('kelola-barang');
@@ -35,7 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::post('add-barang', [BarangController::class, 'AddBarang'])->name('AddBarang');
     Route::get('edit-barang/{id}', [BarangController::class, 'loadEditForm']);
     Route::get('delete-barang/{id}', [BarangController::class, 'deleteBarang']);
-    Route::post('edit-barang', [BarangController::class, 'EditBarang'])->name('EditBarang');
+    Route::put('edit-barang', [BarangController::class, 'EditBarang'])->name('EditBarang');
     // Route::get('detail-barang/{id}', [JenisBarangController::class, 'show'])->name('barang.detail');
 });
 

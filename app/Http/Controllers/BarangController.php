@@ -50,11 +50,11 @@ class BarangController extends Controller
         // Validasi input dari pengguna
         $request->validate([
             'barang_id' => 'required|exists:barangs,id', // Pastikan barang_id valid
-            'nama_barang' => 'required|string',
-            'jenis_barang_id' => 'required|exists:jenis_barangs,id', // Pastikan jenis_barang_id valid
-            'stok' => 'required|numeric',
+            'nama_barang' => 'nullable|string',
+            'jenis_barang_id' => 'nullable|exists:jenis_barangs,id', // Pastikan jenis_barang_id valid
+            'stok' => 'nullable|numeric',
             'kadaluarsa' => 'nullable|date',
-            'lokasi' => 'required|string',
+            'lokasi' => 'nullable|string',
         ]);
 
         try {
@@ -69,15 +69,16 @@ class BarangController extends Controller
 
             return redirect('/kelola-barang')->with('success', 'Barang Updated Successfully');
         } catch (\Exception $e) {
-            return redirect('/edit-barang' . $request->barang_id)->with('fail', $e->getMessage());
+            return redirect('/edit-barang/' . $request->barang_id)->with('fail', $e->getMessage());
         }
     }
 
 
+
     public function loadEditForm($id){
         $barang = barang::find($id);
-
-        return view('kelola-jenis-barang.edit-barang',compact('barang'));
+        $jenis_barangs = jenis_barang::all();
+        return view('kelola-barang.edit-barang',compact('barang', 'jenis_barangs'));
     }
 
     public function deleteBarang($id){
