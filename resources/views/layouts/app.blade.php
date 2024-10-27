@@ -58,7 +58,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="{{ url('/kelola-barang') }}">Data Barang</a>
                         <a class="collapse-item" href="{{ url('/kelola-jenis-barang') }}">Data Jenis Barang</a>
-                        <a class="collapse-item" href="{{ url('/kelola-saldo-awal') }}">Saldo Awal</a>
+                        <a class="collapse-item" href="{{ url('/saldo-awal') }}">Saldo Awal</a>
                     </div>
                 </div>
             </li>
