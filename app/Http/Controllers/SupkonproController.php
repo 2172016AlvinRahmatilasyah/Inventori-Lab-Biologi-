@@ -77,7 +77,14 @@ class SupkonproController extends Controller
         }
     }
 
-    public function EditSupkonpro(Request $request)
+    public function loadEditForm($id, $jenis){
+        $supkonpros = supkonpro::findOrFail($id);
+
+        return view('supkonpro.edit-supkonpro', compact('supkonpros', 'jenis'));
+
+    }
+    
+    public function EditSupkonpro(Request $request, $id, $jenis)
     {
         $request->validate([
             'nama' => 'required|string',
@@ -98,18 +105,12 @@ class SupkonproController extends Controller
                 'email' => $request->email,
                 'jenis' => $request->jenis,
                 'status' => $request->status,
-
             ]);
 
-            return redirect('/supkonpro')->with('success', 'Updated Successfully');
+            return redirect('/supkonpro/' . $jenis)->with('success', 'Updated Successfully');
         } catch (\Exception $e) {
-            return redirect('/supkonpro/' . $request->supkonpro_id)->with('fail', $e->getMessage());
+            return redirect('/supkonpro/' . $jenis)->with('fail', $e->getMessage());
         }
-    }
-
-    public function loadEditForm($id){
-        $supkonpros = supkonpro::find($id);
-        return view('supkonpro.edit-supkonpro',compact('supkonpros'));
     }
 
     public function deleteSupkonpro($id, $jenis)

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Barang')
+@section('title', 'Edit Supkonproy')
 
 @section('content')
 <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
@@ -21,96 +21,90 @@
 
     <div class="container">
         <div class="card mx-auto" style="max-width: 500px;">
-            <div class="card-header text-center">Edit Barang</div>
+            <div class="card-header text-center">Edit Supkonproy</div>
             @if (Session::has('fail'))
                 <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
             @endif
             <div class="card-body">
-                <form action="{{ route('EditBarang') }}" method="post">
+                <form action="{{ route('EditSupkonpro', ['id' => $supkonpros->id, 'jenis' => $supkonpros->jenis]) }}" method="POST">
                     @csrf
-                    @method('PUT') 
-                    <input type="hidden" name="barang_id" value="{{ $barang->id }}">
+                    @method('PUT')
+                    <input type="hidden" name="supkonpro_id" value="{{ $supkonpros->id }}">
                     <div class="mb-3">
-                        <label for="formGroupExampleInput" class="form-label">Nama Barang</label>
-                        <input type="text" name="nama_barang" value="{{ $barang->nama_barang }}" 
-                               class="form-control" id="formGroupExampleInput" 
-                               placeholder="Enter Nama barang">
-                        @error('nama_barang')
+                        <label for="nama" class="form-label">Nama</label>
+                        <input type="text" name="nama" id="nama" value="{{ $supkonpros->nama }}"
+                          class="form-control" placeholder="Enter Nama">
+                        @error('nama')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label for="jenis_barang_id" class="form-label">Jenis Id Barang</label>
-                        <select name="jenis_barang_id" class="form-control select2" id="jenis_barang_id">
-                            <option value="">Pilih Jenis Barang</option>
-                            @foreach ($jenis_barangs as $jenis_barang)
-                                <option value="{{ $jenis_barang->id }}" 
-                                    {{ old('jenis_barang_id', $barang->jenis_barang_id) == $jenis_barang->id ? 'selected' : '' }}>
-                                    {{ $jenis_barang->nama_jenis_barang }} (ID: {{ $jenis_barang->id }})
-                                </option>
-                            @endforeach
-                        </select>                        
-                        @error('jenis_barang_id')
-                            <span class="text-danger">{{$message}}</span>
+                        <label for="alamat" class="form-label">alamat</label>
+                        <input type="text" name="alamat" id="alamat" value="{{ $supkonpros->alamat }}"
+                          class="form-control" placeholder="Enter alamat">
+                        @error('alamat')
+                            <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label for="stok" class="form-label">Stok</label>
-                        <input type="number" name="stok" id="stok" class="form-control" 
-                          value="{{ $barang->stok }}" placeholder="Enter stok barang">
-                        @error('stok')
+                        <label for="kota" class="form-label">kota</label>
+                        <input type="text" name="kota" id="kota" class="form-control" 
+                          value="{{ $supkonpros->kota }}" placeholder="Enter kota">
+                        @error('kota')
                             <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-                    
-                    <div class="mb-3" id="kadaluarsa-container">
-                        <label for="kadaluarsa" class="form-label">Tanggal Kadaluarsa</label>
-                        <input type="date" name="kadaluarsa" id="kadaluarsa" 
-                          value="{{$barang->kadaluarsa}}" class="form-control" 
-                          placeholder="Enter tanggal kadaluarsa">
-                        @error('kadaluarsa')
-                            <span class="text-danger">{{$message}}</span>
                         @enderror
                     </div>
                     
                     <div class="mb-3">
-                        <label for="lokasi" class="form-label">Lokasi</label>
-                        <input type="text" name="lokasi" id="lokasi" class="form-control" 
-                         value="{{ $barang->lokasi }}" placeholder="Enter lokasi barang">
-                        @error('lokasi')
+                        <label for="telepon" class="form-label">telepon</label>
+                        <input type="text" name="telepon" id="telepon" class="form-control" 
+                          value="{{ $supkonpros->telepon }}" placeholder="Enter telepon">
+                        @error('telepon')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">email</label>
+                        <input type="email" name="email" id="email" class="form-control" 
+                         value="{{ $supkonpros->email }}" placeholder="Enter email">
+                        @error('email')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="jenis" class="form-label">Jenis</label>
+                        <select name="jenis" id="jenis" class="form-control">
+                            <option value="" disabled {{ is_null($supkonpros->jenis) ? 'selected' : '' }}>Select jenis</option>
+                            <option value="supplier" {{ $supkonpros->jenis === 'supplier' ? 'selected' : '' }}>Supplier</option>
+                            <option value="konsumen" {{ $supkonpros->jenis === 'konsumen' ? 'selected' : '' }}>Konsumen</option>
+                            <option value="proyek" {{ $supkonpros->jenis === 'proyek' ? 'selected' : '' }}>Proyek</option>
+                        </select>
+                        @error('jenis')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="" disabled {{ is_null($supkonpros->status) ? 'selected' : '' }}>Select status</option>
+                            <option value="aktif" {{ $supkonpros->status === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                            <option value="nonaktif" {{ $supkonpros->status === 'nonaktif' ? 'selected' : '' }}>Non Aktif</option>
+                        </select>
+                        @error('status')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    
+                    
+
                     <button type="submit" class="btn btn-primary w-100">Save</button>
                 </form>
             </div>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Initialize select2 on the select element
-            $('.select2').select2(); 
-            
-            // When a barang (item) is selected
-            $('#jenis_barang_id').change(function() {
-                // Get the selected option's data attributes
-                var namaJenisBarang = $(this).find(':selected').data('nama-jenis-barang');
-                var satuanStok = $(this).find(':selected').data('satuan_stok');
-    
-                // Optionally handle satuanStok (assuming a hidden input or display field exists)
-                // $('#stok').val(satuanStok || '');  // You can add a field for satuan_stok if needed
-    
-                // Check if the selected jenis_barang is "alat"
-                if (namaJenisBarang && namaJenisBarang.toLowerCase() === 'alat') {
-                    $('#kadaluarsa-container').hide();  // Hide the kadaluarsa input
-                } else {
-                    $('#kadaluarsa-container').show();  // Show the kadaluarsa input
-                }
-            });
-        });
-    </script>
 @endsection

@@ -100,20 +100,31 @@
             <hr class="sidebar-divider">
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{{ url('/kelola-admin') }}"
-                    aria-expanded="true" aria-controls="collapsePages">
-                    <i class="fas fa-fw fa-user-shield"></i>
-                    <span>Kelola Admin</span>
-                </a>
-            </li>
+            @if(auth()->user()->role == 'super admin')
+                <!-- Nav Item - Kelola Admin -->
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="{{ url('/kelola-user/admin') }}" aria-expanded="true" aria-controls="collapsePages">
+                        <i class="fas fa-fw fa-user-shield"></i>
+                        <span>Kelola Admin</span>
+                    </a>
+                </li>
+                <!-- Nav Item - Kelola User -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/kelola-user/user') }}">
+                        <i class="fas fa-fw fa-user-cog"></i>
+                        <span>Kelola User</span>
+                    </a>
+                </li>
+            @elseif(auth()->user()->role == 'admin')
+                <!-- Only show Kelola User for Admin -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/kelola-user/user') }}">
+                        <i class="fas fa-fw fa-user-cog"></i>
+                        <span>Kelola User</span>
+                    </a>
+                </li>
+            @endif
 
-            <!-- Nav Item - Charts -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('/kelola-user') }}">
-                    <i class="fas fa-fw fa-user-cog"></i>
-                    <span>Kelola User</span></a>
-            </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
