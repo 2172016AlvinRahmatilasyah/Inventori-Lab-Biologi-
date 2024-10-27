@@ -34,9 +34,10 @@
                 <form action="{{ route('jenis-barangs.search') }}" method="GET" class="d-flex mt-3">
                     <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
+                    <a href="{{ route('kelola-jenis-barang') }}" class="btn btn-secondary ml-3 ">Reset</a>
                 </form>
+                
             </div>
-            
             
         
             <div class="card-body">
