@@ -1,10 +1,12 @@
 <?php
 
+use App\Models\supkonpro;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\JenisBarangController;
 use App\Http\Controllers\SaldoAwalController;
+use App\Http\Controllers\SupkonproController;
+use App\Http\Controllers\JenisBarangController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -37,18 +39,22 @@ Route::middleware('auth')->group(function () {
     Route::get('edit-barang/{id}', [BarangController::class, 'loadEditForm']);
     Route::get('delete-barang/{id}', [BarangController::class, 'deleteBarang']);
     Route::put('edit-barang', [BarangController::class, 'EditBarang'])->name('EditBarang');
-    // Route::get('detail-barang/{id}', [JenisBarangController::class, 'show'])->name('barang.detail');
 
     Route::get('saldo-awal', [SaldoAwalController::class, 'loadAllSaldoAwals'])->name('saldo-awal');
     Route::get('saldo-awal-search', [SaldoAwalController::class, 'search'])->name('saldoawals.search');
     Route::get('saldoawals', [SaldoAwalController::class, 'loadAllSaldoAwals']);
     Route::get('add-saldo-awal', [SaldoAwalController::class, 'loadAddForm']);
     Route::post('add-saldo-awal', [SaldoAwalController::class, 'AddSaldoAwal'])->name('AddSaldoAwal');
-    // Route::get('edit-barang/{id}', [SaldoAwalController::class, 'loadEditForm']);
-    // Route::get('delete-barang/{id}', [SaldoAwalController::class, 'deleteBarang']);
-    // Route::put('edit-barang', [SaldoAwalController::class, 'EditBarang'])->name('EditBarang');
-    // Route::get('detail-barang/{id}', [JenisBarangController::class, 'show'])->name('barang.detail');
-
+   
+    // Route::get('/supkonpro/{jenis}', [supkonpro::class, 'handleType']);
+    Route::get('supkonpro/{jenis}', [SupkonproController::class, 'loadAllSupkonpros'])->name('supkonpro');
+    Route::get('supkonpro-search/{jenis}', [SupkonproController::class, 'search'])->name('supkonpros.search');
+    Route::get('supkonpros/{jenis}', [SupkonproController::class, 'loadAllSupkonpros']);
+    Route::get('add-{jenis}', [SupkonproController::class, 'loadAddForm']);
+    Route::post('add-{jenis}', [SupkonproController::class, 'AddSupkonpro'])->name('AddSupkonpro');
+    Route::get('edit-supkonpro/{id}/{jenis}', [SupkonproController::class, 'loadEditForm']);
+    Route::get('delete-supkonpro/{id}/{jenis}', [SupkonproController::class, 'deleteSupkonpro'])->name('supkonpro.delete');
+    Route::put('edit-supkonpro', [SupkonproController::class, 'EditSupkonpro'])->name('EditSupkonpro');
 });
 
 require __DIR__.'/auth.php';
