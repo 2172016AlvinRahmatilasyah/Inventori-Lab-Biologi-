@@ -96,12 +96,16 @@ class PenerimaanBarangController extends Controller
             $new_detail_penerimaan_barang->total_harga = $total_harga; // Use cleaned total_harga
             $new_detail_penerimaan_barang->save();
 
+            // Update the stock in barangs table
+            $barang = Barang::findOrFail($request->barang_id); // Fetch the barang by ID
+            $barang->stok += $request->jumlah_diterima; // Increment the stock
+            $barang->save(); // Save the updated stock back to the database
+
             return redirect('/master-barang-masuk/' . $request->jenis)->with('success', 'Data Added Successfully');
         } catch (\Exception $e) {
             return redirect('/tambah-barang-masuk')->with('fail', $e->getMessage());
         }
     }
-
 
     public function deleteMasterBarang($id){
         try {
@@ -112,5 +116,21 @@ class PenerimaanBarangController extends Controller
             
         }
     }
-    
+
+    public function detailMasterBarang($id){
+        // $all_master_penerimaans = PenerimaanBarang::where('id',$id);
+        // $all_supkonpros = supkonpro::where('id',$id);
+        // $all_users = User::where('id',$id);
+        // $all_jenis_penerimaans = JenisPenerimaan::where('id',$id);
+        // $all_detail_penerimaans = DetailPenerimaanBarang::where('id',$id);
+
+        
+        // return view('barang-masuk.detail-barang-masuk',compact('all_master_penerimaans', 'all_supkonpros', 
+        //             'all_users', 'all_jenis_penerimaans', 'all_detail_penerimaans'));
+        $master_barang = PenerimaanBarang::with(['supkonpro', 'user', 'jenispenerimaanbarang', 
+                         'barang', 'detailpenerimaanbarang'])
+                          ->findOrFail($id);
+
+        return view('barang-masuk.detail-barang-masuk', compact('master_barang'));
+    }    
 }

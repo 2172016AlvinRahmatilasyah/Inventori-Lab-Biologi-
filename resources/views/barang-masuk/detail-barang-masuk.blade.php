@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Barang Masuk')
+@section('title', 'Detail Barang Masuk')
 
 @section('content')
 <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
@@ -27,13 +27,13 @@
         <!-- DataTales Example -->
         <div class="card">
             <div class="card-header d-flex align-items-center">
-                <h2>Daftar Barang Masuk</h2>
+                <h2>Detail Barang Masuk</h2>
                 {{-- <a href="/add-barang-masuk" class="btn btn-success btn-sm ml-auto">Tambah Barang Masuk</a> --}}
-                <a href="{{ route('AddBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">Add Barang Masuk</a>
+                {{-- <a href="{{ route('AddBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">Add Barang Masuk</a> --}}
             </div>
             
         
-            {{-- Flash message for success or failure --}}
+            {{-- Flash message for success or failure
             @if(Session::has('success'))
                 <div class="alert alert-success">
                     {{ Session::get('success') }}
@@ -44,15 +44,15 @@
                 <div class="alert alert-danger">
                     {{ Session::get('fail') }}
                 </div>
-            @endif
+            @endif --}}
         
-            <div class="mb-3">
+            {{-- <div class="mb-3">
                 <form action="{{ route('master-barang-masuk.search') }}" method="GET" class="d-flex mt-3">
                     <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
                     <a href="{{ route('master-barang-masuk') }}" class="btn btn-secondary ml-3 ">Reset</a>
                 </form>
-            </div>
+            </div> --}}
             
             
         
@@ -67,9 +67,13 @@
                                 <th>Jenis Penerimaan</th>
                                 <th>Nama Pengantar</th>
                                 <th>Keterangan</th>
+                                <th>Nama Barang</th>
+                                <th>Jumlah Diterima</th>
+                                <th>Harga</th>
+                                <th>Total Harga</th>
                                 <th>Tanggal Ditambah</th>
                                 <th>Tanggal Diupdate</th>
-                                <th colspan="3">Action</th>
+                                {{-- <th colspan="3">Action</th> --}}
                             </tr>
                         </thead>
                         <tbody>
@@ -82,11 +86,15 @@
                                         <td>{{ $master_barang->jenispenerimaanbarang->jenis  ?? 'N/A' }}</td>
                                         <td>{{ $master_barang->nama_pengantar }}</td>
                                         <td>{{ $master_barang->keterangan }}</td>
+                                        <td>{{ $master_barang->barang->nama_barang ?? 'N/A'}}</td>
+                                        <td>{{ $master_barang->detailpenerimaanbarang->jumlah_diterima ?? 'N/A'}}</td>
+                                        <td>{{ $master_barang->detailpenerimaanbarang->harga ?? 'N/A'}}</td>
+                                        <td>{{ $master_barang->detailpenerimaanbarang->total_harga ?? 'N/A'}}</td>
                                         <td>{{ $master_barang->created_at }}</td>
                                         <td>{{ $master_barang->updated_at }}</td>
-                                        <td><a href="/edit-penerimaan-barang/{{ $master_barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
-                                        <td><a href="/delete-penerimaan-barang/{{ $master_barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
-                                        <td><a href="/detail-penerimaan-barang/{{ $master_barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
+                                        {{-- <td><a href="/edit-master-barang/{{ $master_barang->id }}" class="btn btn-primary btn-sm">Edit</a></td> --}}
+                                        {{-- <td><a href="/delete-master-barang/{{ $master_barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
+                                        {{-- <td><a href="/detail-master-barang/{{ $master_barang->id }}" class="btn btn-info btn-sm">Detail</a></td> --}}
                                     </tr>
                                     </tr>
                                 @endforeach

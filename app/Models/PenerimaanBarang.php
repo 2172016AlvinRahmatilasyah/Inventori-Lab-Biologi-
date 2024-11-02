@@ -29,6 +29,9 @@ class PenerimaanBarang extends Model
     {
         return $this->belongsTo(JenisPenerimaan::class, 'jenis_id');
     }
-    
+    public function barang()
+    {
+        return $this->belongsTo(barang::class, 'barang_id');
+    }
 
 }

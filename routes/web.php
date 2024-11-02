@@ -72,7 +72,9 @@ Route::middleware('auth')->group(function () {
     Route::get('master-barang-masuk-search', [PenerimaanBarangController::class, 'MasterBarangMasukSearch'])->name('master-barang-masuk.search');
     Route::get('tambah-barang-masuk', [PenerimaanBarangController::class, 'loadAddBarangMasukForm']);
     Route::post('tambah-barang-masuk', [PenerimaanBarangController::class, 'AddBarangMasuk'])->name('AddBarangMasuk');
-    Route::get('delete-master-barang/{id}', [PenerimaanBarangController::class, 'deleteMasterBarang']);
+    Route::get('delete-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'deleteMasterBarang']);
+    Route::get('detail-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'detailMasterBarang'])->name('detail-penerimaan-barang');
+
     
     // Route::get('barangs', [PenerimaanBarangController::class, 'loadAllBarangs']);
     // Route::get('edit-barang/{id}', [PenerimaanBarangController::class, 'loadEditForm']);
