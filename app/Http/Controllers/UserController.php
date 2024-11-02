@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -23,7 +24,7 @@ class UserController extends Controller
         return view('kelola-user.index', compact('all_users', 'role'));
     }
 
-    public function loadAddForm($role){
+    public function loadAddUserForm($role){
         $all_users = User::where('role', $role)->get();;
         return view('kelola-user.add-user', compact('all_users', 'role'));
     }
@@ -62,36 +63,40 @@ class UserController extends Controller
     }
 
     public function EditUser(Request $request, $id, $role)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'role' => ['required', 'in:admin,user'],
-            'email' => 'required|email',
-            'phone_number' => 'required|string',
-            'password' => 'nullable|min:8', // nullable agar password opsional
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string',
+        'email' => 'required|email',
+        'phone_number' => 'required|string',
+        'current_password' => 'required', // Add validation for current password
+        'password' => 'nullable|min:8',
+    ]);
 
-        try {
-            $user = User::findOrFail($id);
-            $user->name = $request->name;
-            $user->role = $request->role;
-            $user->email = $request->email;
-            $user->phone_number = $request->phone_number;
+    try {
+        $user = User::findOrFail($id);
 
-            // Update password jika ada input baru
-            if ($request->filled('password')) {
-                $user->password = bcrypt($request->password);
-            }
-
-            $user->save();
-
-            return redirect('/kelola-user/' . $role)->with('success', 'Updated Successfully');
-        } catch (\Exception $e) {
-            return redirect('/kelola-user/' . $role)->with('fail', $e->getMessage());
+        // Check if the current password matches
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect('/kelola-user/' . $role)
+                   ->with('fail', 'Current password is incorrect.');
         }
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->phone_number = $request->phone_number;
+
+        // Update password if there's a new input
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
+        }
+
+        $user->save();
+
+        return redirect('/kelola-user/' . $role)->with('success', 'Updated Successfully');
+    } catch (\Exception $e) {
+        return redirect('/kelola-user/' . $role)->with('fail', $e->getMessage());
     }
-
-
+}
 
 
     public function deleteUser($id, $role)

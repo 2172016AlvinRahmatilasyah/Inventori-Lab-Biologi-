@@ -13,33 +13,37 @@ class SaldoAwalController extends Controller
         return view('saldo-awal.index',compact('all_saldo_awals'));
     }
 
-    public function loadAddForm(){
+    public function loadAddSaldoAwalForm(){
         $all_saldo_awals = SaldoAwal::all();
         $barangs = barang::all(); // Fetch all barangs
         return view('saldo-awal.add-saldo-awal', compact('all_saldo_awals', 'barangs'));
     }
 
-    public function AddSaldoAwal(Request $request){
-        // perform form validation here
+    public function AddSaldoAwal(Request $request)
+    {
+        // Perform form validation here
         $request->validate([
-            'barang_id' => 'required|exists:barangs,id', 
+            'barang_id' => 'required|exists:barangs,id',
             'tahun' => 'required|string',
-            'bulan' => 'required||string|in:01,02,03,04,05,06,07,08,09,10,11,12',
-            'saldo_awal' => 'required|numeric',
-            'total_terima' => 'required|numeric',
-            'total_keluar' => 'required|numeric',
-            'saldo_akhir' => 'required|numeric',
+            'bulan' => 'required|string|in:01,02,03,04,05,06,07,08,09,10,11,12',
+            'saldo_awal' => 'required',
+            'total_terima' => 'required',
+            'total_keluar' => 'required',
+            'saldo_akhir' => 'required',
         ]);
 
         try {
             $new_saldo_awal = new SaldoAwal();
-            $new_saldo_awal->barang_id = $request->barang_id; 
+            $new_saldo_awal->barang_id = $request->barang_id;
             $new_saldo_awal->tahun = $request->tahun;
-            $new_saldo_awal->bulan = $request->bulan; 
-            $new_saldo_awal->saldo_awal = $request->saldo_awal;
-            $new_saldo_awal->total_terima = $request->total_terima;
-            $new_saldo_awal->total_keluar = $request->total_keluar;
-            $new_saldo_awal->saldo_akhir = $request->saldo_akhir;
+            $new_saldo_awal->bulan = $request->bulan;
+
+            // Process the numeric inputs to remove any dots and convert to float
+            $new_saldo_awal->saldo_awal = $this->parseNumber($request->saldo_awal);
+            $new_saldo_awal->total_terima = $this->parseNumber($request->total_terima);
+            $new_saldo_awal->total_keluar = $this->parseNumber($request->total_keluar);
+            $new_saldo_awal->saldo_akhir = $this->parseNumber($request->saldo_akhir);
+
             $new_saldo_awal->save();
 
             return redirect('/saldo-awal')->with('success', 'Added Successfully');
@@ -47,6 +51,15 @@ class SaldoAwalController extends Controller
             return redirect('/saldo-awal')->with('fail', $e->getMessage());
         }
     }
+
+    /**
+     * Helper function to parse numbers formatted with dots as thousands separators.
+     */
+    private function parseNumber($number)
+    {
+        return (float) str_replace('.', '', $number);
+    }
+
 
 
     Public function search(Request $request)

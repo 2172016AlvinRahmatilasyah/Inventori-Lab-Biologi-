@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Kelola Barang')
+@section('title', 'Barang Masuk')
 
 @section('content')
 <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
@@ -27,8 +27,9 @@
         <!-- DataTales Example -->
         <div class="card">
             <div class="card-header d-flex align-items-center">
-                <h2>Daftar Barang</h2>
-                <a href="/add-barang" class="btn btn-success btn-sm ml-auto">Tambah Barang Baru</a>
+                <h2>Daftar Barang Masuk</h2>
+                {{-- <a href="/add-barang-masuk" class="btn btn-success btn-sm ml-auto">Tambah Barang Masuk</a> --}}
+                <a href="{{ route('AddBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">Add Barang Masuk</a>
             </div>
             
         
@@ -46,10 +47,10 @@
             @endif
         
             <div class="mb-3">
-                <form action="{{ route('barangs.search') }}" method="GET" class="d-flex mt-3">
+                <form action="{{ route('master-barang-masuk.search') }}" method="GET" class="d-flex mt-3">
                     <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
-                    <a href="{{ route('kelola-barang') }}" class="btn btn-secondary ml-3 ">Reset</a>
+                    <a href="{{ route('master-barang-masuk') }}" class="btn btn-secondary ml-3 ">Reset</a>
                 </form>
             </div>
             
@@ -60,40 +61,38 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Nama Barang</th>
-                                <th>Jenis Barang</th>
-                                <th>Stok</th>
-                                <th>Satuan Stok</th>
-                                <th>Kadaluarsa</th>
-                                <th>Lokasi</th>
+                                <th>No</th>
+                                <th>SupKonProy</th>
+                                <th>Nama Staff</th>
+                                <th>Jenis Penerimaan</th>
+                                <th>Nama Pengantar</th>
+                                <th>Keterangan</th>
                                 <th>Tanggal Ditambah</th>
                                 <th>Tanggal Diupdate</th>
                                 <th colspan="3">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if(isset($all_barangs) && count($all_barangs) > 0)
-                                @foreach ($all_barangs as $barang)
+                            @if(isset($all_master_penerimaans) && count($all_master_penerimaans) > 0)
+                                @foreach ($all_master_penerimaans as $master_barang)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $barang->nama_barang }}</td>
-                                        <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
-                                        <td>{{ $barang->stok }}</td>
-                                        <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td> <!-- Ambil satuan_stok dari relasi -->
-                                        <td>{{ $barang->kadaluarsa }}</td>
-                                        <td>{{ $barang->lokasi }}</td>
-                                        <td>{{ $barang->created_at }}</td>
-                                        <td>{{ $barang->updated_at }}</td>
-                                        <td><a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
-                                        <td><a href="/delete-barang/{{ $barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
-                                        <td><a href="/detail-barang/{{ $barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
+                                        <td>{{ $master_barang->supkonpro->nama ?? 'N/A' }}</td>
+                                        <td>{{ $master_barang->user->name }}</td>
+                                        <td>{{ $master_barang->jenispenerimaanbarang->jenis  ?? 'N/A' }}</td>
+                                        <td>{{ $master_barang->nama_pengantar }}</td>
+                                        <td>{{ $master_barang->keterangan }}</td>
+                                        <td>{{ $master_barang->created_at }}</td>
+                                        <td>{{ $master_barang->updated_at }}</td>
+                                        <td><a href="/edit-master-barang/{{ $master_barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
+                                        <td><a href="/delete-master-barang/{{ $master_barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
+                                        <td><a href="/detail-master-barang/{{ $master_barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
                                     </tr>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="8">Barang tidak ditemukan !</td>
+                                    <td colspan="8">Data tidak ditemukan !</td>
                                 </tr>
                             @endif
                         </tbody>

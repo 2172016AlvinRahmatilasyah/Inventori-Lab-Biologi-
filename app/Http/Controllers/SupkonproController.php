@@ -45,7 +45,7 @@ class SupkonproController extends Controller
         return view('supkonpro.index', compact('all_supkonpros', 'jenis'));
     }
 
-    public function loadAddForm($jenis){
+    public function loadAddSupkonproForm($jenis){
         $all_supkonpros = supkonpro::where('jenis', $jenis)->get();;
         return view('supkonpro.add-supkonpro', compact('all_supkonpros', 'jenis'));
     }

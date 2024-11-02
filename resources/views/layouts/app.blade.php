@@ -63,12 +63,26 @@
                 </div>
             </li>
 
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ url('/transaksi-barang-masuk') }}"
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-download"></i>
                     <span>Transaksi Barang Masuk</span>
                 </a>
+            </li> --}}
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBarangMasuk"
+                    aria-expanded="true" aria-controls="collapseBarangMasuk">
+                    <i class="fas fa-fw fa-download"></i>
+                    <span>Barang Masuk</span>
+                </a>
+                <div id="collapseBarangMasuk" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{{ url('/master-barang-masuk') }}">Master Barang Masuk</a>
+                        <a class="collapse-item" href="{{ url('/detail-barang-masuk') }}">Detail Barang Masuk</a>
+                        <a class="collapse-item" href="{{ url('/jenis-barang-masuk') }}">Jenis Barang Masuk</a>
+                    </div>
+                </div>
             </li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ url('/transaksi-barang-keluar') }}"
