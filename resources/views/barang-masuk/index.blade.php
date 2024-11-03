@@ -76,7 +76,7 @@
                             @if(isset($all_master_penerimaans) && count($all_master_penerimaans) > 0)
                                 @foreach ($all_master_penerimaans as $master_barang)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $master_barang->id }}</td>
                                         <td>{{ $master_barang->supkonpro->nama ?? 'N/A' }}</td>
                                         <td>{{ $master_barang->user->name }}</td>
                                         <td>{{ $master_barang->jenispenerimaanbarang->jenis  ?? 'N/A' }}</td>

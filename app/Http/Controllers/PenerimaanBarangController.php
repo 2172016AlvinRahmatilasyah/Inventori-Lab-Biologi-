@@ -68,7 +68,7 @@ class PenerimaanBarangController extends Controller
             'nama_pengantar' => 'required|string|max:255',
             'keterangan' => 'required|string',
             'barang_id' => 'required|exists:barangs,id',
-            'jumlah_diterima' => 'required|numeric',
+            'jumlah_diterima' => 'required',
             'harga' => 'required',  
             'total_harga' => 'required', 
         ]);
@@ -117,20 +117,54 @@ class PenerimaanBarangController extends Controller
         }
     }
 
-    public function detailMasterBarang($id){
-        // $all_master_penerimaans = PenerimaanBarang::where('id',$id);
-        // $all_supkonpros = supkonpro::where('id',$id);
-        // $all_users = User::where('id',$id);
-        // $all_jenis_penerimaans = JenisPenerimaan::where('id',$id);
-        // $all_detail_penerimaans = DetailPenerimaanBarang::where('id',$id);
+    public function detailMasterBarang($id)
+    {
+        $master_penerimaan = PenerimaanBarang::findOrFail($id);
+        $supkonpro = supkonpro::findOrFail($master_penerimaan->supkonpro_id);
+        $user = User::findOrFail($master_penerimaan->user_id);
+        $jenis_penerimaan = JenisPenerimaan::findOrFail($master_penerimaan->jenis_id);
+        $detail_penerimaan = DetailPenerimaanBarang::where('master_penerimaan_barang_id', $id)->get();
 
+        return view('barang-masuk.detail-barang-masuk', compact(
+            'master_penerimaan', 'supkonpro', 'user', 'jenis_penerimaan', 'detail_penerimaan',
+        ));
+    }
+    
+    public function loadAllDetailPenerimaanBarang(){
+        $all_detail_penerimaans= DetailPenerimaanBarang::all();
+        $all_master_penerimaans = PenerimaanBarang::all();
+        $all_supkonpros = supkonpro::all();
+        $all_users = User::all();
+        $all_jenis_penerimaans = JenisPenerimaan::all();
+        $all_barangs = barang::all();
         
-        // return view('barang-masuk.detail-barang-masuk',compact('all_master_penerimaans', 'all_supkonpros', 
-        //             'all_users', 'all_jenis_penerimaans', 'all_detail_penerimaans'));
-        $master_barang = PenerimaanBarang::with(['supkonpro', 'user', 'jenispenerimaanbarang', 
-                         'barang', 'detailpenerimaanbarang'])
-                          ->findOrFail($id);
+        return view('barang-masuk.index-detail',compact('all_detail_penerimaans',
+                    'all_master_penerimaans', 'all_supkonpros', 
+                    'all_users', 'all_jenis_penerimaans', 'all_barangs'));
+    }
+    
+    public function DetailBarangMasukSearch(Request $request)
+    {
+        $query = $request->input('query');
 
-        return view('barang-masuk.detail-barang-masuk', compact('master_barang'));
-    }    
+        $all_detail_penerimaans = DetailPenerimaanBarang::whereHas('PenerimaanBarang', function ($q) use ($query) {
+                $q->where('id', 'like', "%$query%");
+            })
+            ->orWhereHas('barang', function ($q) use ($query) {
+                $q->where('nama', 'like', "%$query%");
+            })
+            ->orWhere('jumlah_diterima', 'like', "%$query%")
+            ->orWhere('harga', 'like', "%$query%")
+            ->orWhere('total_harga', 'like', "%$query%")
+            ->get();
+
+        return view('barang-masuk.index-detail', compact('all_detail_penerimaans'));
+    }
+
+    public function loadAllJenisPenerimaanBarang(){
+        $all_jenis_penerimaans= JenisPenerimaan::all();
+        
+        return view('barang-masuk.jenis-barang-masuk',compact('all_jenis_penerimaans'));
+    }
+
 }

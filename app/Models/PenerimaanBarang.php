@@ -33,5 +33,8 @@ class PenerimaanBarang extends Model
     {
         return $this->belongsTo(barang::class, 'barang_id');
     }
-
+    public function detailpenerimaanbarang()
+    {
+        return $this->hasMany(DetailPenerimaanBarang::class, 'master_penerimaan_barang_id');
+    }
 }

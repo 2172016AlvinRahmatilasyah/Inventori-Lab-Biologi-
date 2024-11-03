@@ -17,12 +17,16 @@ class DetailPenerimaanBarang extends Model
 
     ];
 
-    public function masterPenerimaanBarang()
+    public function penerimaanBarang()
     {
         return $this->belongsTo(PenerimaanBarang::class, 'master_penerimaan_barang_id');
     }
     public function barang()
     {
         return $this->belongsTo(barang::class, 'barang_id');
+    }
+    public function supkonpro()
+    {
+        return $this->belongsTo(supkonpro::class, 'supkonpro_id');
     }
 }

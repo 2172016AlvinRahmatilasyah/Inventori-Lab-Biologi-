@@ -61,7 +61,8 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>No</th>
+                                <th>Id detail</th>
+                                <th>Id master</th>
                                 <th>SupKonProy</th>
                                 <th>Nama Staff</th>
                                 <th>Jenis Penerimaan</th>
@@ -77,24 +78,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if(isset($all_master_penerimaans) && count($all_master_penerimaans) > 0)
-                                @foreach ($all_master_penerimaans as $master_barang)
+                            @if(isset($detail_penerimaan) && count($detail_penerimaan) > 0)
+                                @foreach ($detail_penerimaan as $detail_penerimaan)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $master_barang->supkonpro->nama ?? 'N/A' }}</td>
-                                        <td>{{ $master_barang->user->name }}</td>
-                                        <td>{{ $master_barang->jenispenerimaanbarang->jenis  ?? 'N/A' }}</td>
-                                        <td>{{ $master_barang->nama_pengantar }}</td>
-                                        <td>{{ $master_barang->keterangan }}</td>
-                                        <td>{{ $master_barang->barang->nama_barang ?? 'N/A'}}</td>
-                                        <td>{{ $master_barang->detailpenerimaanbarang->jumlah_diterima ?? 'N/A'}}</td>
-                                        <td>{{ $master_barang->detailpenerimaanbarang->harga ?? 'N/A'}}</td>
-                                        <td>{{ $master_barang->detailpenerimaanbarang->total_harga ?? 'N/A'}}</td>
-                                        <td>{{ $master_barang->created_at }}</td>
-                                        <td>{{ $master_barang->updated_at }}</td>
-                                        {{-- <td><a href="/edit-master-barang/{{ $master_barang->id }}" class="btn btn-primary btn-sm">Edit</a></td> --}}
-                                        {{-- <td><a href="/delete-master-barang/{{ $master_barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
-                                        {{-- <td><a href="/detail-master-barang/{{ $master_barang->id }}" class="btn btn-info btn-sm">Detail</a></td> --}}
+                                        <td>{{ $detail_penerimaan->id }}</td>
+                                        <td>{{ $detail_penerimaan->PenerimaanBarang->id ?? 'N/A' }}</td>
+                                        <td>{{ $detail_penerimaan->PenerimaanBarang->supkonpro->nama ?? 'N/A' }}</td>
+                                        <td>{{ $detail_penerimaan->PenerimaanBarang->user->name ?? 'N/A'}}</td>
+                                        <td>{{ $detail_penerimaan->PenerimaanBarang->jenispenerimaanbarang->jenis  ?? 'N/A' }}</td>
+                                        <td>{{ $detail_penerimaan->PenerimaanBarang->nama_pengantar ?? 'N/A'}}</td>
+                                        <td>{{ $detail_penerimaan->PenerimaanBarang->keterangan ?? 'N/A' }}</td>
+                                        <td>{{ $detail_penerimaan->barang->nama_barang ?? 'N/A'}}</td>
+                                        <td>{{ $detail_penerimaan->jumlah_diterima }}</td>
+                                        <td>{{ number_format($detail_penerimaan->harga, 0, ',', '.') ?? 'N/A'}}</td>
+                                        <td>{{ number_format($detail_penerimaan->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
+                                        <td>{{ $detail_penerimaan->created_at }}</td>
+                                        <td>{{ $detail_penerimaan->updated_at }}</td>
                                     </tr>
                                     </tr>
                                 @endforeach
@@ -110,17 +109,11 @@
         </div>
 
     </div>
-    {{-- <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('template/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="{{ asset('template/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="{{ asset('template/js/sb-admin-2.min.js') }}"></script>
-
-    <script src="{{ asset('template/vendor/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('template/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
-
-    <script src="{{ asset('template/js/demo/datatables-demo.js') }}"></script> --}}
+    <script>
+        function formatNumber(num) {
+            if (!num) return '';
+            num = num.replace(/\./g, '').replace(/,/g, '.'); // Remove existing dots and commas
+            return new Intl.NumberFormat('id-ID').format(num); // Format the number
+        }
+    </script>
 @endsection

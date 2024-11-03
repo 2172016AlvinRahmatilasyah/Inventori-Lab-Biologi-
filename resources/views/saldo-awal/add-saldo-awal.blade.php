@@ -80,7 +80,7 @@
                 
                 <div class="mb-3">
                     <label for="saldo_awal" class="form-label">Saldo Awal</label>
-                    <input type="text" name="saldo_awal" id="saldo_awal" class="form-control" 
+                    <input type="decimal" name="saldo_awal" id="saldo_awal" class="form-control" 
                            value="{{ old('saldo_awal') }}" placeholder="Enter saldo awal" 
                            onblur="this.value = formatNumber(this.value)">
                     @error('saldo_awal')
@@ -90,7 +90,7 @@
                 
                 <div class="mb-3">
                     <label for="total_terima" class="form-label">Total Terima</label>
-                    <input type="text" name="total_terima" id="total_terima" class="form-control" 
+                    <input type="decimal" name="total_terima" id="total_terima" class="form-control" 
                            value="{{ old('total_terima') }}" placeholder="Enter total terima" 
                            onblur="this.value = formatNumber(this.value)">
                     @error('total_terima')
@@ -100,7 +100,7 @@
                 
                 <div class="mb-3">
                     <label for="total_keluar" class="form-label">Total Keluar</label>
-                    <input type="text" name="total_keluar" id="total_keluar" class="form-control" 
+                    <input type="decimal" name="total_keluar" id="total_keluar" class="form-control" 
                            value="{{ old('total_keluar') }}" placeholder="Enter total keluar" 
                            onblur="this.value = formatNumber(this.value)">
                     @error('total_keluar')
@@ -110,7 +110,7 @@
                 
                 <div class="mb-3">
                     <label for="saldo_akhir" class="form-label">Saldo Akhir</label>
-                    <input type="text" name="saldo_akhir" id="saldo_akhir" class="form-control" 
+                    <input type="decimal" name="saldo_akhir" id="saldo_akhir" class="form-control" 
                            value="{{ old('saldo_akhir') }}" placeholder="Enter saldo akhir" 
                            onblur="this.value = formatNumber(this.value)">
                     @error('saldo_akhir')

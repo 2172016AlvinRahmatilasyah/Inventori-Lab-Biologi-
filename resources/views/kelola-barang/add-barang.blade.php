@@ -58,7 +58,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="stok" class="form-label">Stok</label>
-                    <input type="number" name="stok" id="stok" class="form-control" 
+                    <input type="decimal" name="stok" id="stok" class="form-control" 
                       value="{{ old('stok') }}" placeholder="Enter stok barang">
                     @error('stok')
                         <span class="text-danger">{{ $message }}</span>

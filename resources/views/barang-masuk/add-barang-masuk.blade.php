@@ -89,7 +89,7 @@
                 
                 <div class="mb-3">
                     <label for="jumlah_diterima" class="form-label">Jumlah Diterima</label>
-                    <input type="number" name="jumlah_diterima" id="jumlah_diterima" class="form-control" value="{{ old('jumlah_diterima') }}" placeholder="Enter jumlah">
+                    <input type="decimal" name="jumlah_diterima" id="jumlah_diterima" class="form-control" value="{{ old('jumlah_diterima') }}" placeholder="Enter jumlah">
                     @error('jumlah_diterima')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
