@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
     Route::get('edit-jenis-barang-masuk/{id}', [PenerimaanBarangController::class, 'loadEditJenisBarangMasukForm']);
     Route::put('edit-jenis-barang-masuk', [PenerimaanBarangController::class, 'EditJenisBarangMasuk'])->name('EditJenisBarangMasuk');
    
+
     //master barang keluar:
     Route::get('master-barang-keluar', [PengeluaranBarangController::class, 'loadAllMasterPengeluaranBarang'])
                ->name('master-barang-keluar');
@@ -96,6 +97,9 @@ Route::middleware('auth')->group(function () {
     Route::get('tambah-barang-keluar', [PengeluaranBarangController::class, 'loadAddBarangKeluarForm']);
     Route::post('tambah-barang-keluar', [PengeluaranBarangController::class, 'AddBarangKeluar'])->name('AddBarangKeluar');
     Route::get('delete-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'deletePengeluaranBarang']);
+    Route::get('edit-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'loadEditBarangKeluarForm']);
+    Route::put('edit-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'EditPengeluaranBarang'])
+                ->name('EditPengeluaranBarang');
     //detail barang keluar:
     Route::get('detail-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'detailPengeluaranBarang'])
                ->name('detail-pengeluaran-barang');

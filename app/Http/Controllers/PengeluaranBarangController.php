@@ -222,4 +222,61 @@ class PengeluaranBarangController extends Controller
             return redirect('/jenis-barang-keluar')->with('fail', $e->getMessage());
         }
     }
+
+    public function loadEditBarangKeluarForm($id)
+    {
+        $masterPengeluaran = PengeluaranBarang::with('detailpengeluaranbarang')->findOrFail($id);
+        $all_supkonpros = supkonpro::all();
+        $all_users = User::all();
+        $all_jenis_pengeluarans = JenisPengeluaran::all();
+        $user = Auth::user(); 
+        $all_barangs = barang::all();
+        $detail_pengeluaran = DetailPengeluaranBarang::all();
+        
+        return view('barang-keluar.edit-barang-keluar', compact(
+            'masterPengeluaran', 'all_supkonpros', 'all_users', 'all_jenis_pengeluarans', 'user',
+            'all_barangs', 'detail_pengeluaran'
+        ));
+    }
+
+    public function EditPengeluaranBarang(Request $request)
+    {   
+        $request->validate([
+            'masterPengeluaran_id' => 'required|exists:master_pengeluaran_barangs,id',
+            'jenis_id' => 'required|exists:jenis_pengeluaran_barangs,id',
+            'supkonpro_id' => 'required|exists:supkonpros,id',
+            // 'user_id' => 'required|exists:users,id',
+            'nama_pengambil' => 'required|string|max:255',
+            'keterangan' => 'required|string',
+            'barang_id' => 'required|exists:barangs,id',
+            'jumlah_keluar' => 'required',
+            'harga' => 'required',  
+            'total_harga' => 'required', 
+        ]);
+        
+        $harga = str_replace('.', '', $request->input('harga'));
+        $total_harga = str_replace('.', '', $request->input('total_harga'));
+
+        try {
+            $update_pengeluaran_barang = PengeluaranBarang::where('id', $request->masterPengeluaran_id)->update([
+                'jenis_id' => $request->jenis_id,
+                'supkonpro_id' => $request->supkonpro_id,
+                // 'user_id' => $request->user_id,
+                'nama_pengambil' => $request->nama_pengambil,
+                'keterangan' => $request->keterangan,
+            ]);
+            
+            $update_detail_penegeluaran_barang = DetailPengeluaranBarang::where('id', 
+                $request->masterPengeluaran_id)->update([
+                'barang_id' => $request->barang_id,
+                'jumlah_keluar' => $request->jumlah_keluar,
+                'harga' => $request->harga,
+                'total_harga' => $request->total_harga,
+            ]);
+
+            return redirect('/master-barang-keluar/')->with('success', 'Edit Successfully');
+        } catch (\Exception $e) {
+            return redirect('/edit-pengeluaran-barang/' . $request->masterPengeluaran_id)->with('fail', $e->getMessage());
+        }
+    }
 }

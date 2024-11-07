@@ -20,16 +20,18 @@
             <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
         @endif
         <div class="card-body">
-            <form action="{{ route('EditBarangKeluar') }}" method="post">
+            <form action="{{ route('EditPengeluaranBarang', ['id' => $masterPengeluaran->id]) }}" method="post">
+
                 @csrf
                 @method('PUT') 
-                <input type="hidden" name="master_pengeluaran_barang_id" value="{{ $masterPengeluaran->id }}">
+                <input type="hidden" name="masterPengeluaran_id" value="{{ $masterPengeluaran->id }}">
+                
                 <div class="mb-3">
                     <label for="jenis_id" class="form-label">Jenis Barang Keluar</label>
                     <select name="jenis_id" class="form-control select2" id="jenis_id">
                         <option value="">Pilih Jenis Barang Keluar</option>
                         @foreach ($all_jenis_pengeluarans as $jenis_pengeluaran)
-                            <option value="{{ $jenis_pengeluaran->id }}"
+                            <option value="{{ $jenis_pengeluaran->id }}" 
                                 {{ $masterPengeluaran->jenis_id == $jenis_pengeluaran->id ? 'selected' : '' }}>
                                 {{ $jenis_pengeluaran->jenis }} (ID: {{ $jenis_pengeluaran->id }})
                             </option>
@@ -45,7 +47,8 @@
                     <select name="supkonpro_id" class="form-control select2" id="supkonpro_id">
                         <option value="">Pilih Jenis SupKonProy</option>
                         @foreach ($all_supkonpros as $supkonpro)
-                            <option value="{{ $supkonpro->id }}" data-jenis="{{ $supkonpro->jenis }}">
+                            <option value="{{ $supkonpro->id }}" 
+                                {{ $masterPengeluaran->supkonpro_id == $supkonpro->id ? 'selected' : '' }}>
                                 {{ $supkonpro->jenis }}  (Nama: {{ $supkonpro->nama }}) 
                                 (ID: {{ $supkonpro->id }})
                             </option>
@@ -57,9 +60,9 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="nama_pengantar" class="form-label">Nama Pengambil</label>
+                    <label for="nama_pengambil" class="form-label">Nama Pengambil</label>
                     <input type="text" name="nama_pengambil" id="nama_pengambil" value="{{ $masterPengeluaran->nama_pengambil }}"
-                           class="form-control" placeholder="Enter Nama pengambil">
+                           class="form-control" placeholder="Enter Nama Pengambil">
                     @error('nama_pengambil')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -70,20 +73,23 @@
                     <select name="barang_id" class="form-control select2" id="barang_id">
                         <option value="">Pilih Nama Barang</option>
                         @foreach ($all_barangs as $barang)
-                            <option value="{{ $barang->id }}" data-id="{{ $barang->id }}">
+                            <option value="{{ $barang->id }}" 
+                                {{ optional($masterPengeluaran->detailpengeluaranbarang->first())->barang_id == $barang->id ? 'selected' : '' }}>
                                 {{ $barang->nama_barang }} (ID: {{ $barang->id }})
                             </option>
                         @endforeach
                     </select>
-                    @error('supkonpro_id')
-                        <span class="text-danger">{{$message}}</span>
+                    @error('barang_id')
+                        <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
                 
+                
+                
                 <div class="mb-3">
                     <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
-                    <input type="decimal" name="jumlah_keluar" id="jumlah_keluar" class="form-control" 
-                           value="{{ $masterPengeluaran->detailPengeluaran_barang->jumlah_keluar }}" 
+                    <input type="number" name="jumlah_keluar" id="jumlah_keluar" class="form-control" 
+                           value="{{ $masterPengeluaran->detailpengeluaranbarang->first()->jumlah_keluar ?? '' }}"
                            placeholder="Enter jumlah">
                     @error('jumlah_keluar')
                         <span class="text-danger">{{ $message }}</span>
@@ -93,7 +99,7 @@
                 <div class="mb-3">
                     <label for="harga" class="form-label">Harga</label>
                     <input type="text" name="harga" id="harga" class="form-control" 
-                          value="{{ $masterPengeluaran->detailPengeluaran_barang->harga }}" 
+                           value="{{ number_format($masterPengeluaran->detailpengeluaranbarang->first()->harga ?? 0, 0, ',', '.') }}"
                            placeholder="Enter harga">
                     @error('harga')
                         <span class="text-danger">{{ $message }}</span>
@@ -103,8 +109,7 @@
                 <div class="mb-3">
                     <label for="total_harga" class="form-label">Total Harga</label>
                     <input type="text" name="total_harga" id="total_harga" class="form-control" 
-                           value="{{ $masterPengeluaran->detailPengeluaran_barang->jumlah_keluar }}"
-                           placeholder="Enter total harga" readonly>
+                         value="{{ number_format(($masterPengeluaran->detailpengeluaranbarang->first()->jumlah_keluar ?? 0) * ($masterPengeluaran->detailpengeluaranbarang->first()->harga ?? 0), 0, ',', '.') }}">
                     @error('harga')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -113,7 +118,7 @@
                 <div class="mb-3">
                     <label for="keterangan" class="form-label">Keterangan</label>
                     <input type="text" name="keterangan" id="keterangan" 
-                           value="{{ $masterPengeluaran->detailPengeluaran_barang->keterangan }}"
+                           value="{{ $masterPengeluaran->keterangan ?? '' }}"
                            class="form-control" placeholder="Enter keterangan">
                     @error('keterangan')
                         <span class="text-danger">{{ $message }}</span>
@@ -132,7 +137,6 @@
     $(document).ready(function() {
         $('.select2').select2();
 
-        // Function to calculate total harga
         function calculateTotal() {
             let jumlahKeluar = parseFloat($('#jumlah_keluar').val()) || 0;
             let harga = parseFloat(removeThousandsSeparator($('#harga').val())) || 0;
@@ -140,22 +144,18 @@
             $('#total_harga').val(formatNumber(totalHarga));
         }
 
-        // Function to remove thousands separator from string
         function removeThousandsSeparator(value) {
             return value.replace(/\./g, '');
         }
 
-        // Function to format number with thousands separator
         function formatNumber(value) {
             return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        // Event listeners for changes
         $('#jumlah_keluar, #harga').on('input', function() {
             calculateTotal();
         });
 
-        // Format the initial value of harga and total_harga
         $('#harga').on('blur', function() {
             $(this).val(formatNumber(removeThousandsSeparator($(this).val())));
         });
