@@ -68,9 +68,10 @@
                     @enderror
                 </div>
 
+                <input type="hidden" name="barang_id" value="{{ optional($masterPengeluaran->detailpengeluaranbarang->first())->barang_id }}">
                 <div class="mb-3">
                     <label for="barang_id" class="form-label">Nama Barang</label>
-                    <select name="barang_id" class="form-control select2" id="barang_id">
+                    <select name="barang_id" class="form-control select2" id="barang_id" disabled>
                         <option value="">Pilih Nama Barang</option>
                         @foreach ($all_barangs as $barang)
                             <option value="{{ $barang->id }}" 
@@ -86,11 +87,12 @@
                 
                 
                 
+                
                 <div class="mb-3">
                     <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
                     <input type="number" name="jumlah_keluar" id="jumlah_keluar" class="form-control" 
                            value="{{ $masterPengeluaran->detailpengeluaranbarang->first()->jumlah_keluar ?? '' }}"
-                           placeholder="Enter jumlah">
+                           placeholder="Enter jumlah" step="any">
                     @error('jumlah_keluar')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror

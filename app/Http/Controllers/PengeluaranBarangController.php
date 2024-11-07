@@ -245,38 +245,50 @@ class PengeluaranBarangController extends Controller
             'masterPengeluaran_id' => 'required|exists:master_pengeluaran_barangs,id',
             'jenis_id' => 'required|exists:jenis_pengeluaran_barangs,id',
             'supkonpro_id' => 'required|exists:supkonpros,id',
-            // 'user_id' => 'required|exists:users,id',
             'nama_pengambil' => 'required|string|max:255',
             'keterangan' => 'required|string',
             'barang_id' => 'required|exists:barangs,id',
-            'jumlah_keluar' => 'required',
+            'jumlah_keluar' => 'required|integer',
             'harga' => 'required',  
             'total_harga' => 'required', 
         ]);
-        
+
         $harga = str_replace('.', '', $request->input('harga'));
         $total_harga = str_replace('.', '', $request->input('total_harga'));
 
         try {
-            $update_pengeluaran_barang = PengeluaranBarang::where('id', $request->masterPengeluaran_id)->update([
+            // Ambil data detail pengeluaran lama
+            $detailPengeluaranBarang = DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $request->masterPengeluaran_id)
+                ->where('barang_id', $request->barang_id)
+                ->firstOrFail();
+
+            // Hitung selisih jumlah keluar
+            $selisihJumlah = $request->jumlah_keluar - $detailPengeluaranBarang->jumlah_keluar;
+
+            // Update pengeluaran master
+            PengeluaranBarang::where('id', $request->masterPengeluaran_id)->update([
                 'jenis_id' => $request->jenis_id,
                 'supkonpro_id' => $request->supkonpro_id,
-                // 'user_id' => $request->user_id,
                 'nama_pengambil' => $request->nama_pengambil,
                 'keterangan' => $request->keterangan,
             ]);
-            
-            $update_detail_penegeluaran_barang = DetailPengeluaranBarang::where('id', 
-                $request->masterPengeluaran_id)->update([
-                'barang_id' => $request->barang_id,
+
+            // Update detail pengeluaran barang
+            $detailPengeluaranBarang->update([
                 'jumlah_keluar' => $request->jumlah_keluar,
-                'harga' => $request->harga,
-                'total_harga' => $request->total_harga,
+                'harga' => $harga,
+                'total_harga' => $total_harga,
             ]);
+
+            // Update stok barang sesuai selisih jumlah keluar
+            $barang = Barang::findOrFail($request->barang_id);
+            $barang->stok -= $selisihJumlah;
+            $barang->save();
 
             return redirect('/master-barang-keluar/')->with('success', 'Edit Successfully');
         } catch (\Exception $e) {
             return redirect('/edit-pengeluaran-barang/' . $request->masterPengeluaran_id)->with('fail', $e->getMessage());
         }
     }
+
 }

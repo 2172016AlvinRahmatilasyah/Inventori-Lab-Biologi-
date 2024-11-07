@@ -224,5 +224,70 @@ class PenerimaanBarangController extends Controller
         }
     }
 
+    public function loadEditBarangMasukForm($id)
+    {
+        $masterPenerimaan = PenerimaanBarang::with('detailpenerimaanbarang')->findOrFail($id);
+        $all_supkonpros = supkonpro::all();
+        $all_users = User::all();
+        $all_jenis_penerimaans = JenisPenerimaan::all();
+        $user = Auth::user(); 
+        $all_barangs = barang::all();
+        $detail_penerimaan = DetailPenerimaanBarang::all();
+        
+        return view('barang-masuk.edit-barang-masuk', compact(
+            'masterPenerimaan', 'all_supkonpros', 'all_users', 'all_jenis_penerimaans', 'user',
+            'all_barangs', 'detail_penerimaan'
+        ));
+    }
 
+    public function EditPenerimaanBarang(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'masterPenerimaan_id' => 'required|exists:master_penerimaan_barangs,id',
+            'jenis_id' => 'required|exists:jenis_penerimaan_barangs,id',
+            'supkonpro_id' => 'required|exists:supkonpros,id',
+            'nama_pengantar' => 'required|string|max:255',
+            'keterangan' => 'required|string',
+            'barang_id' => 'required|exists:barangs,id',
+            'jumlah_diterima' => 'required',
+            'harga' => 'required',  
+            'total_harga' => 'required', 
+        ]);
+
+        $harga = str_replace('.', '', $request->input('harga'));
+        $total_harga = str_replace('.', '', $request->input('total_harga'));
+
+        try {
+            $detailPenerimaanBarang = DetailPenerimaanBarang::where('master_penerimaan_barang_id', 
+                $request->masterPenerimaan_id)
+                ->where('barang_id', $request->barang_id)
+                ->firstOrFail();
+
+          
+            $selisihJumlah = $request->jumlah_diterima - $detailPenerimaanBarang->jumlah_diterima;
+
+            
+            PenerimaanBarang::where('id', $request->masterPenerimaan_id)->update([
+                'jenis_id' => $request->jenis_id,
+                'supkonpro_id' => $request->supkonpro_id,
+                'nama_pengantar' => $request->nama_pengantar,
+                'keterangan' => $request->keterangan,
+            ]);
+
+            $detailPenerimaanBarang->update([
+                'jumlah_diterima' => $request->jumlah_diterima,
+                'harga' => $harga,
+                'total_harga' => $total_harga,
+            ]);
+
+            $barang = Barang::findOrFail($request->barang_id);
+            $barang->stok += $selisihJumlah;
+            $barang->save();
+
+            return redirect('/master-barang-masuk/')->with('success', 'Edit Successfully');
+        } catch (\Exception $e) {
+            return redirect('/edit-penerimaan-barang/' . $request->masterPenerimaan_id)->with('fail', $e->getMessage());
+        }
+    }
 }
