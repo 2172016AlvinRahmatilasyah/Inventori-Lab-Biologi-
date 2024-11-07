@@ -68,21 +68,24 @@ Route::middleware('auth')->group(function () {
     Route::put('edit-kelola-user/{id}/{role}', [UserController::class, 'EditUser'])->name('EditUser');
     Route::get('delete-kelola-user/{id}/{role}', [UserController::class, 'deleteUser'])->name('user.delete');
 
+    //master barang masuk:
     Route::get('master-barang-masuk', [PenerimaanBarangController::class, 'loadAllMasterPenerimaanBarang'])->name('master-barang-masuk');
     Route::get('master-barang-masuk-search', [PenerimaanBarangController::class, 'MasterBarangMasukSearch'])->name('master-barang-masuk.search');
     Route::get('tambah-barang-masuk', [PenerimaanBarangController::class, 'loadAddBarangMasukForm']);
     Route::post('tambah-barang-masuk', [PenerimaanBarangController::class, 'AddBarangMasuk'])->name('AddBarangMasuk');
     Route::get('delete-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'deleteMasterBarang']);
-    
+    //detail barang masuk:
     Route::get('detail-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'detailMasterBarang'])->name('detail-penerimaan-barang');
     Route::get('index-detail-barang-masuk', [PenerimaanBarangController::class, 'loadAllDetailPenerimaanBarang'])->name('index-detail-barang-masuk');
     Route::get('detail-barang-masuk-search', [PenerimaanBarangController::class, 'DetailBarangMasukSearch'])->name('detail-barang-masuk.search');
-
+    //jenis barang masuk:
     Route::get('jenis-barang-masuk', [PenerimaanBarangController::class, 'loadAllJenisPenerimaanBarang'])->name('jenis-barang-masuk');
-    
-    // Route::get('barangs', [PenerimaanBarangController::class, 'loadAllBarangs']);
-    // Route::get('edit-barang/{id}', [PenerimaanBarangController::class, 'loadEditForm']);
-    // Route::put('edit-barang', [PenerimaanBarangController::class, 'EditBarang'])->name('EditBarang');
+    Route::get('tambah-jenis-barang-masuk', [PenerimaanBarangController::class, 'loadAddJenisBarangMasukForm']);
+    Route::post('tambah-jenis-barang-masuk', [PenerimaanBarangController::class, 'AddJenisBarangMasuk'])->name('AddJenisBarangMasuk');
+    Route::get('delete-jenis-barang-masuk/{id}', [PenerimaanBarangController::class, 'deleteJenisBarangMasuk']);
+    Route::get('edit-jenis-barang-masuk/{id}', [PenerimaanBarangController::class, 'loadEditJenisBarangMasukForm']);
+    Route::put('edit-jenis-barang-masuk', [PenerimaanBarangController::class, 'EditJenisBarangMasuk'])->name('EditJenisBarangMasuk');
+   
 
 });
 

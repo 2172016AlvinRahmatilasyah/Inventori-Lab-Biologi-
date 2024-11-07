@@ -84,12 +84,26 @@
                     </div>
                 </div>
             </li>
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a class="nav-link collapsed" href="{{ url('/transaksi-barang-keluar') }}"
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-upload"></i>
                     <span>Transaksi Barang Keluar</span>
                 </a>
+            </li> --}}
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBarangKeluar"
+                    aria-expanded="true" aria-controls="collapseBarangKeluar">
+                    <i class="fas fa-fw fa-upload"></i>
+                    <span>Barang Keluar</span>
+                </a>
+                <div id="collapseBarangKeluar" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{{ url('/master-barang-keluar') }}">Master Barang Keluar</a>
+                        <a class="collapse-item" href="{{ url('/index-detail-barang-keluar') }}">Detail Barang Keluar</a>
+                        <a class="collapse-item" href="{{ url('/jenis-barang-keluar') }}">Jenis Barang Keluar</a>
+                    </div>
+                </div>
             </li>
 
             <!-- Nav Item - Utilities Collapse Menu -->

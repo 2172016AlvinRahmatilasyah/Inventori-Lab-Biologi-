@@ -21,9 +21,9 @@
         <div class="card">
             <div class="card-header d-flex align-items-center">
                 <h2>Daftar Jenis Barang Masuk</h2>
-                {{-- <a href="{{ route('AddJenisBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">
+                <a href="{{ route('AddJenisBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">
                     Add Jenis Barang Masuk
-                </a> --}}
+                </a>
             </div>
             
         
@@ -70,8 +70,8 @@
                                         <td>{{ $jenis_penerimaan->jenis}}</td>
                                         <td>{{ $jenis_penerimaan->created_at }}</td>
                                         <td>{{ $jenis_penerimaan->updated_at }}</td>
-                                        {{-- <td><a href="/edit-jenis-penerimaan-barang/{{ $master_barang->id }}" class="btn btn-primary btn-sm">Edit</a></td> --}}
-                                        {{-- <td><a href="/delete-jenis-penerimaan-barang/{{ $master_barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
+                                        <td><a href="/edit-jenis-barang-masuk/{{ $jenis_penerimaan->id }}" class="btn btn-primary btn-sm">Edit</a></td>
+                                        <td><a href="/delete-jenis-barang-masuk/{{ $jenis_penerimaan->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
                                     </tr>
                                     </tr>
                                 @endforeach

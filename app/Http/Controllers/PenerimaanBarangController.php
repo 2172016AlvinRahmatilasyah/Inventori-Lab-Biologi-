@@ -167,4 +167,62 @@ class PenerimaanBarangController extends Controller
         return view('barang-masuk.jenis-barang-masuk',compact('all_jenis_penerimaans'));
     }
 
+    public function loadAddJenisBarangMasukForm()
+    {
+        return view('barang-masuk.add-jenis-barang-masuk');
+    }
+
+    public function AddJenisBarangMasuk(Request $request){
+        $request->validate([
+            'jenis' => 'required|string',
+        ]);
+
+        try {
+            $new_jenisBarangMasuk = new JenisPenerimaan();
+            $new_jenisBarangMasuk->jenis = $request->jenis;
+            $new_jenisBarangMasuk->save();
+
+            return redirect('/jenis-barang-masuk/')->with('success', 'Data Added Successfully');
+        } catch (\Exception $e) {
+            return redirect('/jenis-barang-masuk')->with('fail', $e->getMessage());
+        }
+    }
+
+    public function deleteJenisBarangMasuk($id){
+        try {
+            JenisPenerimaan::where('id',$id)->delete();
+            return redirect('/jenis-barang-masuk')->with('success','Deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect('/jenis-barang-masuk')->with('fail',$e->getMessage());
+            
+        }
+    }
+
+    public function loadEditJenisBarangMasukForm($id)
+    {
+        $JenisPenerimaan = JenisPenerimaan::findOrFail($id);
+        return view('barang-masuk.edit-jenis-barang-masuk', compact('JenisPenerimaan'));
+    }
+
+    public function EditJenisBarangMasuk(Request $request)
+    {
+        // Validasi input dari pengguna
+        $request->validate([
+            'jenis' => 'required|string',
+            'jenis_id' => 'required|integer' // Pastikan jenis_id diterima
+        ]);
+
+        try {
+            // Lakukan update berdasarkan jenis_id
+            $update_jenisBarangMasuk = JenisPenerimaan::where('id', $request->jenis_id)->update([
+                'jenis' => $request->jenis,
+            ]);
+
+            return redirect('/jenis-barang-masuk')->with('success', 'Edit Successfully');
+        } catch (\Exception $e) {
+            return redirect('/jenis-barang-masuk')->with('fail', $e->getMessage());
+        }
+    }
+
+
 }

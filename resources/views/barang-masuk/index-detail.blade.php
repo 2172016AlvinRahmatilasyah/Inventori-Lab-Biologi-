@@ -22,7 +22,12 @@
     <div class="container-fluid">
 
         <div class="card">
-  
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <h2>Index Detail Barang Masuk</h2>
+                    {{-- <a href="/add-barang-masuk" class="btn btn-success btn-sm ml-auto">Tambah Barang Masuk</a> --}}
+                    {{-- <a href="{{ route('AddBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">Add Barang Masuk</a> --}}
+                </div>
         
             {{-- Flash message for success or failure --}}
             @if(Session::has('success'))
