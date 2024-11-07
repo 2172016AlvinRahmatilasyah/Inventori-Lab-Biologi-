@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Index Detail Barang Masuk')
+@section('title', 'Index Detail Barang Keluar')
 
 @section('content')
 <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
@@ -24,7 +24,7 @@
         <div class="card">
             <div class="card">
                 <div class="card-header d-flex align-items-center">
-                    <h2>Index Detail Barang Masuk</h2>
+                    <h2>Index Detail Barang Keluar</h2>
                     {{-- <a href="/add-barang-masuk" class="btn btn-success btn-sm ml-auto">Tambah Barang Masuk</a> --}}
                     {{-- <a href="{{ route('AddBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">Add Barang Masuk</a> --}}
                 </div>
@@ -43,10 +43,10 @@
             @endif
         
             <div class="mb-3">
-                <form action="{{ route('detail-barang-masuk.search') }}" method="GET" class="d-flex mt-3">
+                <form action="{{ route('detail-barang-keluar.search') }}" method="GET" class="d-flex mt-3">
                     <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
-                    <a href="{{ route('index-detail-barang-masuk') }}" class="btn btn-secondary ml-3 ">Reset</a>
+                    <a href="{{ route('index-detail-barang-keluar') }}" class="btn btn-secondary ml-3 ">Reset</a>
                 </form>
             </div>
             
@@ -60,7 +60,7 @@
                                 <th>Id</th>
                                 <th>Id Master</th>
                                 <th>Nama Barang</th>
-                                <th>Jumlah Diterima</th>
+                                <th>Jumlah Keluar</th>
                                 <th>Harga</th>
                                 <th>Total harga</th>
                                 <th>Tanggal Ditambah</th>
@@ -69,13 +69,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if(isset($all_detail_penerimaans) && count($all_detail_penerimaans) > 0)
-                                @foreach ($all_detail_penerimaans as $detail_barang)
+                            @if(isset($all_detail_pengeluarans) && count($all_detail_pengeluarans) > 0)
+                                @foreach ($all_detail_pengeluarans as $detail_barang)
                                     <tr>
                                         <td>{{ $detail_barang->id }}</td>
-                                        <td>{{ $detail_barang->PenerimaanBarang->id ?? 'N/A' }}</td>
+                                        <td>{{ $detail_barang->PengeluaranBarang->id ?? 'N/A' }}</td>
                                         <td>{{ $detail_barang->barang->nama_barang ?? 'N/A'}}</td>
-                                        <td>{{ $detail_barang->jumlah_diterima }}</td>
+                                        <td>{{ $detail_barang->jumlah_keluar }}</td>
                                         <td>{{ number_format($detail_barang->harga, 0, ',', '.') ?? 'N/A'}}</td>
                                         <td>{{ number_format($detail_barang->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
                                         <td>{{ $detail_barang->created_at }}</td>

@@ -10,6 +10,8 @@ use App\Http\Controllers\SaldoAwalController;
 use App\Http\Controllers\SupkonproController;
 use App\Http\Controllers\JenisBarangController;
 use App\Http\Controllers\PenerimaanBarangController;
+use App\Http\Controllers\PengeluaranBarangController;
+use App\Models\PengeluaranBarang;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -86,6 +88,31 @@ Route::middleware('auth')->group(function () {
     Route::get('edit-jenis-barang-masuk/{id}', [PenerimaanBarangController::class, 'loadEditJenisBarangMasukForm']);
     Route::put('edit-jenis-barang-masuk', [PenerimaanBarangController::class, 'EditJenisBarangMasuk'])->name('EditJenisBarangMasuk');
    
+    //master barang keluar:
+    Route::get('master-barang-keluar', [PengeluaranBarangController::class, 'loadAllMasterPengeluaranBarang'])
+               ->name('master-barang-keluar');
+    Route::get('master-barang-keluar-search', [PengeluaranBarangController::class, 'MasterBarangKeluarSearch'])
+               ->name('master-barang-keluar.search');
+    Route::get('tambah-barang-keluar', [PengeluaranBarangController::class, 'loadAddBarangKeluarForm']);
+    Route::post('tambah-barang-keluar', [PengeluaranBarangController::class, 'AddBarangKeluar'])->name('AddBarangKeluar');
+    Route::get('delete-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'deletePengeluaranBarang']);
+    //detail barang keluar:
+    Route::get('detail-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'detailPengeluaranBarang'])
+               ->name('detail-pengeluaran-barang');
+    Route::get('index-detail-barang-keluar', [PengeluaranBarangController::class, 'loadAllDetailPengeluaranBarang'])
+               ->name('index-detail-barang-keluar');
+    Route::get('detail-barang-keluar-search', [PengeluaranBarangController::class, 'DetailBarangKeluarSearch'])
+               ->name('detail-barang-keluar.search');
+    //jenis barang keluar:
+    Route::get('jenis-barang-keluar', [PengeluaranBarangController::class, 'loadAllJenisPengeluaranBarang'])
+               ->name('jenis-barang-keluar');
+    Route::get('tambah-jenis-barang-keluar', [PengeluaranBarangController::class, 'loadAddJenisBarangKeluarForm']);
+    Route::post('tambah-jenis-barang-keluar', [PengeluaranBarangController::class, 'AddJenisBarangKeluar'])
+                ->name('AddJenisBarangKeluar');
+    Route::get('delete-jenis-barang-keluar/{id}', [PengeluaranBarangController::class, 'deleteJenisBarangKeluar']);
+    Route::get('edit-jenis-barang-keluar/{id}', [PengeluaranBarangController::class, 'loadEditJenisBarangKeluarForm']);
+    Route::put('edit-jenis-barang-keluar', [PengeluaranBarangController::class, 'EditJenisBarangKeluar'])
+               ->name('EditJenisBarangKeluar');
 
 });
 

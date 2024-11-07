@@ -163,9 +163,9 @@ class PengeluaranBarangController extends Controller
     }
 
     public function loadAllJenisPengeluaranBarang(){
-        $all_jenis_pengeluaran= JenisPengeluaran::all();
+        $all_jenis_pengeluarans= JenisPengeluaran::all();
         
-        return view('barang-keluar.jenis-barang-keluar',compact('all_jenis_pengeluaran'));
+        return view('barang-keluar.jenis-barang-keluar',compact('all_jenis_pengeluarans'));
     }
 
     public function loadAddJenisBarangKeluarForm()

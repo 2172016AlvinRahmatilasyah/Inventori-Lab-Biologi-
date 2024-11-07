@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Barang Masuk')
+@section('title', 'Tambah Barang Keluar')
 
 @section('content')
 <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
@@ -15,24 +15,24 @@
 
 <div class="container">
     <div class="card mx-auto" style="max-width: 500px;">
-        <div class="card-header text-center">Tambah Barang Masuk</div>
+        <div class="card-header text-center">Tambah Barang Keluar</div>
         @if (Session::has('fail'))
             <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
         @endif
         <div class="card-body">
-            <form action="{{ route('AddBarangMasuk') }}" method="post">
+            <form action="{{ route('AddBarangKeluar') }}" method="post">
                 @csrf
                 <div class="mb-3">
-                    <label for="jenis_id" class="form-label">Jenis Barang Masuk</label>
+                    <label for="jenis_id" class="form-label">Jenis Barang Keluar</label>
                     <select name="jenis_id" class="form-control select2" id="jenis_id">
-                        <option value="">Pilih Jenis Barang Masuk</option>
-                        @foreach ($all_jenis_penerimaans as $jenis_penerimaan)
-                            <option value="{{ $jenis_penerimaan->id }}" data-jenis="{{ $jenis_penerimaan->jenis }}">
-                                {{ $jenis_penerimaan->jenis }} (ID: {{ $jenis_penerimaan->id }})
+                        <option value="">Pilih Jenis Barang Keluar</option>
+                        @foreach ($all_jenis_pengeluarans as $jenis_pengeluaran)
+                            <option value="{{ $jenis_pengeluaran->id }}" data-jenis="{{ $jenis_pengeluaran->jenis }}">
+                                {{ $jenis_pengeluaran->jenis }} (ID: {{ $jenis_pengeluaran->id }})
                             </option>
                         @endforeach
                     </select>
-                    @error('jenis_penerimaan_barang_id')
+                    @error('jenis_pengeluaran_barang_id')
                         <span class="text-danger">{{$message}}</span>
                     @enderror
                 </div>
@@ -65,9 +65,10 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="nama_pengantar" class="form-label">Nama Pengantar</label>
-                    <input type="text" name="nama_pengantar" id="nama_pengantar" value="{{ old('nama_pengantar') }}" class="form-control" placeholder="Enter Nama pengantar">
-                    @error('nama_pengantar')
+                    <label for="nama_pengantar" class="form-label">Nama Pengambil</label>
+                    <input type="text" name="nama_pengambil" id="nama_pengambil" value="{{ old('nama_pengambil')}}"
+                           class="form-control" placeholder="Enter Nama pengambil">
+                    @error('nama_pengambil')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
@@ -88,16 +89,18 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="jumlah_diterima" class="form-label">Jumlah Diterima</label>
-                    <input type="decimal" name="jumlah_diterima" id="jumlah_diterima" class="form-control" value="{{ old('jumlah_diterima') }}" placeholder="Enter jumlah">
-                    @error('jumlah_diterima')
+                    <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
+                    <input type="decimal" name="jumlah_keluar" id="jumlah_keluar" class="form-control" 
+                           value="{{ old('jumlah_keluar') }}" placeholder="Enter jumlah">
+                    @error('jumlah_keluar')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="mb-3">
                     <label for="harga" class="form-label">Harga</label>
-                    <input type="text" name="harga" id="harga" class="form-control" value="{{ old('harga') }}" placeholder="Enter harga">
+                    <input type="text" name="harga" id="harga" class="form-control" value="{{ old('harga') }}" 
+                           placeholder="Enter harga">
                     @error('harga')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -105,7 +108,8 @@
 
                 <div class="mb-3">
                     <label for="total_harga" class="form-label">Total Harga</label>
-                    <input type="text" name="total_harga" id="total_harga" class="form-control" value="{{ old('total_harga') }}" placeholder="Enter total harga" readonly>
+                    <input type="text" name="total_harga" id="total_harga" class="form-control" 
+                           value="{{ old('total_harga') }}" placeholder="Enter total harga" readonly>
                     @error('harga')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -113,7 +117,8 @@
 
                 <div class="mb-3">
                     <label for="keterangan" class="form-label">Keterangan</label>
-                    <input type="text" name="keterangan" id="keterangan" value="{{ old('keterangan') }}" class="form-control" placeholder="Enter keterangan">
+                    <input type="text" name="keterangan" id="keterangan" value="{{ old('keterangan') }}" 
+                           class="form-control" placeholder="Enter keterangan">
                     @error('keterangan')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -133,9 +138,9 @@
 
         // Function to calculate total harga
         function calculateTotal() {
-            let jumlahDiterima = parseFloat($('#jumlah_diterima').val()) || 0;
+            let jumlahKeluar = parseFloat($('#jumlah_keluar').val()) || 0;
             let harga = parseFloat(removeThousandsSeparator($('#harga').val())) || 0;
-            let totalHarga = jumlahDiterima * harga;
+            let totalHarga = jumlahKeluar * harga;
             $('#total_harga').val(formatNumber(totalHarga));
         }
 
@@ -150,7 +155,7 @@
         }
 
         // Event listeners for changes
-        $('#jumlah_diterima, #harga').on('input', function() {
+        $('#jumlah_keluar, #harga').on('input', function() {
             calculateTotal();
         });
 

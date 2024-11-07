@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Index Detail Barang Masuk')
+@section('title', 'Jenis Barang Keluar')
 
 @section('content')
 <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
@@ -15,19 +15,17 @@
 <script src="{{ asset('template/vendor/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('template/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
 
-{{-- <script src="{{ asset('template/js/demo/datatables-demo.js') }}"></script> --}}
-{{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> --}}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
     <div class="container-fluid">
-
         <div class="card">
-            <div class="card">
-                <div class="card-header d-flex align-items-center">
-                    <h2>Index Detail Barang Masuk</h2>
-                    {{-- <a href="/add-barang-masuk" class="btn btn-success btn-sm ml-auto">Tambah Barang Masuk</a> --}}
-                    {{-- <a href="{{ route('AddBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">Add Barang Masuk</a> --}}
-                </div>
+            <div class="card-header d-flex align-items-center">
+                <h2>Daftar Jenis Barang Keluar</h2>
+                <a href="{{ route('AddJenisBarangKeluar') }}" class="btn btn-success btn-sm ml-auto">
+                    Add Jenis Barang Keluar
+                </a>
+            </div>
+            
         
             {{-- Flash message for success or failure --}}
             @if(Session::has('success'))
@@ -43,11 +41,11 @@
             @endif
         
             <div class="mb-3">
-                <form action="{{ route('detail-barang-masuk.search') }}" method="GET" class="d-flex mt-3">
+                {{-- <form action="{{ route('jenis-barang-masuk.search') }}" method="GET" class="d-flex mt-3">
                     <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
-                    <a href="{{ route('index-detail-barang-masuk') }}" class="btn btn-secondary ml-3 ">Reset</a>
-                </form>
+                    <a href="{{ route('jenis-barang-masuk') }}" class="btn btn-secondary ml-3 ">Reset</a>
+                </form> --}}
             </div>
             
             
@@ -58,28 +56,22 @@
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>Id Master</th>
-                                <th>Nama Barang</th>
-                                <th>Jumlah Diterima</th>
-                                <th>Harga</th>
-                                <th>Total harga</th>
+                                <th>Jenis Pengeluaran</th>
                                 <th>Tanggal Ditambah</th>
                                 <th>Tanggal Diupdate</th>
-                                
+                                <th colspan="3">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if(isset($all_detail_penerimaans) && count($all_detail_penerimaans) > 0)
-                                @foreach ($all_detail_penerimaans as $detail_barang)
+                            @if(isset($all_jenis_pengeluarans) && count($all_jenis_pengeluarans) > 0)
+                                @foreach ($all_jenis_pengeluarans as $jenis)
                                     <tr>
-                                        <td>{{ $detail_barang->id }}</td>
-                                        <td>{{ $detail_barang->PenerimaanBarang->id ?? 'N/A' }}</td>
-                                        <td>{{ $detail_barang->barang->nama_barang ?? 'N/A'}}</td>
-                                        <td>{{ $detail_barang->jumlah_diterima }}</td>
-                                        <td>{{ number_format($detail_barang->harga, 0, ',', '.') ?? 'N/A'}}</td>
-                                        <td>{{ number_format($detail_barang->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
-                                        <td>{{ $detail_barang->created_at }}</td>
-                                        <td>{{ $detail_barang->updated_at }}</td>
+                                        <td>{{ $jenis->id }}</td>
+                                        <td>{{ $jenis->jenis}}</td>
+                                        <td>{{ $jenis->created_at }}</td>
+                                        <td>{{ $jenis->updated_at }}</td>
+                                        <td><a href="/edit-jenis-barang-keluar/{{ $jenis->id }}" class="btn btn-primary btn-sm">Edit</a></td>
+                                        <td><a href="/delete-jenis-barang-keluar/{{ $jenis->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
                                     </tr>
                                     </tr>
                                 @endforeach
@@ -95,5 +87,5 @@
         </div>
 
     </div>
-    
+   
 @endsection
