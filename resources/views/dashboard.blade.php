@@ -9,7 +9,7 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report Keseluruhan</a>
         </div>
 
         <!-- Content Row -->
@@ -24,7 +24,9 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             {{ $barangMasukBulanIni }} Transaksi
                         </div>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                     </div>
+                    
                 </div>
             </div>
 
@@ -38,6 +40,8 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             {{ $barangKeluarBulanIni }} Transaksi
                         </div>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+
                     </div>
                 </div>
             </div>
@@ -52,6 +56,8 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             {{ $barangMasukBulanIni + $barangKeluarBulanIni }} Transaksi
                         </div>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+
                     </div>
                 </div>
             </div>
@@ -63,12 +69,14 @@
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card border-left-warning shadow h-100 py-2">
                     <div class="card-body">
+                        {{-- sudah <=20 stok --}}
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Stok mendekati/sudah minimum
+                            Stok mendekati/sudah minimum 
                         </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
                             {{ count($barangStokMinimal) }} Barang/Bahan
                         </div>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                     </div>
                 </div>
             </div>
@@ -81,8 +89,10 @@
                             Stok mendekati kadaluarsa
                         </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            5 Warnings
+                            {{ count($barangKadaluarsaMendekati) }} Warnings
                         </div>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+
                     </div>
                 </div>
             </div>
@@ -95,8 +105,10 @@
                             Statistik Total Barang
                         </div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            500 Items
+                            {{ $totalStok  }} Items
                         </div>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+
                     </div>
                 </div>
             </div>

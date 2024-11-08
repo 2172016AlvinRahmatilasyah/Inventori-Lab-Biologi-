@@ -20,12 +20,17 @@ class DashboardController extends Controller
                                                  ->whereMonth('created_at', Carbon::now()->month)
                                                  ->count();
 
-
         $barangStokMinimal = Barang::where('stok', '<=', 20)->get();
 
+        $today = Carbon::now();
+        $twoMonthsLater = Carbon::now()->addMonths(2);
+        $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
+
+        $totalStok = Barang::sum('stok');
        
         return view('dashboard', compact('barangMasukBulanIni', 'barangKeluarBulanIni', 
-                    'barangStokMinimal'));
+                    'barangStokMinimal', 'barangKadaluarsaMendekati','totalStok'
+        ));
     }
 }
 
