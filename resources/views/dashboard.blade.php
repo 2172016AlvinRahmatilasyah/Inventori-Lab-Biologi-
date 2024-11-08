@@ -18,8 +18,12 @@
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card border-left-primary shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Laporan Barang Masuk</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">120 Items</div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Laporan Barang Masuk Bulan ini
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ $barangMasukBulanIni }} Transaksi
+                        </div>
                     </div>
                 </div>
             </div>
@@ -28,8 +32,12 @@
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card border-left-success shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Laporan Barang Keluar</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">75 Items</div>
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Laporan Barang Keluar bulan ini
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ $barangKeluarBulanIni }} Transaksi
+                        </div>
                     </div>
                 </div>
             </div>
@@ -38,8 +46,12 @@
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card border-left-info shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Laporan Persediaan</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">250 Items</div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Laporan Perubahan Persediaan Bulan ini
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ $barangMasukBulanIni + $barangKeluarBulanIni }} Transaksi
+                        </div>
                     </div>
                 </div>
             </div>
@@ -51,8 +63,12 @@
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card border-left-warning shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Laporan Mutasi Persediaan</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">20 Transactions</div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Stok mendekati/sudah minimum
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ count($barangStokMinimal) }} Barang/Bahan
+                        </div>
                     </div>
                 </div>
             </div>
@@ -61,8 +77,12 @@
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card border-left-danger shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Stok Minimum & Kadaluarsa</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">5 Warnings</div>
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Stok mendekati kadaluarsa
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            5 Warnings
+                        </div>
                     </div>
                 </div>
             </div>
@@ -71,8 +91,12 @@
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card border-left-dark shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">Statistik Total Barang</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">500 Items</div>
+                        <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                            Statistik Total Barang
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            500 Items
+                        </div>
                     </div>
                 </div>
             </div>

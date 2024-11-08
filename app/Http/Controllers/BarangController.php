@@ -2,9 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\barang;
+use App\Models\supkonpro;
 use App\Models\jenis_barang;
 use Illuminate\Http\Request;
+use App\Models\JenisPenerimaan;
+use App\Models\PenerimaanBarang;
+use Illuminate\Support\Facades\Auth;
+use App\Models\DetailPenerimaanBarang;
+use App\Models\DetailPengeluaranBarang;
+use App\Models\JenisPengeluaran;
+use App\Models\PengeluaranBarang;
 
 class BarangController extends Controller
 {
@@ -108,59 +117,35 @@ class BarangController extends Controller
          return view('kelola-barang.index', compact('all_barangs'));
      }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+     public function detailTransaksiBarang($id)
     {
-        //
-    }
+        $barang = barang::findOrFail($id);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        $all_master_penerimaans = PenerimaanBarang::whereHas('detailpenerimaanbarang', function ($query) 
+            use ($id) { $query->where('barang_id', $id); })->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $all_supkonpros = supkonpro::all();
+        $all_users = User::all();
+        $all_jenis_penerimaans = JenisPenerimaan::all();
+        $all_detail_penerimaans = DetailPenerimaanBarang::where('barang_id', $id)->get();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(barang $barang)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(barang $barang)
-    {
-        //
-    }
+        $all_master_pengeluarans = PengeluaranBarang::whereHas('detailpengeluaranbarang', function 
+            ($query) use ($id) { $query->where('barang_id', $id); })->get();
+        $all_jenis_pengeluarans = JenisPengeluaran::all();
+        $all_detail_pengeluarans = DetailPengeluaranBarang::where('barang_id', $id)->get();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, barang $barang)
-    {
-        //
-    }
+        return view('kelola-barang.detail', compact(
+            'barang',
+            'all_master_penerimaans', 
+            'all_supkonpros', 
+            'all_users', 
+            'all_jenis_penerimaans', 
+            'all_detail_penerimaans',
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(barang $barang)
-    {
-        //
+            'all_master_pengeluarans', 
+            'all_jenis_pengeluarans',
+            'all_detail_pengeluarans',
+        ));
     }
 }

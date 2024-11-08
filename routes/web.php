@@ -2,24 +2,25 @@
 
 use App\Models\supkonpro;
 use App\Models\PenerimaanBarang;
+use App\Models\PengeluaranBarang;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SaldoAwalController;
 use App\Http\Controllers\SupkonproController;
 use App\Http\Controllers\JenisBarangController;
 use App\Http\Controllers\PenerimaanBarangController;
 use App\Http\Controllers\PengeluaranBarangController;
-use App\Models\PengeluaranBarang;
 
 Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -34,7 +35,6 @@ Route::middleware('auth')->group(function () {
     Route::get('edit-jenis-barang/{id}', [JenisBarangController::class, 'loadEditForm']);
     Route::put('edit-jenis-barang', [JenisBarangController::class, 'EditJenisBarang'])->name('EditJenisBarang');
     Route::get('delete-jenis-barang/{id}', [JenisBarangController::class, 'deleteJenisBarang']);
-    // Route::get('detail-barang/{id}', [JenisBarangController::class, 'show'])->name('barang.detail');
 
     Route::get('kelola-barang', [BarangController::class, 'loadAllBarangs'])->name('kelola-barang');
     Route::get('barang-search', [BarangController::class, 'search'])->name('barangs.search');
@@ -44,6 +44,9 @@ Route::middleware('auth')->group(function () {
     Route::get('edit-barang/{id}', [BarangController::class, 'loadEditForm']);
     Route::put('edit-barang', [BarangController::class, 'EditBarang'])->name('EditBarang');
     Route::get('delete-barang/{id}', [BarangController::class, 'deleteBarang']);
+    Route::get('detail-barang/{id}', [BarangController::class, 'detailTransaksiBarang'])
+               ->name('barang.detail');
+
 
     Route::get('saldo-awal', [SaldoAwalController::class, 'loadAllSaldoAwals'])->name('saldo-awal');
     Route::get('saldo-awal-search', [SaldoAwalController::class, 'search'])->name('saldoawals.search');
@@ -51,7 +54,6 @@ Route::middleware('auth')->group(function () {
     Route::get('add-saldo-awal', [SaldoAwalController::class, 'loadAddSaldoAwalForm']);
     Route::post('add-saldo-awal', [SaldoAwalController::class, 'AddSaldoAwal'])->name('AddSaldoAwal');
    
-    // Route::get('/supkonpro/{jenis}', [supkonpro::class, 'handleType']);
     Route::get('supkonpro/{jenis}', [SupkonproController::class, 'loadAllSupkonpros'])->name('supkonpro');
     Route::get('supkonpro-search/{jenis}', [SupkonproController::class, 'search'])->name('supkonpros.search');
     Route::get('supkonpros/{jenis}', [SupkonproController::class, 'loadAllSupkonpros']);
