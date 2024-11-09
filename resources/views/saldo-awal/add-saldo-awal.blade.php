@@ -80,13 +80,13 @@
                 
                 <div class="mb-3">
                     <label for="saldo_awal" class="form-label">Saldo Awal</label>
-                    <input type="decimal" name="saldo_awal" id="saldo_awal" class="form-control" 
+                    <input type="decimal" name="saldo_awal" id="saldo_awal" readonly class="form-control" 
                            value="{{ old('saldo_awal') }}" placeholder="Enter saldo awal" 
                            onblur="this.value = formatNumber(this.value)">
                     @error('saldo_awal')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
-                </div>
+                </div>                
                 
                 <div class="mb-3">
                     <label for="total_terima" class="form-label">Total Terima</label>
@@ -110,28 +110,62 @@
                 
                 <div class="mb-3">
                     <label for="saldo_akhir" class="form-label">Saldo Akhir</label>
-                    <input type="decimal" name="saldo_akhir" id="saldo_akhir" class="form-control" 
+                    <input type="decimal" name="saldo_akhir" readonly id="saldo_akhir" class="form-control" 
                            value="{{ old('saldo_akhir') }}" placeholder="Enter saldo akhir" 
-                           onblur="this.value = formatNumber(this.value)">
+                           readonly onblur="this.value = formatNumber(this.value)">
                     @error('saldo_akhir')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
-                
-                <script>
-                    function formatNumber(num) {
-                        if (!num) return '';
-                        num = num.replace(/\./g, '').replace(/,/g, '.'); // Remove existing dots and commas
-                        return new Intl.NumberFormat('id-ID').format(num); // Format the number
-                    }
-                </script>
                 
                 <button type="submit" class="btn btn-primary w-100">Save</button>
             </form>
         </div>
     </div>
 </div>
+<script>
+    function formatNumber(num) {
+        if (!num) return '';
+            num = num.replace(/\./g, '').replace(/,/g, '.'); 
+            return new Intl.NumberFormat('id-ID').format(num); 
+    }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+ 
+     function calculateSaldoAkhir() {
+        let saldoAwal = parseFloat($('#saldo_awal').val().replace(/\./g, '').replace(',', '.')) || 0;
+        let totalTerima = parseFloat($('#total_terima').val().replace(/\./g, '').replace(',', '.')) || 0;
+        let totalKeluar = parseFloat($('#total_keluar').val().replace(/\./g, '').replace(',', '.')) || 0;
+
+        let saldoAkhir = saldoAwal + totalTerima - totalKeluar;
+
+        $('#saldo_akhir').val(formatNumber(saldoAkhir.toString()));
+    }
+
+    $(document).ready(function() {
+        $('#barang_id, #bulan, #tahun').change(function() {
+            let barangId = $('#barang_id').val();
+            let bulan = $('#bulan').val();
+            let tahun = $('#tahun').val();
+
+            if (barangId && bulan && tahun) {
+                $.ajax({
+                    url: "{{ route('getSaldoAkhirSebelum') }}",
+                    type: "GET",
+                    data: { barang_id: barangId, bulan: bulan, tahun: tahun },
+                    success: function(response) {
+                        $('#saldo_awal').val(response.saldo_akhir || 0);
+                    },
+                    error: function() {
+                        $('#saldo_awal').val(0);
+                    }
+                });
+            } else {
+                $('#saldo_awal').val(0); // Reset to 0 if fields are incomplete
+            }
+        });
+    });
+    $('#total_terima, #total_keluar').on('input', function() {
+            calculateSaldoAkhir();
+    });
+</script>
 @endsection

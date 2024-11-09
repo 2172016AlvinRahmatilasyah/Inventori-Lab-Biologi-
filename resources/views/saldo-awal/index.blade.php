@@ -62,7 +62,19 @@
                     </thead>
                     <tbody>
                         @if(isset($all_saldo_awals) && count($all_saldo_awals) > 0)
+                            @php
+                                $previousBarangId = null;
+                            @endphp
                             @foreach ($all_saldo_awals as $saldo_awal)
+                                @if($previousBarangId !== $saldo_awal->barang_id)
+                                    <!-- Insert empty row to break when barang_id changes -->
+                                    @if($previousBarangId !== null)
+                                        <tr><td colspan="10" class="text-center">-----</td></tr>
+                                    @endif
+                                    <tr>
+                                        <td colspan="10" class="text-center"><strong>Barang: {{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</strong></td>
+                                    </tr>
+                                @endif
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</td>
@@ -75,6 +87,9 @@
                                     <td>{{ $saldo_awal->created_at }}</td>
                                     <td>{{ $saldo_awal->updated_at }}</td>
                                 </tr>
+                                @php
+                                    $previousBarangId = $saldo_awal->barang_id;
+                                @endphp
                             @endforeach
                         @else
                             <tr>

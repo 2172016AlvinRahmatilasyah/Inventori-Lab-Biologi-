@@ -9,9 +9,15 @@ use Illuminate\Http\Request;
 class SaldoAwalController extends Controller
 {
     public function loadAllSaldoAwals(){
-        $all_saldo_awals = SaldoAwal::all();
-        return view('saldo-awal.index',compact('all_saldo_awals'));
+        $all_saldo_awals = SaldoAwal::with('barang')
+            ->orderBy('barang_id') 
+            ->orderBy('tahun') 
+            ->orderByRaw('LPAD(bulan, 2, "0")') 
+            ->get();
+    
+        return view('saldo-awal.index', compact('all_saldo_awals'));
     }
+    
 
     public function loadAddSaldoAwalForm(){
         $all_saldo_awals = SaldoAwal::all();
@@ -82,60 +88,22 @@ class SaldoAwalController extends Controller
         return view('saldo-awal.index', compact('all_saldo_awals'));
     }
 
-    
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function getSaldoAkhirSebelum(Request $request)
     {
-        //
-    }
+        $barangId = $request->query('barang_id');
+        $bulan = $request->query('bulan');
+        $tahun = $request->query('tahun');
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        // Calculate the previous month and adjust the year if necessary
+        $previousMonth = $bulan == '01' ? '12' : str_pad($bulan - 1, 2, '0', STR_PAD_LEFT);
+        $previousYear = $bulan == '01' ? $tahun - 1 : $tahun;
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $saldoAkhir = SaldoAwal::where('barang_id', $barangId)
+            ->where('tahun', $previousYear)
+            ->where('bulan', $previousMonth)
+            ->value('saldo_akhir') ?? 0; // Default to 0 if no saldo_akhir found
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(SaldoAwal $saldoAwal)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(SaldoAwal $saldoAwal)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, SaldoAwal $saldoAwal)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SaldoAwal $saldoAwal)
-    {
-        //
-    }
+        return response()->json(['saldo_akhir' => $saldoAkhir]);
+        }
+ 
 }

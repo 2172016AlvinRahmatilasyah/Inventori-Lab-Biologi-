@@ -175,7 +175,7 @@
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
                     <a class="navbar-brand ps-3" href="{{ url('/dashboard') }}">
-                        Hello '{{ Auth::user()->name }}' 
+                        Hello {{ Auth::user()->name }}
                     </a>
                     <!-- Sidebar Toggle (Topbar) -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">

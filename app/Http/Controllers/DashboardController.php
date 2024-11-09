@@ -11,6 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Http\Request;
 use App\Models\PenerimaanBarang;
 use App\Models\PengeluaranBarang;
+use App\Models\SaldoAwal;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -29,13 +30,22 @@ class DashboardController extends Controller
         $twoMonthsLater = Carbon::now()->addMonths(2);
         $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
         $totalStok = Barang::sum('stok');
-
+        $totalSaldoAwalBulanIni = SaldoAwal::where('bulan', Carbon::now()->month)
+                                             ->sum('saldo_awal');
+        $totalSaldoTerimaBulanIni = SaldoAwal::where('bulan', Carbon::now()->month)
+                                             ->sum('total_terima');
+        $totalSaldoKeluarBulanIni = SaldoAwal::where('bulan', Carbon::now()->month)
+                                             ->sum('total_keluar');
+        
         return view('dashboard', compact(
             'barangMasukBulanIni',
             'barangKeluarBulanIni',
             'barangStokMinimal',
             'barangKadaluarsaMendekati',
-            'totalStok'
+            'totalStok',
+            'totalSaldoAwalBulanIni',
+            'totalSaldoTerimaBulanIni',
+            'totalSaldoKeluarBulanIni'
         ));
     }
 

@@ -105,8 +105,50 @@
             </div>
         </div>
 
-        <!-- Data Permintaan Proyek -->
         <div class="row">
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Saldo Awal Keseluruhan Barang Bulan Ini
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            Rp {{ number_format($totalSaldoAwalBulanIni, 0, ',', '.') }} 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Saldo Terima Keseluruhan Barang Bulan Ini
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Rp {{ number_format($totalSaldoTerimaBulanIni, 0, ',', '.') }} 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Saldo Keluar Keseluruhan Barang Bulan Ini
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Rp {{ number_format($totalSaldoKeluarBulanIni, 0, ',', '.') }}  
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+        <!-- Data Permintaan Proyek -->
+        {{-- <div class="row">
             <div class="col-xl-12 col-lg-12">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -142,14 +184,14 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Chart Example Row -->
-        <div class="row">
-            <div class="col-xl-8 col-lg-7">
+        {{-- <div class="row">
+            <div class="col-xl-12 col-lg-12">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">Saldo Awal per Bulan Keseluruhan</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Saldo Awal per Bulan Keseluruhan Barang Tahun Ini</h6>
                         <div class="dropdown no-arrow">
                             <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -172,7 +214,8 @@
                     </div>
                 </div>
             </div>
-            {{-- <div class="col-xl-4 col-lg-5">
+            
+            <div class="col-xl-4 col-lg-5">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                         <h6 class="m-0 font-weight-bold text-primary">Stok Distribution</h6>
@@ -183,8 +226,9 @@
                         </div>
                     </div>
                 </div>
-            </div> --}}
-        </div>
+            </div>
+        </div> --}}
+        
     </div>
 
     <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
