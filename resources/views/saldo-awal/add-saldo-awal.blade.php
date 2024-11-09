@@ -16,6 +16,18 @@
 <script src="{{ asset('template/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
 
 <script src="{{ asset('template/js/demo/datatables-demo.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+<script>
+    new AutoNumeric('#saldo_awal', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
+    new AutoNumeric('#total_terima', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
+    new AutoNumeric('#total_keluar', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
+
+    // Trigger penghitungan saldo akhir otomatis
+    $('#total_terima, #total_keluar').on('input', function() {
+        calculateSaldoAkhir();
+    });
+</script>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
@@ -80,9 +92,9 @@
                 
                 <div class="mb-3">
                     <label for="saldo_awal" class="form-label">Saldo Awal</label>
-                    <input type="decimal" name="saldo_awal" id="saldo_awal" readonly class="form-control" 
-                           value="{{ old('saldo_awal') }}" placeholder="Enter saldo awal" 
-                           onblur="this.value = formatNumber(this.value)">
+                    <input type="text" name="saldo_awal" id="saldo_awal" readonly class="form-control" 
+                           value="{{ old('saldo_awal') }}" placeholder="Enter saldo awal" readonly
+                    >
                     @error('saldo_awal')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -125,23 +137,37 @@
 </div>
 <script>
     function formatNumber(num) {
-        if (!num) return '';
-            num = num.replace(/\./g, '').replace(/,/g, '.'); 
-            return new Intl.NumberFormat('id-ID').format(num); 
+        if (!num) return ''; 
+            num = num.replace(/\./g, '').replace(/,/g, '.'); // Menghapus format lama
+            let parsedNum = parseFloat(num); // Parse menjadi angka
+        if (isNaN(parsedNum)) return ''; // Jika bukan angka, kembali string kosong
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2 }).format(parsedNum); // Format dengan dua desimal
     }
 
+
  
-     function calculateSaldoAkhir() {
+    function calculateSaldoAkhir() {
         let saldoAwal = parseFloat($('#saldo_awal').val().replace(/\./g, '').replace(',', '.')) || 0;
         let totalTerima = parseFloat($('#total_terima').val().replace(/\./g, '').replace(',', '.')) || 0;
         let totalKeluar = parseFloat($('#total_keluar').val().replace(/\./g, '').replace(',', '.')) || 0;
 
+        // Hitung saldo akhir
         let saldoAkhir = saldoAwal + totalTerima - totalKeluar;
 
-        $('#saldo_akhir').val(formatNumber(saldoAkhir.toString()));
+        // Tampilkan saldo_akhir dengan format Indonesia (IDR)
+        $('#saldo_akhir').val(formatNumber(saldoAkhir));
     }
 
+function formatNumber(num) {
+    return num.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+
     $(document).ready(function() {
+        $('#total_terima, #total_keluar').on('input', function() {
+            calculateSaldoAkhir(); // Panggil fungsi penghitungan saldo akhir setiap kali ada perubahan
+        });
+
         $('#barang_id, #bulan, #tahun').change(function() {
             let barangId = $('#barang_id').val();
             let bulan = $('#bulan').val();
@@ -163,9 +189,6 @@
                 $('#saldo_awal').val(0); // Reset to 0 if fields are incomplete
             }
         });
-    });
-    $('#total_terima, #total_keluar').on('input', function() {
-            calculateSaldoAkhir();
     });
 </script>
 @endsection

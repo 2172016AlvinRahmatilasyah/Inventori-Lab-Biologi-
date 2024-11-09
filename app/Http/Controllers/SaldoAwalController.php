@@ -37,19 +37,19 @@ class SaldoAwalController extends Controller
             'total_keluar' => 'required',
             'saldo_akhir' => 'required',
         ]);
-
+        $saldo_awal = str_replace('.', '', $request->input('saldo_awal'));
+        $total_terima = str_replace('.', '', $request->input('total_terima'));
+        $total_keluar = str_replace('.', '', $request->input('total_keluar'));
+        $saldo_akhir = str_replace('.', '', $request->input('saldo_akhir'));
         try {
             $new_saldo_awal = new SaldoAwal();
             $new_saldo_awal->barang_id = $request->barang_id;
             $new_saldo_awal->tahun = $request->tahun;
             $new_saldo_awal->bulan = $request->bulan;
-
-            // Process the numeric inputs to remove any dots and convert to float
-            $new_saldo_awal->saldo_awal = $this->parseNumber($request->saldo_awal);
-            $new_saldo_awal->total_terima = $this->parseNumber($request->total_terima);
-            $new_saldo_awal->total_keluar = $this->parseNumber($request->total_keluar);
-            $new_saldo_awal->saldo_akhir = $this->parseNumber($request->saldo_akhir);
-
+            $new_saldo_awal->saldo_awal = $saldo_awal;
+            $new_saldo_awal->total_terima = $total_terima;
+            $new_saldo_awal->total_keluar = $total_keluar;
+            $new_saldo_awal->saldo_akhir = $saldo_akhir;
             $new_saldo_awal->save();
 
             return redirect('/saldo-awal')->with('success', 'Added Successfully');
@@ -58,13 +58,13 @@ class SaldoAwalController extends Controller
         }
     }
 
-    /**
-     * Helper function to parse numbers formatted with dots as thousands separators.
-     */
-    private function parseNumber($number)
-    {
-        return (float) str_replace('.', '', $number);
-    }
+    // /**
+    //  * Helper function to parse numbers formatted with dots as thousands separators.
+    //  */
+    // private function parseNumber($number)
+    // {
+    //     return (float) str_replace('.', '', $number);
+    // }
 
 
 
@@ -94,16 +94,19 @@ class SaldoAwalController extends Controller
         $bulan = $request->query('bulan');
         $tahun = $request->query('tahun');
 
-        // Calculate the previous month and adjust the year if necessary
         $previousMonth = $bulan == '01' ? '12' : str_pad($bulan - 1, 2, '0', STR_PAD_LEFT);
         $previousYear = $bulan == '01' ? $tahun - 1 : $tahun;
 
         $saldoAkhir = SaldoAwal::where('barang_id', $barangId)
             ->where('tahun', $previousYear)
             ->where('bulan', $previousMonth)
-            ->value('saldo_akhir') ?? 0; // Default to 0 if no saldo_akhir found
+            ->value('saldo_akhir') ?? 0;
 
-        return response()->json(['saldo_akhir' => $saldoAkhir]);
-        }
+        // Pastikan data dikembalikan dalam format dua desimal
+        return response()->json(['saldo_akhir' => number_format($saldoAkhir, 2, '.', '')]);
+    }
+
+
+
  
 }
