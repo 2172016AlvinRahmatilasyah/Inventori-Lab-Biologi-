@@ -78,7 +78,7 @@
                                         <td>{{ $jenisbarang->created_at }}</td>
                                         <td>{{ $jenisbarang->updated_at }}</td>
                                         <td><a href="/edit-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
-                                        <td><a href="/delete-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
+                                        {{-- <td><a href="/delete-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
                                         <td><a href="/detail-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-info btn-sm">Detail</a></td>
                                     </tr>
                                     </tr>
