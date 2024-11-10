@@ -10,6 +10,7 @@ use App\Models\supkonpro;
 use Illuminate\Http\Request;
 use App\Models\PenerimaanBarang;
 use App\Models\User;
+use Illuminate\Support\Facades\DB; 
 
 class PenerimaanBarangController extends Controller
 {
@@ -107,15 +108,43 @@ class PenerimaanBarangController extends Controller
         }
     }
 
-    public function deleteMasterBarang($id){
+    public function deleteMasterBarang($id)
+    {
         try {
-            PenerimaanBarang::where('id',$id)->delete();
-            return redirect('/master-barang-masuk')->with('success','Deleted successfully!');
-        } catch (\Exception $e) {
-            return redirect('/master-barang-masuk')->with('fail',$e->getMessage());
+            // Begin a transaction to ensure data consistency
+            DB::beginTransaction();
             
+            // Retrieve all associated detail records
+            $details = DetailPenerimaanBarang::where('master_penerimaan_barang_id', $id)->get();
+
+            // Iterate over each detail to adjust the stock
+            foreach ($details as $detail) {
+                $barang = Barang::find($detail->barang_id);
+
+                if ($barang) {
+                    // Deduct the jumlah_diterima from the stock
+                    $barang->stok -= $detail->jumlah_diterima;
+                    $barang->save();
+                }
+            }
+
+            // Delete the detail records associated with this master record
+            DetailPenerimaanBarang::where('master_penerimaan_barang_id', $id)->delete();
+            
+            // Delete the master PenerimaanBarang record
+            PenerimaanBarang::where('id', $id)->delete();
+            
+            // Commit the transaction
+            DB::commit();
+            
+            return redirect('/master-barang-masuk')->with('success', 'Deleted successfully!');
+        } catch (\Exception $e) {
+            // Rollback the transaction on failure
+            DB::rollBack();
+            return redirect('/master-barang-masuk')->with('fail', $e->getMessage());
         }
     }
+
 
     public function detailMasterBarang($id)
     {

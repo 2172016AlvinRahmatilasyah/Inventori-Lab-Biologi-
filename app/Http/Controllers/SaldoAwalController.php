@@ -37,10 +37,11 @@ class SaldoAwalController extends Controller
             'total_keluar' => 'required',
             'saldo_akhir' => 'required',
         ]);
-        $saldo_awal = str_replace('.', '', $request->input('saldo_awal'));
-        $total_terima = str_replace('.', '', $request->input('total_terima'));
-        $total_keluar = str_replace('.', '', $request->input('total_keluar'));
-        $saldo_akhir = str_replace('.', '', $request->input('saldo_akhir'));
+        $saldo_awal = (float) str_replace(['.', ','], ['', '.'], $request->input('saldo_awal'));
+        $total_terima = (float) str_replace(['.', ','], ['', '.'], $request->input('total_terima'));
+        $total_keluar = (float) str_replace(['.', ','], ['', '.'], $request->input('total_keluar'));
+        $saldo_akhir = (float) str_replace(['.', ','], ['', '.'], $request->input('saldo_akhir'));
+
         try {
             $new_saldo_awal = new SaldoAwal();
             $new_saldo_awal->barang_id = $request->barang_id;
@@ -93,18 +94,22 @@ class SaldoAwalController extends Controller
         $barangId = $request->query('barang_id');
         $bulan = $request->query('bulan');
         $tahun = $request->query('tahun');
-
+    
+        // Calculate previous month and year
         $previousMonth = $bulan == '01' ? '12' : str_pad($bulan - 1, 2, '0', STR_PAD_LEFT);
         $previousYear = $bulan == '01' ? $tahun - 1 : $tahun;
-
+    
+        // Fetch saldo_akhir for the previous month and year, or default to 0
         $saldoAkhir = SaldoAwal::where('barang_id', $barangId)
             ->where('tahun', $previousYear)
             ->where('bulan', $previousMonth)
             ->value('saldo_akhir') ?? 0;
-
-        // Pastikan data dikembalikan dalam format dua desimal
-        return response()->json(['saldo_akhir' => number_format($saldoAkhir, 2, '.', '')]);
+    
+        // Format saldo_akhir as decimal (15,2) before returning
+        return response()->json(['saldo_akhir' => number_format((float)$saldoAkhir, 2, '.', '')]);
     }
+    
+
 
 
 

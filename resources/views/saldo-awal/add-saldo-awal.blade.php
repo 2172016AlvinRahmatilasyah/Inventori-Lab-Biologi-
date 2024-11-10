@@ -17,7 +17,7 @@
 
 <script src="{{ asset('template/js/demo/datatables-demo.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
-<script>
+{{-- <script>
     new AutoNumeric('#saldo_awal', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
     new AutoNumeric('#total_terima', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
     new AutoNumeric('#total_keluar', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
@@ -26,7 +26,7 @@
     $('#total_terima, #total_keluar').on('input', function() {
         calculateSaldoAkhir();
     });
-</script>
+</script> --}}
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
@@ -98,13 +98,13 @@
                     @error('saldo_awal')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
-                </div>                
+                </div>             
                 
                 <div class="mb-3">
                     <label for="total_terima" class="form-label">Total Terima</label>
                     <input type="decimal" name="total_terima" id="total_terima" class="form-control" 
                            value="{{ old('total_terima') }}" placeholder="Enter total terima" 
-                           onblur="this.value = formatNumber(this.value)">
+                    >
                     @error('total_terima')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -114,7 +114,7 @@
                     <label for="total_keluar" class="form-label">Total Keluar</label>
                     <input type="decimal" name="total_keluar" id="total_keluar" class="form-control" 
                            value="{{ old('total_keluar') }}" placeholder="Enter total keluar" 
-                           onblur="this.value = formatNumber(this.value)">
+                    >
                     @error('total_keluar')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -122,9 +122,9 @@
                 
                 <div class="mb-3">
                     <label for="saldo_akhir" class="form-label">Saldo Akhir</label>
-                    <input type="decimal" name="saldo_akhir" readonly id="saldo_akhir" class="form-control" 
+                    <input type="decimal" name="saldo_akhir" id="saldo_akhir" class="form-control" 
                            value="{{ old('saldo_akhir') }}" placeholder="Enter saldo akhir" 
-                           readonly onblur="this.value = formatNumber(this.value)">
+                    >
                     @error('saldo_akhir')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -136,36 +136,29 @@
     </div>
 </div>
 <script>
-    function formatNumber(num) {
-        if (!num) return ''; 
-            num = num.replace(/\./g, '').replace(/,/g, '.'); // Menghapus format lama
-            let parsedNum = parseFloat(num); // Parse menjadi angka
-        if (isNaN(parsedNum)) return ''; // Jika bukan angka, kembali string kosong
-            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2 }).format(parsedNum); // Format dengan dua desimal
-    }
-
-
- 
-    function calculateSaldoAkhir() {
-        let saldoAwal = parseFloat($('#saldo_awal').val().replace(/\./g, '').replace(',', '.')) || 0;
-        let totalTerima = parseFloat($('#total_terima').val().replace(/\./g, '').replace(',', '.')) || 0;
-        let totalKeluar = parseFloat($('#total_keluar').val().replace(/\./g, '').replace(',', '.')) || 0;
-
-        // Hitung saldo akhir
-        let saldoAkhir = saldoAwal + totalTerima - totalKeluar;
-
-        // Tampilkan saldo_akhir dengan format Indonesia (IDR)
-        $('#saldo_akhir').val(formatNumber(saldoAkhir));
-    }
-
-function formatNumber(num) {
-    return num.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-
     $(document).ready(function() {
-        $('#total_terima, #total_keluar').on('input', function() {
-            calculateSaldoAkhir(); // Panggil fungsi penghitungan saldo akhir setiap kali ada perubahan
+        function calculateSaldoAkhir() {
+            let saldoAwal =  parseFloat(removeThousandsSeparator($('#saldo_awal').val())) || 0;
+            let totalTerima = parseFloat(removeThousandsSeparator($('#total_terima').val())) || 0;
+            let totalKeluar = parseFloat(removeThousandsSeparator($('#total_keluar').val())) || 0;
+            let saldoAkhir = saldoAwal + totalTerima - totalKeluar;
+            $('#saldo_akhir').val(formatNumber(saldoAkhir));
+        }
+
+        function removeThousandsSeparator(value) {
+            return value.replace(/\./g, '');
+        }
+
+        function formatNumber(value) {
+            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        $('#saldo_awal, #total_terima, #total_keluar').on('input', function() {
+            calculateSaldoAkhir();
+        });
+
+        $('#saldo_awal, #total_terima, #total_keluar, #saldo_akhir').on('blur', function() {
+            $(this).val(formatNumber(parseFloat(removeThousandsSeparator($(this).val())) || 0));
         });
 
         $('#barang_id, #bulan, #tahun').change(function() {
@@ -179,14 +172,17 @@ function formatNumber(num) {
                     type: "GET",
                     data: { barang_id: barangId, bulan: bulan, tahun: tahun },
                     success: function(response) {
-                        $('#saldo_awal').val(response.saldo_akhir || 0);
+                        $('#saldo_awal').val(formatNumber(parseFloat(response.saldo_akhir) || 0));
+                        calculateSaldoAkhir();
                     },
                     error: function() {
-                        $('#saldo_awal').val(0);
+                        $('#saldo_awal').val(formatNumber(0));
+                        calculateSaldoAkhir();
                     }
                 });
             } else {
-                $('#saldo_awal').val(0); // Reset to 0 if fields are incomplete
+                $('#saldo_awal').val(formatNumber(0)); // Reset to 0 if fields are incomplete
+                calculateSaldoAkhir();
             }
         });
     });

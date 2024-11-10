@@ -51,7 +51,7 @@ class DashboardController extends Controller
 
     public function generateReport()
     {
-        // Dapatkan tanggal bulan ini
+        $thisYear = Carbon::now()->year;
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
 
@@ -78,13 +78,19 @@ class DashboardController extends Controller
                 $jumlahKeluar = $barangKeluarBulanIni->where('barang_id', $barang->id)->sum('jumlah_keluar');
                 $jumlahMasuk = $barangMasukBulanIni->where('barang_id', $barang->id)->sum('jumlah_diterima');
         
-                return [
-                    'nama_barang' => $barang->nama_barang,
-                    'satuan_stok' => $barang->jenisBarang->satuan_stok ?? 'N/A',
-                    'jumlah_keluar' => $jumlahKeluar ?: 0,
-                    'jumlah_masuk' => $jumlahMasuk ?: 0,
-                ];
+        return [
+            'nama_barang' => $barang->nama_barang,
+            'satuan_stok' => $barang->jenisBarang->satuan_stok ?? 'N/A',
+            'jumlah_keluar' => $jumlahKeluar ?: 0,
+            'jumlah_masuk' => $jumlahMasuk ?: 0,
+        ];
         });
+
+        $allSaldoAwals = SaldoAwal::with('barang')
+        ->where('bulan', Carbon::now()->month)
+        ->where('tahun', $thisYear)
+        ->get();
+
 
         $allBarangs = Barang::with('jenisBarang')->get();
 
@@ -106,6 +112,13 @@ class DashboardController extends Controller
             'detail_pengeluaran' => $detailPengeluaran,
             'barangList' => $barangList,
             'all_barangs' => $allBarangs,
+            'totalSaldoAwalBulanIni' => SaldoAwal::where('bulan', Carbon::now()->month)
+                                        ->sum('saldo_awal'),
+            'totalSaldoTerimaBulanIni' => SaldoAwal::where('bulan', Carbon::now()->month)
+                                          ->sum('total_terima'),
+            'totalSaldoKeluarBulanIni' => SaldoAwal::where('bulan', Carbon::now()->month)
+                                             ->sum('total_keluar'),
+            'all_saldo_awals'=>$allSaldoAwals,
         ];
 
         // Generate PDF

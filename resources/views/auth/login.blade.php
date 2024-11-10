@@ -12,13 +12,22 @@
         background-color: black;
       }
     }
+    .center-image {
+        display: flex;
+        justify-content: center; 
+        align-items: center;
+    }
 </style>
 <x-guest-layout>
+    <div class="center-image">
+        <img src="{{ asset('image/logo.png') }}" alt="Logo">
+    </div>
   <!-- Session Status -->
   <x-auth-session-status class="mb-4" :status="session('status')" />
   <h1 style="text-align: center; color: var(--text-color, black);">
       Sistem Inventori Laboratorium Biologi
   </h1>
+  
   <form method="POST" action="{{ route('login') }}">
       @csrf
 

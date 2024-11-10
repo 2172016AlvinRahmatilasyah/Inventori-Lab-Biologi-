@@ -60,6 +60,10 @@
     <p>Stok Mendekati/Sudah Minimum: {{ count($barangStokMinimal) }} Items</p>
     <p>Stok Mendekati Kadaluarsa: {{ count($barangKadaluarsaMendekati) }} Items</p>
     <p>Total Stok Keseluruhan: {{ $totalStok }} Items</p>
+    <p>Saldo Awal Keseluruhan Barang Bulan Ini: Rp {{ number_format($totalSaldoAwalBulanIni, 0, ',', '.') }}</p>
+    <p>Saldo Terima Keseluruhan Barang Bulan Ini: Rp {{ number_format($totalSaldoTerimaBulanIni, 0, ',', '.') }}</p>
+    <p>Saldo Keluar Keseluruhan Barang Bulan Ini: Rp {{ number_format($totalSaldoKeluarBulanIni, 0, ',', '.') }}</p>
+    
     <br>
 
     <h3>Transaksi Barang Masuk Bulan Ini</h3>
@@ -210,7 +214,7 @@
     </table>
     <br>
 
-    <h3>Statistik Total Barang</h3>
+    <h3>Total Barang Keseluruhan</h3>
     <table border="1" cellspacing="0" cellpadding="8">
         <thead>
             <tr>
@@ -249,6 +253,46 @@
     </table>
     <br>
 
+    <h3>Saldo Awal Bulan Ini</h3>
+    <table class="table table-bordered" width="100%" cellspacing="0">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Barang</th>
+                <th>Tahun</th>
+                <th>Bulan</th>
+                <th>Saldo Awal</th>
+                <th>Total Terima</th>
+                <th>Total Keluar</th>
+                <th>Saldo Akhir</th>
+                <th>Tanggal Ditambah</th>
+                <th>Tanggal Diupdate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if($all_saldo_awals->isNotEmpty())
+                @foreach ($all_saldo_awals as $index => $saldo_awal)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</td>
+                        <td>{{ $saldo_awal->tahun }}</td>
+                        <td>{{ $saldo_awal->bulan }}</td>
+                        <td>{{ number_format($saldo_awal->saldo_awal, 0, ',', '.') }}</td>
+                        <td>{{ number_format($saldo_awal->total_terima, 0, ',', '.') }}</td>
+                        <td>{{ number_format($saldo_awal->total_keluar, 0, ',', '.') }}</td>
+                        <td>{{ number_format($saldo_awal->saldo_akhir, 0, ',', '.') }}</td>
+                        <td>{{ $saldo_awal->created_at }}</td>
+                        <td>{{ $saldo_awal->updated_at }}</td>
+                    </tr>
+                @endforeach
+            @else
+                <tr>
+                    <td colspan="10">Data tidak ditemukan!</td>
+                </tr>
+            @endif
+        </tbody>
+    </table>
+    
 
 </body>
 </html>

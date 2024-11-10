@@ -12,6 +12,8 @@ use App\Models\PengeluaranBarang;
 use App\Models\pengeluaran_barang;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Testing\Fakes\PendingMailFake;
+use Illuminate\Support\Facades\DB; 
+
 
 class PengeluaranBarangController extends Controller
 {
@@ -108,15 +110,43 @@ class PengeluaranBarangController extends Controller
         }
     }
 
-    public function deletePengeluaranBarang($id){
+    public function deletePengeluaranBarang($id)
+    {
         try {
-            PengeluaranBarang::where('id',$id)->delete();
-            return redirect('/master-barang-keluar')->with('success','Deleted successfully!');
-        } catch (\Exception $e) {
-            return redirect('/master-barang-keluar')->with('fail',$e->getMessage());
+            // Start a transaction to ensure data consistency
+            DB::beginTransaction();
             
+            // Retrieve all associated detail records
+            $details = DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $id)->get();
+
+            // Iterate over each detail to adjust the stock
+            foreach ($details as $detail) {
+                $barang = Barang::find($detail->barang_id);
+
+                if ($barang) {
+                    // Increase the stock back based on the jumlah_keluar
+                    $barang->stok += $detail->jumlah_keluar;
+                    $barang->save();
+                }
+            }
+
+            // Delete the detail records associated with this master record
+            DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $id)->delete();
+
+            // Delete the master PengeluaranBarang record
+            PengeluaranBarang::where('id', $id)->delete();
+
+            // Commit the transaction
+            DB::commit();
+            
+            return redirect('/master-barang-keluar')->with('success', 'Deleted successfully!');
+        } catch (\Exception $e) {
+            // Rollback the transaction on failure
+            DB::rollBack();
+            return redirect('/master-barang-keluar')->with('fail', $e->getMessage());
         }
     }
+
 
     public function detailPengeluaranBarang($id)
     {
