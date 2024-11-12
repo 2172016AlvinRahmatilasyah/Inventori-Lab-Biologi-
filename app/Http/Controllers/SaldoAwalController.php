@@ -109,9 +109,4 @@ class SaldoAwalController extends Controller
         return response()->json(['saldo_akhir' => number_format((float)$saldoAkhir, 2, '.', '')]);
     }
     
-
-
-
-
- 
 }
