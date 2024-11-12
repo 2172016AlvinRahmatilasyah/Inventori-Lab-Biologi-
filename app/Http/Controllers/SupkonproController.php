@@ -7,23 +7,7 @@ use Illuminate\Http\Request;
 
 class SupkonproController extends Controller
 {
-    // public function handleType($jenis)
-    // {
-    //     // Check the type and return the appropriate view or data
-    //     if ($jenis === 'supplier') {
-    //         $jenis = 'Supplier';
-    //     } elseif ($jenis === 'konsumen') {
-    //         $jenis = 'Konsumen';
-    //     } elseif ($jenis === 'proyek') {
-    //         $jenis = 'Proyek';
-    //     } else {
-    //         // Handle invalid type if necessary
-    //         abort(404);
-    //     }
 
-    //     // Return a view with the corresponding 'jenis'
-    //     return view('kelola-supkonpro.index', compact('jenis'));
-    // }
     protected $jenis;
 
     public function loadAllSupkonpros($jenis)
@@ -148,62 +132,5 @@ class SupkonproController extends Controller
             ->get();
 
         return view('supkonpro.index', compact('all_supkonpros', 'jenis'));
-    }
-
-    
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(supkonpro $supkonpro)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(supkonpro $supkonpro)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, supkonpro $supkonpro)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(supkonpro $supkonpro)
-    {
-        //
     }
 }
