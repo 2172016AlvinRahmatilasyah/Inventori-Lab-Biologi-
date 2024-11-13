@@ -1,5 +1,3 @@
-<!-- resources/views/dashboard.blade.php -->
-
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
@@ -69,20 +67,22 @@
 
         <!-- Content Row -->
         <div class="row">
-            <!-- Laporan Mutasi Persediaan -->
+           <!-- Stok Mendekati/Sudah Minimum -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card border-left-warning shadow h-100 py-2">
-                    <div class="card-body">
-                        {{-- sudah <=20 stok --}}
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Stok mendekati/sudah minimum 
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ count($barangStokMinimal) }} Barang/Bahan
+                <a href="{{ route('laporan-stok-minimum') }}" style="text-decoration: none;">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Stok mendekati/sudah minimum
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ count($barangStokMinimal) }} Barang/Bahan
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
+
 
             <!-- Laporan Stok Minimum dan Kadaluarsa -->
             <div class="col-xl-4 col-md-6 mb-4">

@@ -107,7 +107,7 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="13">Data tidak ada !</td>
+                    <td colspan="13">Tidak Ada Transaksi Barang Masuk Bulan Ini!</td>
                 </tr>
             @endif
         </tbody>
@@ -154,7 +154,7 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="13">Data tidak ada!</td>
+                    <td colspan="13">Tidak Ada Transaksi Barang Masuk Bulan Ini!</td>
                 </tr>
             @endif
         </tbody>
@@ -172,32 +172,49 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($barangList as $barang)
+            @if(count($barangList) > 0)
+                @foreach ($barangList as $barang)
+                    <tr>
+                        <td>{{ $barang['nama_barang'] }}</td>
+                        <td>{{ $barang['satuan_stok'] }}</td>
+                        <td>{{ $barang['jumlah_keluar'] }}</td>
+                        <td>{{ $barang['jumlah_masuk'] }}</td>
+                    </tr>
+                @endforeach
+            @else
                 <tr>
-                    <td>{{ $barang['nama_barang'] }}</td>
-                    <td>{{ $barang['satuan_stok'] }}</td>
-                    <td>{{ $barang['jumlah_keluar'] }}</td>
-                    <td>{{ $barang['jumlah_masuk'] }}</td>
+                    <td colspan="4">Tidak Ada Perubahan Persediaan!</td>
                 </tr>
-            @endforeach
+            @endif
         </tbody>
     </table>
     <br>
+
 
     <h3>Stok Mendekati/Sudah Minimum</h3>
     <table border="1" cellspacing="0" cellpadding="8">
         <tr>
             <th>Nama Barang</th>
+            <th>Satuan Stok Barang</th>
             <th>Stok</th>
         </tr>
-        @foreach($barangStokMinimal as $barang)
+        @if(count($barangStokMinimal) > 0)
+            @foreach($barangStokMinimal as $barang)
+                <tr>
+                    <td>{{ $barang->nama_barang }}</td>
+                    <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
+                    <td>{{ $barang->stok }}</td>
+                </tr>
+            @endforeach
+        @else
             <tr>
-                <td>{{ $barang->nama_barang }}</td>
-                <td>{{ $barang->stok }}</td>
+                <td colspan="2">Tidak Ada Stok Mendekati/Sudah Minimum!</td>
             </tr>
-        @endforeach
+        @endif
     </table>
     <br>
+    
+
 
     <h3>Barang Mendekati Kadaluarsa</h3>
     <table border="1" cellspacing="0" cellpadding="8">
@@ -205,14 +222,21 @@
             <th>Nama Barang</th>
             <th>Kadaluarsa</th>
         </tr>
-        @foreach($barangKadaluarsaMendekati as $barang)
+        @if(count($barangKadaluarsaMendekati) > 0)
+            @foreach($barangKadaluarsaMendekati as $barang)
+                <tr>
+                    <td>{{ $barang->nama_barang }}</td>
+                    <td>{{ $barang->kadaluarsa }}</td>
+                </tr>
+            @endforeach
+        @else
             <tr>
-                <td>{{ $barang->nama_barang }}</td>
-                <td>{{ $barang->kadaluarsa }}</td>
+                <td colspan="2">Tidak Ada Barang Mendekati Kadaluarsa!</td> 
             </tr>
-        @endforeach
+        @endif
     </table>
     <br>
+    
 
     <h3>Total Barang Keseluruhan</h3>
     <table border="1" cellspacing="0" cellpadding="8">
@@ -246,7 +270,7 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="13">Barang tidak ditemukan!</td>
+                    <td colspan="9">Barang tidak ditemukan!</td>
                 </tr>
             @endif
         </tbody>

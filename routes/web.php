@@ -30,6 +30,9 @@ Route::middleware('auth')->group(function () {
                 ->name('laporan-barang-keluar');
     Route::get('laporan-perubahan-persediaan', [DashboardController::class, 
                'showPerubahanPersediaanBulanIni'])->name('laporan-perubahan-persediaan');
+    Route::get('laporan-stok-minimum', [DashboardController::class, 'showStokMinimum'])
+                ->name('laporan-stok-minimum');
+
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

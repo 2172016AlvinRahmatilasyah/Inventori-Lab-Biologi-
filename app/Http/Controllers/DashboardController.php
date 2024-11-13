@@ -190,4 +190,13 @@ class DashboardController extends Controller
                     'detailPengeluaran'));
     }
 
+    public function showStokMinimum()
+    {
+        $barangStokMinimal = Barang::where('stok', '<=', 20)->get();
+
+        return view('laporan.laporan-stok-minimum', compact('barangStokMinimal'));
+    }
+
+    
+
 }
