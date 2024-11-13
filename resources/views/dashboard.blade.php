@@ -18,46 +18,54 @@
         <div class="row">
             <!-- Laporan Barang Masuk -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Laporan Barang Masuk Bulan ini
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ $barangMasukBulanIni }} Transaksi
+                <a href="{{ route('laporan-barang-masuk') }}" style="text-decoration: none;">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Laporan Barang Masuk Bulan ini
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ $barangMasukBulanIni }} Transaksi
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
+
 
             <!-- Laporan Barang Keluar -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Laporan Barang Keluar bulan ini
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ $barangKeluarBulanIni }} Transaksi
+                <a href="{{ route('laporan-barang-keluar') }}" style="text-decoration: none;">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Laporan Barang Keluar bulan ini
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ $barangKeluarBulanIni }} Transaksi
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Laporan Persediaan -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Laporan Perubahan Persediaan Bulan ini
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ $barangMasukBulanIni + $barangKeluarBulanIni }} Transaksi
+                <a href="{{ route('laporan-perubahan-persediaan') }}" style="text-decoration: none;">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Laporan Perubahan Persediaan Bulan ini
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ $barangMasukBulanIni + $barangKeluarBulanIni }} Transaksi
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
+
 
         <!-- Content Row -->
         <div class="row">

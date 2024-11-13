@@ -125,4 +125,69 @@ class DashboardController extends Controller
         $pdf = PDF::loadView('laporan.laporan-keseluruhan', $data);
         return $pdf->download('Laporan_Keseluruhan.pdf');
     }
+
+    public function showBarangMasukBulanIni()
+    {
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $detailPenerimaan = DetailPenerimaanBarang::with([
+            'PenerimaanBarang.jenisPenerimaanBarang',
+            'PenerimaanBarang.user',
+            'PenerimaanBarang.supkonpro',
+            'barang'
+        ])
+        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        ->get();
+
+
+        return view('laporan.laporan-barang-masuk', compact('detailPenerimaan'));
+    }
+
+    public function showBarangKeluarBulanIni()
+    {
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $detailPengeluaran = DetailPengeluaranBarang::with([
+            'PengeluaranBarang.jenisPengeluaranBarang',
+            'PengeluaranBarang.user',
+            'PengeluaranBarang.supkonpro',
+            'barang'
+        ])
+        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        ->get();
+
+
+        return view('laporan.laporan-barang-keluar', compact('detailPengeluaran'));
+    }
+
+    public function showPerubahanPersediaanBulanIni()
+    {
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $detailPenerimaan = DetailPenerimaanBarang::with([
+            'PenerimaanBarang.jenisPenerimaanBarang',
+            'PenerimaanBarang.user',
+            'PenerimaanBarang.supkonpro',
+            'barang'
+        ]) 
+        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        ->get();
+        
+        $detailPengeluaran = DetailPengeluaranBarang::with([
+            'PengeluaranBarang.jenisPengeluaranBarang',
+            'PengeluaranBarang.user',
+            'PengeluaranBarang.supkonpro',
+            'barang'
+        ])
+        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        ->get();
+
+
+        return view('laporan.laporan-perubahan-persediaan', compact('detailPenerimaan', 
+                    'detailPengeluaran'));
+    }
+
 }

@@ -24,6 +24,12 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::middleware('auth')->group(function () {
     Route::get('/generate-report', [DashboardController::class, 'generateReport'])
                 ->name('generateReport');
+    Route::get('laporan-barang-masuk', [DashboardController::class, 'showBarangMasukBulanIni'])
+                ->name('laporan-barang-masuk');
+    Route::get('laporan-barang-keluar', [DashboardController::class, 'showBarangKeluarBulanIni'])
+                ->name('laporan-barang-keluar');
+    Route::get('laporan-perubahan-persediaan', [DashboardController::class, 
+               'showPerubahanPersediaanBulanIni'])->name('laporan-perubahan-persediaan');
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
