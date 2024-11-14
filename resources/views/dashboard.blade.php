@@ -86,73 +86,85 @@
 
             <!-- Laporan Stok Minimum dan Kadaluarsa -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card border-left-danger shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Stok mendekati kadaluarsa
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ count($barangKadaluarsaMendekati) }} Warnings
+                <a href="{{ route('laporan-mendekati-kadaluarsa') }}" style="text-decoration: none;">
+                    <div class="card border-left-danger shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Stok mendekati kadaluarsa
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ count($barangKadaluarsaMendekati) }} Warnings
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Statistik Total Barang -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card border-left-dark shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
-                            Total Stok Keseluruhan
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ $totalStok  }} Items
+                <a href="{{ route('laporan-total-stok') }}" style="text-decoration: none;">
+                    <div class="card border-left-dark shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                                Total Stok Keseluruhan
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ $totalStok }} Items
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
-        </div>
 
-        <div class="row">
+
+            <!-- Saldo Awal -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Saldo Awal Keseluruhan Barang Bulan Ini
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            Rp {{ number_format($totalSaldoAwalBulanIni, 0, ',', '.') }} 
+                <a href="{{ url('/laporan-saldo/saldo-awal') }}" style="text-decoration: none;">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Saldo Awal Keseluruhan Barang Bulan Ini
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Rp {{ number_format($totalSaldoAwalBulanIni, 0, ',', '.') }}
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
-            
-            
 
-                <div class="col-xl-4 col-md-6 mb-4">
+            <!-- Saldo Terima -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <a href="{{ url('/laporan-saldo/saldo-terima') }}" style="text-decoration: none;">
                     <div class="card border-left-success shadow h-100 py-2">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Saldo Terima Keseluruhan Barang Bulan Ini
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Rp {{ number_format($totalSaldoTerimaBulanIni, 0, ',', '.') }} 
+                                Rp {{ number_format($totalSaldoTerimaBulanIni, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-xl-4 col-md-6 mb-4">
+                </a>
+            </div>
+
+            <!-- Saldo Keluar -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <a href="{{ url('/laporan-saldo/saldo-keluar') }}" style="text-decoration: none;">
                     <div class="card border-left-primary shadow h-100 py-2">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Saldo Keluar Keseluruhan Barang Bulan Ini
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Rp {{ number_format($totalSaldoKeluarBulanIni, 0, ',', '.') }}  
+                                Rp {{ number_format($totalSaldoKeluarBulanIni, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
+            </div>
+
         </div>
 
         <!-- Data Permintaan Proyek -->

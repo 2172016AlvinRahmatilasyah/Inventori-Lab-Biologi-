@@ -192,11 +192,42 @@ class DashboardController extends Controller
 
     public function showStokMinimum()
     {
-        $barangStokMinimal = Barang::where('stok', '<=', 20)->get();
+        $barangStokMinimal = barang::where('stok', '<=', 20)->get();
 
         return view('laporan.laporan-stok-minimum', compact('barangStokMinimal'));
     }
 
+    public function showBarangMendekatiKadaluarsa()
+    {
+        $twoMonthsLater = Carbon::now()->addMonths(2);
+        $barangKadaluarsaMendekati = barang::where('kadaluarsa', '<=', Carbon::now()->addMonths(2))->get();
+
+        return view('laporan.laporan-mendekati-kadaluarsa', compact('barangKadaluarsaMendekati'));
+    }
+
+    public function showTotalStok()
+    {
+        $allBarangs = Barang::with('jenisBarang')->get(); 
+      
+        $totalStokSemuaBarang = $allBarangs->sum('stok');
+        return view('laporan.laporan-total-stok', compact('allBarangs', 'totalStokSemuaBarang'));
+    }
+
+    public function showSaldo($type)
+    {
+        $thisYear = Carbon::now()->year;
+        $thisMonth = Carbon::now()->month;
+
+        $allSaldoAwals = SaldoAwal::with('barang')
+            ->where('tahun', $thisYear)
+            ->where('bulan', $thisMonth)
+            ->get();
+
+        return view('laporan.laporan-saldo-awal', compact('allSaldoAwals', 'type'));
+    }
+
+
+    
     
 
 }

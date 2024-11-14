@@ -32,6 +32,14 @@ Route::middleware('auth')->group(function () {
                'showPerubahanPersediaanBulanIni'])->name('laporan-perubahan-persediaan');
     Route::get('laporan-stok-minimum', [DashboardController::class, 'showStokMinimum'])
                 ->name('laporan-stok-minimum');
+    Route::get('laporan-mendekati-kadaluarsa', [DashboardController::class, 'showBarangMendekatiKadaluarsa'])
+                ->name('laporan-mendekati-kadaluarsa');
+    Route::get('/laporan-total-stok', [DashboardController::class, 'showTotalStok'])
+                ->name('laporan-total-stok');
+    Route::get('/laporan-saldo/{type}', [DashboardController::class, 'showSaldo']);
+
+
+
 
 
 

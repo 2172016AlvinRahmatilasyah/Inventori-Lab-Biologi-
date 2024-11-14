@@ -208,7 +208,7 @@
             @endforeach
         @else
             <tr>
-                <td colspan="2">Tidak Ada Stok Mendekati/Sudah Minimum!</td>
+                <td colspan="3">Tidak Ada Stok Mendekati/Sudah Minimum!</td>
             </tr>
         @endif
     </table>
@@ -255,6 +255,9 @@
         </thead>
         <tbody>
             @if(isset($all_barangs) && count($all_barangs) > 0)
+                @php
+                    $totalStokSemuaBarang = 0;
+                @endphp
                 @foreach ($all_barangs as $barang)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
@@ -267,7 +270,15 @@
                         <td>{{ $barang->created_at }}</td>
                         <td>{{ $barang->updated_at }}</td>
                     </tr>
+                    @php
+                        $totalStokSemuaBarang += $barang->stok;
+                    @endphp
                 @endforeach
+                <!-- Baris untuk total stok -->
+                <tr>
+                    <td colspan="3"><strong>Total Stok Seluruh Barang</strong></td>
+                    <td colspan="6"><strong>{{ $totalStokSemuaBarang }}</strong></td>
+                </tr>
             @else
                 <tr>
                     <td colspan="9">Barang tidak ditemukan!</td>
@@ -275,6 +286,7 @@
             @endif
         </tbody>
     </table>
+
     <br>
 
     <h3>Saldo Awal Bulan Ini</h3>
