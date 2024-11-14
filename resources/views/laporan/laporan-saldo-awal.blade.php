@@ -13,7 +13,7 @@
 <div class="container-fluid">
     <div class="card">
         <div class="card-header d-flex align-items-center">
-            <h2>Laporan Saldo Bulan {{$type}} Ini</h2>
+            <h2>Laporan {{$type}} Bulan Ini</h2>
         </div>
         <div class="card-body">
             <div class="table-responsive">
