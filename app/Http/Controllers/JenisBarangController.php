@@ -83,4 +83,18 @@ class JenisBarangController extends Controller
          // Return view dengan hasil pencarian
          return view('kelola-jenis-barang.index', compact('all_jenis_barangs'));
      }
+
+    public function detailJenisBarang($id)
+    {
+        $jenis_barang = jenis_barang::find($id);
+
+        if (!$jenis_barang) {
+            return redirect()->route('kelola-jenis-barang')->with('fail', 'Jenis Barang not found.');
+        }
+
+        $barangs = $jenis_barang->barangs;
+
+        return view('kelola-jenis-barang.detail-jenis-barang', compact('jenis_barang', 'barangs'));
+    }
+
 }

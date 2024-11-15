@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::get('edit-jenis-barang/{id}', [JenisBarangController::class, 'loadEditForm']);
     Route::put('edit-jenis-barang', [JenisBarangController::class, 'EditJenisBarang'])->name('EditJenisBarang');
     Route::get('delete-jenis-barang/{id}', [JenisBarangController::class, 'deleteJenisBarang']);
+    Route::get('detail-jenis-barang/{id}', [JenisBarangController::class, 'detailJenisBarang'])->name('detail-jenis-barang');
 
     Route::get('kelola-barang', [BarangController::class, 'loadAllBarangs'])->name('kelola-barang');
     Route::get('barang-search', [BarangController::class, 'search'])->name('barangs.search');

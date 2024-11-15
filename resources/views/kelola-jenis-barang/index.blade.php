@@ -72,14 +72,14 @@
                             @if(isset($all_jenis_barangs) && count($all_jenis_barangs) > 0)
                                 @foreach ($all_jenis_barangs as $jenisbarang)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $jenisbarang->id }}</td>
                                         <td>{{ $jenisbarang->nama_jenis_barang }}</td>
                                         <td>{{ $jenisbarang->satuan_stok }}</td>
                                         <td>{{ $jenisbarang->created_at }}</td>
                                         <td>{{ $jenisbarang->updated_at }}</td>
                                         <td><a href="/edit-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
                                         {{-- <td><a href="/delete-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
-                                        <td><a href="/detail-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-info btn-sm">Detail</a></td>
+                                        <td><a href="{{ route('detail-jenis-barang', $jenisbarang->id) }}" class="btn btn-info btn-sm">Detail</a></td>
                                     </tr>
                                     </tr>
                                 @endforeach

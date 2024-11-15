@@ -12,4 +12,10 @@ class jenis_barang extends Model
         'nama_jenis_barang',
         'satuan_stok'
     ];
+
+    public function barangs()
+    {
+        return $this->hasMany(Barang::class, 'jenis_barang_id');  // Adjust the foreign key if needed
+    }
+
 }
