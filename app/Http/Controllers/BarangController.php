@@ -101,21 +101,26 @@ class BarangController extends Controller
     }
 
     //  Method to handle search
-     public function search(Request $request)
-     {
-         $query = $request->input('query');
- 
-         // Cari berdasarkan nama, email, atau nomor telepon
-         $all_barangs = barang::where('nama_barang', 'like', "%$query%")
-             ->orWhere('jenis_barang_id', 'like', "%$query%")
-             ->orWhere('stok', 'like', "%$query%")
-             ->orWhere('kadaluarsa', 'like', "%$query%")
-             ->orWhere('lokasi', 'like', "%$query%")
-             ->get();
- 
-         // Return view dengan hasil pencarian
-         return view('kelola-barang.index', compact('all_barangs'));
-     }
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+    
+        // Search with a join to include nama_jenis_barang from the jenis_barang table
+        $all_barangs = barang::where('nama_barang', 'like', "%$query%")
+            ->orWhereHas('jenisBarang', function ($q) use ($query) {
+                $q->where('nama_jenis_barang', 'like', "%$query%");
+            })->orWhereHas('jenisBarang', function ($q) use ($query) {
+                $q->where('satuan_stok', 'like', "%$query%");
+            })
+            ->orWhere('stok', 'like', "%$query%")
+            ->orWhere('kadaluarsa', 'like', "%$query%")
+            ->orWhere('lokasi', 'like', "%$query%")
+            ->get();
+    
+        // Return view with search results
+        return view('kelola-barang.index', compact('all_barangs'));
+    }
+    
 
      public function detailTransaksiBarang($id)
     {

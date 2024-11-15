@@ -123,7 +123,7 @@
                                             <td>{{ $master_barang2->supkonpro->nama ?? 'N/A' }}</td>
                                             <td>{{ $master_barang2->user->name }}</td>
                                             <td>{{ $master_barang2->nama_pengambil }}</td>
-                                            <td>{{ $detail2->jumlah_diterima ?? 'N/A' }}</td>
+                                            <td>{{ $detail2->jumlah_keluar ?? 'N/A' }}</td>
                                             <td>{{number_format($detail2->harga, 0, ',', '.') ?? 'N/A' }}</td>
                                             <td>{{number_format($detail2->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
                                             <td>{{ $master_barang2->keterangan }}</td>
