@@ -76,7 +76,7 @@
                             @if(isset($all_barangs) && count($all_barangs) > 0)
                                 @foreach ($all_barangs as $barang)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $barang->id }}</td>
                                         <td>{{ $barang->nama_barang }}</td>
                                         <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
                                         <td>{{ $barang->stok }}</td>
