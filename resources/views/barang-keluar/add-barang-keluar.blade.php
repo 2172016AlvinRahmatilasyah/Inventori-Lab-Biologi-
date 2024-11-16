@@ -32,7 +32,7 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('jenis_pengeluaran_barang_id')
+                    @error('jenis_id')
                         <span class="text-danger">{{$message}}</span>
                     @enderror
                 </div>
@@ -65,7 +65,7 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="nama_pengantar" class="form-label">Nama Pengambil</label>
+                    <label for="nama_pengambil" class="form-label">Nama Pengambil</label>
                     <input type="text" name="nama_pengambil" id="nama_pengambil" value="{{ old('nama_pengambil')}}"
                            class="form-control" placeholder="Enter Nama pengambil">
                     @error('nama_pengambil')
@@ -83,7 +83,7 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('supkonpro_id')
+                    @error('barang_id')
                         <span class="text-danger">{{$message}}</span>
                     @enderror
                 </div>
@@ -110,7 +110,7 @@
                     <label for="total_harga" class="form-label">Total Harga</label>
                     <input type="text" name="total_harga" id="total_harga" class="form-control" 
                            value="{{ old('total_harga') }}" placeholder="Enter total harga" readonly>
-                    @error('harga')
+                    @error('total_harga')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>

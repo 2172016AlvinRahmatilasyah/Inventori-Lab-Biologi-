@@ -94,4 +94,23 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ambil URL saat ini
+            var currentUrl = window.location.pathname;
+            
+            // Ambil elemen select untuk jenis
+            var jenisSelect = document.getElementById('jenis');
+    
+            // Periksa URL dan isi jenis yang sesuai
+            if (currentUrl.includes('/add-konsumen')) {
+                jenisSelect.value = 'konsumen';
+            } else if (currentUrl.includes('/add-supplier')) {
+                jenisSelect.value = 'supplier';
+            } else if (currentUrl.includes('/add-proyek')) {
+                jenisSelect.value = 'proyek';
+            }
+        });
+    </script>
+    
 @endsection

@@ -278,7 +278,7 @@ class PengeluaranBarangController extends Controller
             'nama_pengambil' => 'required|string|max:255',
             'keterangan' => 'required|string',
             'barang_id' => 'required|exists:barangs,id',
-            'jumlah_keluar' => 'required|integer',
+            'jumlah_keluar' => 'required',
             'harga' => 'required',  
             'total_harga' => 'required', 
         ]);

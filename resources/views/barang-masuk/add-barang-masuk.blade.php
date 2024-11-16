@@ -32,7 +32,7 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('jenis_penerimaan_barang_id')
+                    @error('jenis_id')
                         <span class="text-danger">{{$message}}</span>
                     @enderror
                 </div>
@@ -106,7 +106,7 @@
                 <div class="mb-3">
                     <label for="total_harga" class="form-label">Total Harga</label>
                     <input type="text" name="total_harga" id="total_harga" class="form-control" value="{{ old('total_harga') }}" placeholder="Enter total harga" readonly>
-                    @error('harga')
+                    @error('total_harga')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>

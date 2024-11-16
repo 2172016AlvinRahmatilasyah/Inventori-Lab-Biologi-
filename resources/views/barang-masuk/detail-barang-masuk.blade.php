@@ -107,8 +107,11 @@
                 </div>
             </div>
         </div>
+        <br>
+        <a href="{{ route('master-barang-masuk') }}" class="btn btn-secondary">Back to List</a>
 
     </div>
+
     <script>
         function formatNumber(num) {
             if (!num) return '';
