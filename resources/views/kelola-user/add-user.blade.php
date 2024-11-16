@@ -42,10 +42,10 @@
                     <div class="mb-3">
                         <label for="role" class="form-label">Role</label>
                         <select name="role" id="role" class="form-control">
-                            <option value="{{ $role }}" disabled selected>Select role</option>
+                            <option value="" disabled selected>Select role</option>
                             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
-                        </select>
+                        </select>                        
                         @error('role')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -93,4 +93,18 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var currentUrl = window.location.pathname;
+    
+            var roleSelect = document.getElementById('role');
+    
+            if (currentUrl.includes('/kelola-user-add-user')) {
+                roleSelect.value = 'user';
+            } else if (currentUrl.includes('/kelola-user-add-admin')) {
+                roleSelect.value = 'admin';
+            }
+        });
+    </script>
+    
 @endsection
