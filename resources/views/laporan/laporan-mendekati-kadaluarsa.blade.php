@@ -19,16 +19,30 @@
         </div>     
 
         <div class="card-body">
+            <!-- Dropdown to select number of items per page -->
+            <div class="form-group">
+                <label for="perPage">Tampilkan per halaman:</label>
+                <select name="perPage" id="perPage" class="form-control">
+                    <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
+                    <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
+                </select>
+            </div>
+
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
+                            <th>No</th>
                             <th>Nama Barang</th>
                             <th>Kadaluarsa</th>
                         </tr>
-                            @if(isset($barangKadaluarsaMendekati) && count($barangKadaluarsaMendekati) > 0)
+                    </thead>
+                    <tbody>
+                        @if(isset($barangKadaluarsaMendekati) && count($barangKadaluarsaMendekati) > 0)
                             @foreach ($barangKadaluarsaMendekati as $barang)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>{{ $barang->nama_barang }}</td>
                                     <td>{{ $barang->kadaluarsa }}</td>
                                 </tr>
@@ -41,7 +55,34 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination controls -->
+            <div class="pagination" style="margin-top: 20px;">
+                <!-- Previous page button -->
+                @if($barangKadaluarsaMendekati->currentPage() > 1)
+                    <a href="{{ $barangKadaluarsaMendekati->previousPageUrl() }}" class="btn btn-primary" style="margin-right: 10px;">Previous</a>
+                @endif
+
+                <!-- Next page button -->
+                @if($barangKadaluarsaMendekati->hasMorePages())
+                    <a href="{{ $barangKadaluarsaMendekati->nextPageUrl() }}" class="btn btn-primary">Next</a>
+                @endif
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    // JavaScript to handle changing items per page
+    $(document).ready(function() {
+        $('#perPage').change(function() {
+            var perPage = $(this).val();
+            var currentUrl = window.location.href;
+            var newUrl = new URL(currentUrl);
+            newUrl.searchParams.set('perPage', perPage); // Set the perPage parameter
+            window.location.href = newUrl.toString(); // Redirect to the updated URL
+        });
+    });
+</script>
+
 @endsection

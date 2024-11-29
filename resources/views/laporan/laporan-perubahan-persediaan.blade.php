@@ -17,53 +17,58 @@
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-header d-flex align-items-center">
-                <h2>Laporan Perubahan Persediaan</h2>
-            </div>
-            {{-- @if(Session::has('success'))
-                <div class="alert alert-success">
-                    {{ Session::get('success') }}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <h2>Laporan Perubahan Persediaan</h2>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="card-body">
+            <form method="get" action="{{ route('laporan-perubahan-persediaan') }}">
+                <div class="form-group">
+                    <label for="filter">Pilih Filter</label>
+                    <select name="filter" id="filter" class="form-control">
+                        <option value="current_month" {{ request('filter') == 'current_month' ? 'selected' : '' }}>Bulan Ini</option>
+                        <option value="current_year" {{ request('filter') == 'current_year' ? 'selected' : '' }}>Tahun Ini</option>
+                        <option value="last_30_days" {{ request('filter') == 'last_30_days' ? 'selected' : '' }}>30 Hari Terakhir</option>
+                        <option value="last_60_days" {{ request('filter') == 'last_60_days' ? 'selected' : '' }}>60 Hari Terakhir</option>
+                        <option value="last_90_days" {{ request('filter') == 'last_90_days' ? 'selected' : '' }}>90 Hari Terakhir</option>
+                        <option value="last_12_months" {{ request('filter') == 'last_12_months' ? 'selected' : '' }}>12 Bulan Terakhir</option>
+                        <option value="month_to_date" {{ request('filter') == 'month_to_date' ? 'selected' : '' }}>Bulan Ini Sampai Tanggal</option>
+                        <option value="previous_month" {{ request('filter') == 'previous_month' ? 'selected' : '' }}>Bulan Lalu</option>
+                        <option value="previous_year" {{ request('filter') == 'previous_year' ? 'selected' : '' }}>Tahun Lalu</option>
+                        <option value="year_to_date" {{ request('filter') == 'year_to_date' ? 'selected' : '' }}>Tahun Ini Sampai Tanggal</option>
+                    </select>
                 </div>
-            @endif
-        
-            @if(Session::has('fail'))
-                <div class="alert alert-danger">
-                    {{ Session::get('fail') }}
-                </div>
-            @endif --}}
-            {{-- <div class="mb-3">
-                <form action="{{ route('detailBarangMasuk.search') }}" method="GET" class="d-flex mt-3">
-                    <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
-                    <button type="submit" class="btn btn-primary ml-2">Search</button>
-                    <a href="{{ route('detail-barang-masuk') }}" class="btn btn-secondary ml-3 ">Reset</a>
-                </form>
-            </div> --}}
-                
-            <div class="card-body">
-                <h5>Laporan Transaksi Barang Masuk Bulan Ini</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Id detail</th>
-                                <th>Id master</th>
-                                <th>SupKonProy</th>
-                                <th>Nama Staff</th>
-                                <th>Jenis Penerimaan</th>
-                                <th>Nama Pengantar</th>
-                                <th>Keterangan</th>
-                                <th>Nama Barang</th>
-                                <th>Jumlah Diterima</th>
-                                <th>Harga</th>
-                                <th>Total Harga</th>
-                                <th>Tanggal Ditambah</th>
-                                <th>Tanggal Diupdate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(isset($detailPenerimaan) && count($detailPenerimaan) > 0)
+                <button type="submit" class="btn btn-primary">Terapkan Filter</button>
+            </form>
+        </div>
+
+        <!-- Data Tables for Barang Masuk and Barang Keluar -->
+        <div class="card-body">
+            <h5>Laporan Transaksi Barang Masuk</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Id detail</th>
+                            <th>Id master</th>
+                            <th>SupKonProy</th>
+                            <th>Nama Staff</th>
+                            <th>Jenis Penerimaan</th>
+                            <th>Nama Pengantar</th>
+                            <th>Keterangan</th>
+                            <th>Nama Barang</th>
+                            <th>Jumlah Diterima</th>
+                            <th>Harga</th>
+                            <th>Total Harga</th>
+                            <th>Tanggal Ditambah</th>
+                            <th>Tanggal Diupdate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(isset($detailPenerimaan) && count($detailPenerimaan) > 0)
                             @foreach ($detailPenerimaan as $penerimaan)
                                 <tr>
                                     <td>{{ $penerimaan->id }}</td>
@@ -86,34 +91,34 @@
                                 <td colspan="13">Data tidak ada!</td>
                             </tr>
                         @endif                        
-                        </tbody>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
             </div>
+        </div>
 
-            <div class="card-body">
-                <h5>Laporan Transaksi Barang Keluar Bulan Ini</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Id detail</th>
-                                <th>Id master</th>
-                                <th>SupKonProy</th>
-                                <th>Nama Staff</th>
-                                <th>Jenis Pengeluaran</th>
-                                <th>Nama Pengambil</th>
-                                <th>Keterangan</th>
-                                <th>Nama Barang</th>
-                                <th>Jumlah Keluar</th>
-                                <th>Harga</th>
-                                <th>Total Harga</th>
-                                <th>Tanggal Ditambah</th>
-                                <th>Tanggal Diupdate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(isset($detailPengeluaran) && count($detailPengeluaran) > 0)
+        <div class="card-body">
+            <h5>Laporan Transaksi Barang Keluar</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Id detail</th>
+                            <th>Id master</th>
+                            <th>SupKonProy</th>
+                            <th>Nama Staff</th>
+                            <th>Jenis Pengeluaran</th>
+                            <th>Nama Pengambil</th>
+                            <th>Keterangan</th>
+                            <th>Nama Barang</th>
+                            <th>Jumlah Keluar</th>
+                            <th>Harga</th>
+                            <th>Total Harga</th>
+                            <th>Tanggal Ditambah</th>
+                            <th>Tanggal Diupdate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(isset($detailPengeluaran) && count($detailPengeluaran) > 0)
                             @foreach ($detailPengeluaran as $pengeluaran)
                                 <tr>
                                     <td>{{ $pengeluaran->id }}</td>
@@ -136,10 +141,16 @@
                                 <td colspan="13">Data tidak ada!</td>
                             </tr>
                         @endif                        
-                        </tbody>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+     {{-- Download PDF --}}
+     <form method="get" action="{{ route('laporan-perubahan-persediaan-pdf') }}">
+        <input type="hidden" name="filter" value="{{ request('filter') }}">
+        <button type="submit" name="download_pdf" class="btn btn-danger">Download PDF</button>
+    </form>    
+    
+</div>
 @endsection

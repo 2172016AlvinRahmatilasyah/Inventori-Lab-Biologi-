@@ -54,19 +54,19 @@
     <br>
     
     <h2>Summary</h2>
-    <p>Transaksi Barang Masuk Bulan Ini: {{ $barangMasukBulanIni }} Transaksi</p>
-    <p>Transaksi Barang Keluar Bulan Ini: {{ $barangKeluarBulanIni }} Transaksi</p>
-    <p>Total Transaksi Bulan Ini: {{ $barangMasukBulanIni + $barangKeluarBulanIni }} Transaksi</p>
+    <p>Transaksi Barang Masuk: {{ $barangMasukBulanIni }} Transaksi</p>
+    <p>Transaksi Barang Keluar: {{ $barangKeluarBulanIni }} Transaksi</p>
+    <p>Total Transaksi: {{ $barangMasukBulanIni + $barangKeluarBulanIni }} Transaksi</p>
     <p>Stok Mendekati/Sudah Minimum: {{ count($barangStokMinimal) }} Items</p>
     <p>Stok Mendekati Kadaluarsa: {{ count($barangKadaluarsaMendekati) }} Items</p>
     <p>Total Stok Keseluruhan: {{ $totalStok }} Items</p>
-    <p>Saldo Awal Keseluruhan Barang Bulan Ini: Rp {{ number_format($totalSaldoAwalBulanIni, 0, ',', '.') }}</p>
-    <p>Saldo Terima Keseluruhan Barang Bulan Ini: Rp {{ number_format($totalSaldoTerimaBulanIni, 0, ',', '.') }}</p>
-    <p>Saldo Keluar Keseluruhan Barang Bulan Ini: Rp {{ number_format($totalSaldoKeluarBulanIni, 0, ',', '.') }}</p>
+    <p>Saldo Awal Keseluruhan Barang: Rp {{ number_format($totalSaldoAwalBulanIni, 0, ',', '.') }}</p>
+    <p>Saldo Terima Keseluruhan Barang : Rp {{ number_format($totalSaldoTerimaBulanIni, 0, ',', '.') }}</p>
+    <p>Saldo Keluar Keseluruhan Barang : Rp {{ number_format($totalSaldoKeluarBulanIni, 0, ',', '.') }}</p>
     
     <br>
 
-    <h3>Transaksi Barang Masuk Bulan Ini</h3>
+    <h3>Transaksi Barang Masuk</h3>
     <table border="1" cellspacing="0" cellpadding="8">
         <thead>
             <tr>
@@ -107,14 +107,14 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="13">Tidak Ada Transaksi Barang Masuk Bulan Ini!</td>
+                    <td colspan="13">Tidak Ada Transaksi Barang Masuk!</td>
                 </tr>
             @endif
         </tbody>
     </table>
     <br>
 
-    <h3>Transaksi Barang Keluar Bulan Ini</h3>
+    <h3>Transaksi Barang Keluar</h3>
     <table border="1" cellspacing="0" cellpadding="8">
         <thead>
             <tr>
@@ -154,7 +154,7 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="13">Tidak Ada Transaksi Barang Masuk Bulan Ini!</td>
+                    <td colspan="13">Tidak Ada Transaksi Barang Keluar!</td>
                 </tr>
             @endif
         </tbody>
@@ -166,29 +166,28 @@
         <thead>
             <tr>
                 <th>Nama Barang</th>
-                <th>Satuan Stok Barang</th>
                 <th>Jumlah Keluar</th>
                 <th>Jumlah Masuk</th>
             </tr>
         </thead>
         <tbody>
-            @if(count($barangList) > 0)
+            @if(is_array($barangList) || $barangList instanceof Countable && count($barangList) > 0)
                 @foreach ($barangList as $barang)
                     <tr>
                         <td>{{ $barang['nama_barang'] }}</td>
-                        <td>{{ $barang['satuan_stok'] }}</td>
                         <td>{{ $barang['jumlah_keluar'] }}</td>
                         <td>{{ $barang['jumlah_masuk'] }}</td>
                     </tr>
                 @endforeach
             @else
                 <tr>
-                    <td colspan="4">Tidak Ada Perubahan Persediaan!</td>
+                    <td colspan="3">Tidak Ada Perubahan Persediaan!</td>
                 </tr>
             @endif
         </tbody>
     </table>
     <br>
+
 
 
     <h3>Stok Mendekati/Sudah Minimum</h3>
@@ -238,7 +237,7 @@
     <br>
     
 
-    <h3>Total Barang Keseluruhan</h3>
+    {{-- <h3>Total Barang Keseluruhan</h3>
     <table border="1" cellspacing="0" cellpadding="8">
         <thead>
             <tr>
@@ -285,11 +284,11 @@
                 </tr>
             @endif
         </tbody>
-    </table>
+    </table> --}}
 
     <br>
 
-    <h3>Saldo Awal Bulan Ini</h3>
+    <h3>Saldo Awal</h3>
     <table class="table table-bordered" width="100%" cellspacing="0">
         <thead>
             <tr>

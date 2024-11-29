@@ -16,132 +16,473 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Existing code for data retrieval
-        $barangMasukBulanIni = PenerimaanBarang::whereYear('created_at', Carbon::now()->year)
-                                               ->whereMonth('created_at', Carbon::now()->month)
-                                               ->count();
-        $barangKeluarBulanIni = PengeluaranBarang::whereYear('created_at', Carbon::now()->year)
-                                                 ->whereMonth('created_at', Carbon::now()->month)
-                                                 ->count();
+        $filter = $request->get('filter', 'current_month'); // Default ke bulan ini
+        $startDate = null;
+        $endDate = null;
+
+        switch ($filter) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                break;
+            case 'last_30_days':
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+            case 'last_60_days':
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+            case 'last_90_days':
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+            case 'last_12_months':
+                $startDate = Carbon::now()->subMonths(12);
+                $endDate = Carbon::now();
+                break;
+            case 'month_to_date':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now();
+                break;
+            case 'previous_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+            case 'previous_year':
+                $startDate = Carbon::now()->subYear()->startOfYear();
+                $endDate = Carbon::now()->subYear()->endOfYear();
+                break;
+            case 'year_to_date':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now();
+                break;
+            case 'custom_dates':
+                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
+                break;
+        }
+
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Invalid date range selected.');
+        }
+
+        // Fetch data based on the selected filter
+        $barangMasuk = PenerimaanBarang::whereBetween('created_at', [$startDate, $endDate])->count();
+        $barangKeluar = PengeluaranBarang::whereBetween('created_at', [$startDate, $endDate])->count();
+        $totalPerubahanPersediaan = $barangMasuk + $barangKeluar;
         $barangStokMinimal = Barang::where('stok', '<=', 20)->get();
-        $today = Carbon::now();
         $twoMonthsLater = Carbon::now()->addMonths(2);
         $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
         $totalStok = Barang::sum('stok');
-        $totalSaldoAwalBulanIni = SaldoAwal::where('bulan', Carbon::now()->month)
-                                             ->sum('saldo_awal');
-        $totalSaldoTerimaBulanIni = SaldoAwal::where('bulan', Carbon::now()->month)
-                                             ->sum('total_terima');
-        $totalSaldoKeluarBulanIni = SaldoAwal::where('bulan', Carbon::now()->month)
-                                             ->sum('total_keluar');
-        
+        $totalSaldoAwal = SaldoAwal::whereBetween('created_at', [$startDate, $endDate])->sum('saldo_awal');
+        $totalSaldoTerima = SaldoAwal::whereBetween('created_at', [$startDate, $endDate])->sum('total_terima');
+        $totalSaldoKeluar = SaldoAwal::whereBetween('created_at', [$startDate, $endDate])->sum('total_keluar');
+        $saldoAwal = SaldoAwal::whereBetween('created_at', [$startDate, $endDate])->get();
+
+        // Prepare data for the report
+        $data = [
+            'title' => 'Laporan',
+             'date' => Carbon::now()->toFormattedDateString(),
+             'filter' => $filter,
+             'user' => Auth::user()->name,
+             'barangMasukBulanIni' => $barangMasuk,
+             'barangKeluarBulanIni' => $barangKeluar,
+             'totalStok' => $saldoAwal->sum('stok'),
+             'barangList' => $this->getBarangList($barangMasuk, $barangKeluar),
+             'barangStokMinimal' => $this->getStokMinimal(),
+             'barangKadaluarsaMendekati' => $this->getBarangKadaluarsa(),
+             'totalSaldoAwalBulanIni' => $saldoAwal->sum('saldo_awal'),
+             'totalSaldoTerimaBulanIni' => $saldoAwal->sum('total_terima'),
+             'totalSaldoKeluarBulanIni' => $saldoAwal->sum('total_keluar'),
+             'all_saldo_awals' => $saldoAwal
+        ];
+
+        // Check if PDF download is requested
+        if ($request->get('download_pdf')) {
+            // Generate PDF using the view
+            $pdf = Pdf::loadView('laporan.laporan-keseluruhan', $data);
+
+            // Download the PDF
+            return $pdf->download('laporan-keseluruhan.pdf');
+        }
+
+        // Otherwise, return the view
         return view('dashboard', compact(
-            'barangMasukBulanIni',
-            'barangKeluarBulanIni',
+            'filter',
+            'startDate',
+            'endDate',
+            'totalSaldoAwal',
+            'totalSaldoTerima',
+            'totalSaldoKeluar',
+            'barangMasuk',
+            'barangKeluar',
+            'totalPerubahanPersediaan',
             'barangStokMinimal',
             'barangKadaluarsaMendekati',
             'totalStok',
-            'totalSaldoAwalBulanIni',
-            'totalSaldoTerimaBulanIni',
-            'totalSaldoKeluarBulanIni'
+            'saldoAwal'
         ));
     }
 
-    public function generateReport()
+
+    public function showBarangMasuk(Request $request)
     {
-        $thisYear = Carbon::now()->year;
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        // Mengambil filter dari request
+        $filter = $request->get('filter', 'current_month'); // Default ke bulan ini
+        $startDate = null;
+        $endDate = null;
 
-        // Fetch detail transactions of this month for 'penerimaan' and 'pengeluaran'
-        $detailPenerimaan = DetailPenerimaanBarang::with(['PenerimaanBarang.jenisPenerimaanBarang', 'PenerimaanBarang.user', 'PenerimaanBarang.supkonpro', 'barang'])
-            ->whereHas('PenerimaanBarang', function($query) {
-                $query->whereYear('created_at', Carbon::now()->year)
-                      ->whereMonth('created_at', Carbon::now()->month);
-            })->get();
+        // Menentukan rentang tanggal sesuai filter
+        switch ($filter) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                break;
+            case 'last_30_days':
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+            case 'last_60_days':
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+            case 'last_90_days':
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+            case 'last_12_months':
+                $startDate = Carbon::now()->subMonths(12);
+                $endDate = Carbon::now();
+                break;
+            case 'month_to_date':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now();
+                break;
+            case 'previous_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+            case 'previous_year':
+                $startDate = Carbon::now()->subYear()->startOfYear();
+                $endDate = Carbon::now()->subYear()->endOfYear();
+                break;
+            case 'year_to_date':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now();
+                break;
+            case 'custom_dates':
+                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
+                break;
+        }
 
-        $detailPengeluaran = DetailPengeluaranBarang::with(['PengeluaranBarang.jenisPengeluaranBarang', 'PengeluaranBarang.user', 'PengeluaranBarang.supkonpro', 'barang'])
-            ->whereHas('PengeluaranBarang', function($query) {
-                $query->whereYear('created_at', Carbon::now()->year)
-                      ->whereMonth('created_at', Carbon::now()->month);
-            })->get();
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Invalid date range selected.');
+        }
 
+        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
+        $barangMasuk = DetailPenerimaanBarang::with('barang')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
 
-        $barangKeluarBulanIni = DetailPengeluaranBarang::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->with('barang')->get();
-        // Query untuk barang masuk bulan ini
-        $barangMasukBulanIni = DetailPenerimaanBarang::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->with('barang')->get();
-        $barangList = Barang::all()->map(function ($barang) use ($barangKeluarBulanIni, $barangMasukBulanIni) {
-                $jumlahKeluar = $barangKeluarBulanIni->where('barang_id', $barang->id)->sum('jumlah_keluar');
-                $jumlahMasuk = $barangMasukBulanIni->where('barang_id', $barang->id)->sum('jumlah_diterima');
-        
-        return [
-            'nama_barang' => $barang->nama_barang,
-            'satuan_stok' => $barang->jenisBarang->satuan_stok ?? 'N/A',
-            'jumlah_keluar' => $jumlahKeluar ?: 0,
-            'jumlah_masuk' => $jumlahMasuk ?: 0,
-        ];
-        });
-
-        $allSaldoAwals = SaldoAwal::with('barang')
-        ->where('bulan', Carbon::now()->month)
-        ->where('tahun', $thisYear)
-        ->get();
-
-
-        $allBarangs = Barang::with('jenisBarang')->get();
-
-        // Data for the PDF report
+        // Siapkan data untuk laporan
         $data = [
-            'title' => 'Laporan Keseluruhan',
-            'date' => Carbon::now()->format('Y-m-d'),
+            'title' => 'Laporan Barang Masuk',
+            'date' => Carbon::now()->toFormattedDateString(),
+            'filter' => $filter,
             'user' => Auth::user()->name,
-            'barangMasukBulanIni' => PenerimaanBarang::whereYear('created_at', Carbon::now()->year)
-                                                      ->whereMonth('created_at', Carbon::now()->month)
-                                                      ->count(),
-            'barangKeluarBulanIni' => PengeluaranBarang::whereYear('created_at', Carbon::now()->year)
-                                                       ->whereMonth('created_at', Carbon::now()->month)
-                                                       ->count(),
-            'barangStokMinimal' => Barang::where('stok', '<=', 20)->get(),
-            'barangKadaluarsaMendekati' => Barang::where('kadaluarsa', '<=', Carbon::now()->addMonths(2))->get(),
-            'totalStok' => Barang::sum('stok'),
-            'detail_penerimaan' => $detailPenerimaan,
-            'detail_pengeluaran' => $detailPengeluaran,
-            'barangList' => $barangList,
-            'all_barangs' => $allBarangs,
-            'totalSaldoAwalBulanIni' => SaldoAwal::where('bulan', Carbon::now()->month)
-                                        ->sum('saldo_awal'),
-            'totalSaldoTerimaBulanIni' => SaldoAwal::where('bulan', Carbon::now()->month)
-                                          ->sum('total_terima'),
-            'totalSaldoKeluarBulanIni' => SaldoAwal::where('bulan', Carbon::now()->month)
-                                             ->sum('total_keluar'),
-            'all_saldo_awals'=>$allSaldoAwals,
+            'barangMasuk' => $barangMasuk,
+        ];
+
+        return view('laporan.laporan-barang-masuk', $data);
+    }
+
+
+    public function downloadBarangMasukPdf(Request $request)
+    {
+        // Mengambil filter dari request
+        $filter = $request->get('filter', 'current_month');
+        $startDate = null;
+        $endDate = null;
+
+        // Menentukan rentang tanggal sesuai filter
+        switch ($filter) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                break;
+            case 'last_30_days':
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+            case 'last_60_days':
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+            case 'last_90_days':
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+            case 'last_12_months':
+                $startDate = Carbon::now()->subMonths(12);
+                $endDate = Carbon::now();
+                break;
+            case 'month_to_date':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now();
+                break;
+            case 'previous_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+            case 'previous_year':
+                $startDate = Carbon::now()->subYear()->startOfYear();
+                $endDate = Carbon::now()->subYear()->endOfYear();
+                break;
+            case 'year_to_date':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now();
+                break;
+            case 'custom_dates':
+                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
+                break;
+        }
+
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Invalid date range selected.');
+        }
+
+        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
+        $barangMasuk = DetailPenerimaanBarang::with('barang')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
+        // Siapkan data untuk laporan
+        $data = [
+            'title' => 'Laporan Barang Masuk',
+            'date' => Carbon::now()->toFormattedDateString(),
+            'filter' => $filter,
+            'user' => Auth::user()->name,
+            'barangMasuk' => $barangMasuk,
         ];
 
         // Generate PDF
-        $pdf = PDF::loadView('laporan.laporan-keseluruhan', $data);
-        return $pdf->download('Laporan_Keseluruhan.pdf');
+        $pdf = PDF::loadView('laporan.laporan-barang-masuk-pdf', $data);
+        
+        // Download PDF dengan nama file yang dinamis
+        return $pdf->download('laporan-barang-masuk-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
 
-    public function showBarangMasukBulanIni()
+
+    public function showBarangKeluar(Request $request)
     {
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        // Mengambil filter dari request
+        $filter = $request->get('filter', 'current_month'); // Default ke bulan ini
+        $startDate = null;
+        $endDate = null;
 
-        $detailPenerimaan = DetailPenerimaanBarang::with([
-            'PenerimaanBarang.jenisPenerimaanBarang',
-            'PenerimaanBarang.user',
-            'PenerimaanBarang.supkonpro',
-            'barang'
-        ])
-        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-        ->get();
+        // Menentukan rentang tanggal sesuai filter
+        switch ($filter) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                break;
+            case 'last_30_days':
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+            case 'last_60_days':
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+            case 'last_90_days':
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+            case 'last_12_months':
+                $startDate = Carbon::now()->subMonths(12);
+                $endDate = Carbon::now();
+                break;
+            case 'month_to_date':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now();
+                break;
+            case 'previous_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+            case 'previous_year':
+                $startDate = Carbon::now()->subYear()->startOfYear();
+                $endDate = Carbon::now()->subYear()->endOfYear();
+                break;
+            case 'year_to_date':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now();
+                break;
+            case 'custom_dates':
+                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
+                break;
+        }
+
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Invalid date range selected.');
+        }
+
+        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
+        $barangKeluar = DetailPengeluaranBarang::with('barang')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
+        // Siapkan data untuk laporan
+        $data = [
+            'date' => Carbon::now()->toFormattedDateString(),
+            'filter' => $filter,
+            'user' => Auth::user()->name,
+            'barangKeluar' => $barangKeluar,
+        ];
+
+        return view('laporan.laporan-barang-keluar', $data);
+    }
+
+    public function downloadBarangKeluarPdf(Request $request)
+    {
+        // Mengambil filter dari request
+        $filter = $request->get('filter', 'current_month');
+        $startDate = null;
+        $endDate = null;
+
+        // Menentukan rentang tanggal sesuai filter
+        switch ($filter) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                break;
+            case 'last_30_days':
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+            case 'last_60_days':
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+            case 'last_90_days':
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+            case 'last_12_months':
+                $startDate = Carbon::now()->subMonths(12);
+                $endDate = Carbon::now();
+                break;
+            case 'month_to_date':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now();
+                break;
+            case 'previous_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+            case 'previous_year':
+                $startDate = Carbon::now()->subYear()->startOfYear();
+                $endDate = Carbon::now()->subYear()->endOfYear();
+                break;
+            case 'year_to_date':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now();
+                break;
+            case 'custom_dates':
+                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
+                break;
+        }
+
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Invalid date range selected.');
+        }
+
+        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
+        $barangKeluar = DetailPengeluaranBarang::with('barang')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
+        // Siapkan data untuk laporan
+        $data = [
+            'date' => Carbon::now()->toFormattedDateString(),
+            'filter' => $filter,
+            'user' => Auth::user()->name,
+            'barangKeluar' => $barangKeluar,
+        ];
+
+        // Generate PDF
+        $pdf = PDF::loadView('laporan.laporan-barang-keluar-pdf', $data);
+        
+        // Download PDF dengan nama file yang dinamis
+        return $pdf->download('laporan-barang-keluar-' . Carbon::now()->format('Y-m-d') . '.pdf');
+    }
 
 
-        return view('laporan.laporan-barang-masuk', compact('detailPenerimaan'));
+    public function getBarangList($barangMasuk, $barangKeluar)
+    {
+        // Ensure that $barangMasuk and $barangKeluar are collections
+        $barangMasuk = collect($barangMasuk);
+        $barangKeluar = collect($barangKeluar);
+
+        return Barang::all()->map(function ($barang) use ($barangMasuk, $barangKeluar) {
+            // Group barangMasuk and barangKeluar by barang_id
+            $barangMasukFiltered = $barangMasuk->where('barang_id', $barang->id);
+            $barangKeluarFiltered = $barangKeluar->where('barang_id', $barang->id);
+
+            $jumlahMasuk = $barangMasukFiltered->sum('jumlah_diterima');
+            $jumlahKeluar = $barangKeluarFiltered->sum('jumlah_keluar');
+
+            if ($jumlahMasuk > 0 || $jumlahKeluar > 0) {
+                return [
+                    'nama_barang' => $barang->nama_barang,
+                    'satuan_stok' => $barang->jenisBarang->satuan_stok ?? 'N/A',
+                    'jumlah_keluar' => $jumlahKeluar ?: 0,
+                    'jumlah_masuk' => $jumlahMasuk ?: 0,
+                ];
+            }
+
+            return null;
+        })->filter(); // Filter null values from the result
+    }
+
+
+
+    public function getStokMinimal()
+    {
+        return Barang::where('stok', '<=', 20)->get();
+    }
+
+    public function getBarangKadaluarsa()
+    {
+        $twoMonthsLater = Carbon::now()->addMonths(2);
+        return Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
     }
 
     public function showBarangKeluarBulanIni()
@@ -162,72 +503,406 @@ class DashboardController extends Controller
         return view('laporan.laporan-barang-keluar', compact('detailPengeluaran'));
     }
 
-    public function showPerubahanPersediaanBulanIni()
+    public function showPerubahanPersediaan(Request $request)
     {
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        $filter = $request->input('filter', 'current_month'); // Default filter is current_month
 
+        switch ($filter) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                break;
+
+            case 'last_30_days':
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+
+            case 'last_60_days':
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+
+            case 'last_90_days':
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+
+            case 'last_12_months':
+                $startDate = Carbon::now()->subMonths(12);
+                $endDate = Carbon::now();
+                break;
+
+            case 'previous_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+
+            case 'previous_year':
+                $startDate = Carbon::now()->subYear()->startOfYear();
+                $endDate = Carbon::now()->subYear()->endOfYear();
+                break;
+
+            case 'year_to_date':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now();
+                break;
+
+            case 'month_to_date':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now();
+                break;
+
+            default:
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+        }
+
+        // Query the data for both incoming and outgoing goods
         $detailPenerimaan = DetailPenerimaanBarang::with([
             'PenerimaanBarang.jenisPenerimaanBarang',
             'PenerimaanBarang.user',
             'PenerimaanBarang.supkonpro',
             'barang'
-        ]) 
-        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        ])
+        ->whereBetween('created_at', [$startDate, $endDate])
         ->get();
-        
+
         $detailPengeluaran = DetailPengeluaranBarang::with([
             'PengeluaranBarang.jenisPengeluaranBarang',
             'PengeluaranBarang.user',
             'PengeluaranBarang.supkonpro',
             'barang'
         ])
-        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->get();
+
+        // Return to the view
+        return view('laporan.laporan-perubahan-persediaan', compact('detailPenerimaan', 'detailPengeluaran', 'filter'));
+    }
+
+    public function downloadPerubahanPersediaanPdf(Request $request)
+    {
+        // Mengambil filter dari request
+        $filter = $request->get('filter', 'current_month');
+        $startDate = null;
+        $endDate = null;
+
+        // Menentukan rentang tanggal sesuai filter
+        switch ($filter) {
+            case 'current_month':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                break;
+            case 'current_year':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now()->endOfYear();
+                break;
+            case 'last_30_days':
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+            case 'last_60_days':
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+            case 'last_90_days':
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+            case 'last_12_months':
+                $startDate = Carbon::now()->subMonths(12);
+                $endDate = Carbon::now();
+                break;
+            case 'month_to_date':
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now();
+                break;
+            case 'previous_month':
+                $startDate = Carbon::now()->subMonth()->startOfMonth();
+                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                break;
+            case 'previous_year':
+                $startDate = Carbon::now()->subYear()->startOfYear();
+                $endDate = Carbon::now()->subYear()->endOfYear();
+                break;
+            case 'year_to_date':
+                $startDate = Carbon::now()->startOfYear();
+                $endDate = Carbon::now();
+                break;
+            case 'custom_dates':
+                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
+                break;
+        }
+
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Invalid date range selected.');
+        }
+
+        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
+        // Query the data for both incoming and outgoing goods
+        $detailPenerimaan = DetailPenerimaanBarang::with([
+            'PenerimaanBarang.jenisPenerimaanBarang',
+            'PenerimaanBarang.user',
+            'PenerimaanBarang.supkonpro',
+            'barang'
+        ])
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->get();
+
+        $detailPengeluaran = DetailPengeluaranBarang::with([
+            'PengeluaranBarang.jenisPengeluaranBarang',
+            'PengeluaranBarang.user',
+            'PengeluaranBarang.supkonpro',
+            'barang'
+        ])
+        ->whereBetween('created_at', [$startDate, $endDate])
         ->get();
 
 
-        return view('laporan.laporan-perubahan-persediaan', compact('detailPenerimaan', 
-                    'detailPengeluaran'));
+        // Siapkan data untuk laporan
+        $data = [
+            'date' => Carbon::now()->toFormattedDateString(),
+            'filter' => $filter,
+            'user' => Auth::user()->name,
+            'detailPenerimaan' => $detailPenerimaan,
+            'detailPengeluaran' => $detailPengeluaran,
+        ];
+
+        // Generate PDF
+        $pdf = PDF::loadView('laporan.laporan-perubahan-persediaan-pdf', $data);
+        
+        // Download PDF dengan nama file yang dinamis
+        return $pdf->download('laporan-barang-keluar-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
 
-    public function showStokMinimum()
-    {
-        $barangStokMinimal = barang::where('stok', '<=', 20)->get();
 
+    public function showBarangStokMinimal(Request $request)
+    {
+        // Get the page size from the request, default to 25 if not provided
+        $perPage = $request->input('perPage', 25); 
+    
+        // Query with pagination
+        $barangStokMinimal = Barang::with('jenisBarang')
+            ->where('stok', '<=', 10) // Example condition, adjust as needed
+            ->paginate($perPage); // Paginate results
+    
         return view('laporan.laporan-stok-minimum', compact('barangStokMinimal'));
     }
+    
 
-    public function showBarangMendekatiKadaluarsa()
+    public function showKadaluarsa(Request $request)
     {
-        $twoMonthsLater = Carbon::now()->addMonths(2);
-        $barangKadaluarsaMendekati = barang::where('kadaluarsa', '<=', Carbon::now()->addMonths(2))->get();
+        $perPage = $request->input('perPage', 25); // Default to 25 if not specified
+        $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', Carbon::now()->addDays(30)) // Example filter for approaching expiry
+            ->paginate($perPage);
 
         return view('laporan.laporan-mendekati-kadaluarsa', compact('barangKadaluarsaMendekati'));
     }
 
-    public function showTotalStok()
+
+    public function showTotalStok(Request $request)
     {
-        $allBarangs = Barang::with('jenisBarang')->get(); 
-      
-        $totalStokSemuaBarang = $allBarangs->sum('stok');
+        // Get the perPage parameter from the request, default to 25
+        $perPage = $request->input('perPage', 25);
+    
+        // Paginate the data based on the perPage value
+        $allBarangs = Barang::with('jenisBarang') // Assuming "jenisBarang" is a relation on Barang model
+            ->paginate($perPage);
+    
+        // Get the total stock of all items
+        $totalStokSemuaBarang = Barang::sum('stok'); // Sum of the 'stok' field from all barang
+    
         return view('laporan.laporan-total-stok', compact('allBarangs', 'totalStokSemuaBarang'));
     }
 
-    public function showSaldo($type)
+    public function showSaldo($type, Request $request)
     {
+        $filter = $request->input('filter', 'current_month'); // Default filter is 'current_month'
         $thisYear = Carbon::now()->year;
         $thisMonth = Carbon::now()->month;
 
-        $allSaldoAwals = SaldoAwal::with('barang')
-            ->where('tahun', $thisYear)
-            ->where('bulan', $thisMonth)
-            ->get();
+        // Initialize start and end dates for the filter
+        switch ($filter) {
+            case 'current_month':
+                // Show the current month
+                $startMonth = $thisMonth;
+                $endMonth = $thisMonth;
+                $startYear = $thisYear;
+                $endYear = $thisYear;
+                break;
 
-        return view('laporan.laporan-saldo-awal', compact('allSaldoAwals', 'type'));
+            case 'current_year':
+                // Show the current year
+                $startMonth = 1;  // January
+                $endMonth = 12;   // December
+                $startYear = $thisYear;
+                $endYear = $thisYear;
+                break;
+
+            case 'last_30_days':
+                // For the last 30 days (not dependent on year/month)
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+
+            case 'last_60_days':
+                // For the last 60 days
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+
+            case 'last_90_days':
+                // For the last 90 days
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+
+            case 'previous_month':
+                // Show the previous month
+                $startMonth = Carbon::now()->subMonth()->month;
+                $endMonth = $startMonth;
+                $startYear = Carbon::now()->subMonth()->year;
+                $endYear = $startYear;
+                break;
+
+            case 'previous_year':
+                // Show the previous year
+                $startMonth = 1; // January
+                $endMonth = 12;  // December
+                $startYear = Carbon::now()->subYear()->year;
+                $endYear = $startYear;
+                break;
+
+            default:
+                // Default filter - current month
+                $startMonth = $thisMonth;
+                $endMonth = $thisMonth;
+                $startYear = $thisYear;
+                $endYear = $thisYear;
+                break;
+        }
+
+        // If the filter is based on a date range (e.g., 'last_30_days'), use that range
+        if (isset($startDate) && isset($endDate)) {
+            $allSaldoAwals = SaldoAwal::with('barang')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get();
+        } else {
+            // Otherwise, filter by year and month
+            $allSaldoAwals = SaldoAwal::with('barang')
+                ->where('tahun', '>=', $startYear)
+                ->where('tahun', '<=', $endYear)
+                ->where('bulan', '>=', $startMonth)
+                ->where('bulan', '<=', $endMonth)
+                ->get();
+        }
+
+        return view('laporan.laporan-saldo-awal', compact('allSaldoAwals', 'type', 'filter'));
+    }
+    public function downloadSaldoAwalPdf($type, Request $request)
+    {
+        // Get the filter parameter from the request
+        $filter = $request->input('filter', 'current_month'); // Default filter is 'current_month'
+        $thisYear = Carbon::now()->year;
+        $thisMonth = Carbon::now()->month;
+
+        // Initialize start and end dates for the filter
+        switch ($filter) {
+            case 'current_month':
+                // Show the current month
+                $startMonth = $thisMonth;
+                $endMonth = $thisMonth;
+                $startYear = $thisYear;
+                $endYear = $thisYear;
+                break;
+
+            case 'current_year':
+                // Show the current year
+                $startMonth = 1;  // January
+                $endMonth = 12;   // December
+                $startYear = $thisYear;
+                $endYear = $thisYear;
+                break;
+
+            case 'last_30_days':
+                // For the last 30 days (not dependent on year/month)
+                $startDate = Carbon::now()->subDays(30);
+                $endDate = Carbon::now();
+                break;
+
+            case 'last_60_days':
+                // For the last 60 days
+                $startDate = Carbon::now()->subDays(60);
+                $endDate = Carbon::now();
+                break;
+
+            case 'last_90_days':
+                // For the last 90 days
+                $startDate = Carbon::now()->subDays(90);
+                $endDate = Carbon::now();
+                break;
+
+            case 'previous_month':
+                // Show the previous month
+                $startMonth = Carbon::now()->subMonth()->month;
+                $endMonth = $startMonth;
+                $startYear = Carbon::now()->subMonth()->year;
+                $endYear = $startYear;
+                break;
+
+            case 'previous_year':
+                // Show the previous year
+                $startMonth = 1; // January
+                $endMonth = 12;  // December
+                $startYear = Carbon::now()->subYear()->year;
+                $endYear = $startYear;
+                break;
+
+            default:
+                // Default filter - current month
+                $startMonth = $thisMonth;
+                $endMonth = $thisMonth;
+                $startYear = $thisYear;
+                $endYear = $thisYear;
+                break;
+        }
+
+        // If the filter is based on a date range (e.g., 'last_30_days'), use that range
+        if (isset($startDate) && isset($endDate)) {
+            $allSaldoAwals = SaldoAwal::with('barang')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get();
+        } else {
+            // Otherwise, filter by year and month
+            $allSaldoAwals = SaldoAwal::with('barang')
+                ->where('tahun', '>=', $startYear)
+                ->where('tahun', '<=', $endYear)
+                ->where('bulan', '>=', $startMonth)
+                ->where('bulan', '<=', $endMonth)
+                ->get();
+        }
+
+        // Prepare additional data for the PDF
+        $data = [
+            'date' => Carbon::now()->toFormattedDateString(),
+            'filter' => $filter,
+            'user' => Auth::user()->name,
+        ];
+
+        // Load the view and pass all the data (merged compact variables with additional data)
+        $pdf = PDF::loadView('laporan.laporan-saldo-awal-pdf', array_merge(compact('allSaldoAwals', 'type', 'filter'), $data));
+
+        // Download the PDF with a specific name
+        return $pdf->download('laporan_saldo_awal_' . $type . '.pdf');
     }
 
-
-    
-    
 
 }

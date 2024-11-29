@@ -3,14 +3,52 @@
 @section('title', 'Dashboard')
 
 @section('content')
+<!-- Include Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Include Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <div class="container-fluid">
         <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div class="d-sm-flex align-items-center justify-content-between mb-3">
             <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-            <a href="{{ route('generateReport') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            {{-- <a href="{{ route('generateReport') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                 <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
-            </a>
+            </a> --}}
         </div>
+        <form method="GET" class="mb-4">
+            <div class="form-row align-items-center">
+                <div class="col-auto">
+                    <select name="filter" class="form-control" id="filter">
+                        <option value="current_month" {{ request('filter') == 'current_month' ? 'selected' : '' }}>Bulan Ini</option>
+                        <option value="current_year" {{ request('filter') == 'current_year' ? 'selected' : '' }}>Tahun Ini</option>
+                        <option value="last_30_days" {{ request('filter') == 'last_30_days' ? 'selected' : '' }}>30 Hari Terakhir</option>
+                        <option value="last_60_days" {{ request('filter') == 'last_60_days' ? 'selected' : '' }}>60 Hari Terakhir</option>
+                        <option value="last_90_days" {{ request('filter') == 'last_90_days' ? 'selected' : '' }}>90 Hari Terakhir</option>
+                        <option value="last_12_months" {{ request('filter') == 'last_12_months' ? 'selected' : '' }}>12 Bulan Terakhir</option>
+                        <option value="month_to_date" {{ request('filter') == 'month_to_date' ? 'selected' : '' }}>Bulan Ini Sampai Tanggal</option>
+                        <option value="previous_month" {{ request('filter') == 'previous_month' ? 'selected' : '' }}>Bulan Lalu</option>
+                        <option value="previous_year" {{ request('filter') == 'previous_year' ? 'selected' : '' }}>Tahun Lalu</option>
+                        <option value="year_to_date" {{ request('filter') == 'year_to_date' ? 'selected' : '' }}>Tahun Ini Sampai Tanggal</option>
+                        <option value="custom_dates" {{ request('filter') == 'custom_dates' ? 'selected' : '' }}>Custom</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <input type="date" name="start_date" class="form-control" placeholder="Start Date" value="{{ request('start_date') }}" id="start_date" {{ request('filter') == 'custom_dates' ? '' : 'disabled' }}>
+                </div>
+                <div class="col-auto">
+                    <input type="date" name="end_date" class="form-control" placeholder="End Date" value="{{ request('end_date') }}" id="end_date" {{ request('filter') == 'custom_dates' ? '' : 'disabled' }}>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+                {{-- <a href="{{ route('generateReport') }}?download_pdf=true" class="btn btn-success">Download PDF</a> --}}
+            </div>
+        </form>
+        
+        
+        
 
         <!-- Content Row -->
         <div class="row">
@@ -20,10 +58,10 @@
                     <div class="card border-left-primary shadow h-100 py-2">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Laporan Barang Masuk Bulan ini
+                                Laporan Barang Masuk
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ $barangMasukBulanIni }} Transaksi
+                                {{ $barangMasuk }} Transaksi
                             </div>
                         </div>
                     </div>
@@ -34,29 +72,82 @@
             <!-- Laporan Barang Keluar -->
             <div class="col-xl-4 col-md-6 mb-4">
                 <a href="{{ route('laporan-barang-keluar') }}" style="text-decoration: none;">
-                    <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card border-left-danger shadow h-100 py-2">
                         <div class="card-body">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Laporan Barang Keluar bulan ini
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Laporan Barang Keluar
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ $barangKeluarBulanIni }} Transaksi
+                                {{ $barangKeluar }} Transaksi
                             </div>
                         </div>
                     </div>
                 </a>
             </div>
 
-            <!-- Laporan Persediaan -->
+            <!-- Laporan Perubahan Persediaan -->
             <div class="col-xl-4 col-md-6 mb-4">
                 <a href="{{ route('laporan-perubahan-persediaan') }}" style="text-decoration: none;">
                     <div class="card border-left-info shadow h-100 py-2">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Laporan Perubahan Persediaan Bulan ini
+                                Laporan Perubahan Persediaan
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ $barangMasukBulanIni + $barangKeluarBulanIni }} Transaksi
+                                {{ $totalPerubahanPersediaan }} Transaksi
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+
+        <!-- Content Row -->
+        <div class="row">
+            <!-- Saldo Awal -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <a href="{{ url('/laporan-saldo/saldo-awal') }}" style="text-decoration: none;">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Saldo Awal Keseluruhan Barang
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Rp {{ number_format($totalSaldoAwal, 0, ',', '.') }}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Saldo Terima -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <a href="{{ url('/laporan-saldo/saldo-terima') }}" style="text-decoration: none;">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Saldo Terima Keseluruhan Barang
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Rp {{ number_format($totalSaldoTerima, 0, ',', '.') }}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Saldo Keluar -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <a href="{{ url('/laporan-saldo/saldo-keluar') }}" style="text-decoration: none;">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Saldo Keluar Keseluruhan Barang
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                Rp {{ number_format($totalSaldoKeluar, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
@@ -65,9 +156,12 @@
         </div>
 
 
+    
+
+        <h1 class="h3 mb-2 text-gray-800">Informasi</h1>
         <!-- Content Row -->
         <div class="row">
-           <!-- Stok Mendekati/Sudah Minimum -->
+            <!-- Stok Mendekati/Sudah Minimum -->
             <div class="col-xl-4 col-md-6 mb-4">
                 <a href="{{ route('laporan-stok-minimum') }}" style="text-decoration: none;">
                     <div class="card border-left-warning shadow h-100 py-2">
@@ -76,7 +170,8 @@
                                 Stok mendekati/sudah minimum
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ count($barangStokMinimal) }} Barang/Bahan
+                                {{ count($barangStokMinimal) }} 
+                                Barang/Bahan
                             </div>
                         </div>
                     </div>
@@ -93,7 +188,8 @@
                                 Stok mendekati kadaluarsa
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ count($barangKadaluarsaMendekati) }} Warnings
+                                {{ count($barangKadaluarsaMendekati) }} 
+                                Warnings
                             </div>
                         </div>
                     </div>
@@ -109,148 +205,39 @@
                                 Total Stok Keseluruhan
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ $totalStok }} Items
+                                {{ $totalStok }} 
+                                Items
                             </div>
                         </div>
                     </div>
                 </a>
             </div>
-
-
-            <!-- Saldo Awal -->
-            <div class="col-xl-4 col-md-6 mb-4">
-                <a href="{{ url('/laporan-saldo/saldo-awal') }}" style="text-decoration: none;">
-                    <div class="card border-left-info shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Saldo Awal Keseluruhan Barang Bulan Ini
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Rp {{ number_format($totalSaldoAwalBulanIni, 0, ',', '.') }}
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Saldo Terima -->
-            <div class="col-xl-4 col-md-6 mb-4">
-                <a href="{{ url('/laporan-saldo/saldo-terima') }}" style="text-decoration: none;">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Saldo Terima Keseluruhan Barang Bulan Ini
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Rp {{ number_format($totalSaldoTerimaBulanIni, 0, ',', '.') }}
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Saldo Keluar -->
-            <div class="col-xl-4 col-md-6 mb-4">
-                <a href="{{ url('/laporan-saldo/saldo-keluar') }}" style="text-decoration: none;">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Saldo Keluar Keseluruhan Barang Bulan Ini
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Rp {{ number_format($totalSaldoKeluarBulanIni, 0, ',', '.') }}
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-        </div>
-
-        <!-- Data Permintaan Proyek -->
-        {{-- <div class="row">
-            <div class="col-xl-12 col-lg-12">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">Data Permintaan Proyek</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th>Proyek</th>
-                                        <th>Jumlah Permintaan</th>
-                                        <th>Status</th>
-                                        <th>Tanggal Permintaan</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Proyek A</td>
-                                        <td>50 Items</td>
-                                        <td>Pending</td>
-                                        <td>2024-10-27</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Proyek B</td>
-                                        <td>30 Items</td>
-                                        <td>Approved</td>
-                                        <td>2024-10-25</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> --}}
-
-        <!-- Chart Example Row -->
-        {{-- <div class="row">
-            <div class="col-xl-12 col-lg-12">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">Saldo Awal per Bulan Keseluruhan Barang Tahun Ini</h6>
-                        <div class="dropdown no-arrow">
-                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                                aria-labelledby="dropdownMenuLink">
-                                <div class="dropdown-header">Dropdown Header:</div>
-                                <a class="dropdown-item" href="#">Action</a>
-                                <a class="dropdown-item" href="#">Another action</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#">Something else here</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-area">
-                            <canvas id="myAreaChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-xl-4 col-lg-5">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">Stok Distribution</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-pie pt-4 pb-2">
-                            <canvas id="inventoryPieChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> --}}
         
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+                const filterSelect = document.getElementById('filter');
+                const startDateInput = document.getElementById('start_date');
+                const endDateInput = document.getElementById('end_date');
 
+                // Function to toggle date inputs based on the selected filter
+                function toggleDateInputs() {
+                    if (filterSelect.value === 'custom_dates') {
+                        startDateInput.disabled = false;
+                        endDateInput.disabled = false;
+                    } else {
+                        startDateInput.disabled = true;
+                        endDateInput.disabled = true;
+                    }
+                }
+
+                // Initialize the date inputs based on the current selected filter
+                toggleDateInputs();
+
+                // Add event listener for filter changes
+                filterSelect.addEventListener('change', toggleDateInputs);
+        });
+    </script>
     <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('template/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('template/vendor/jquery-easing/jquery.easing.min.js') }}"></script>

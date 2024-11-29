@@ -19,10 +19,22 @@
         </div>     
 
         <div class="card-body">
+            <!-- Items per page filter -->
+            <div class="form-group">
+                <label for="perPage">Tampilkan per halaman:</label>
+                <select name="perPage" id="perPage" class="form-control">
+                    <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
+                    <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
+                </select>
+            </div>
+
+            <!-- Table of items -->
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
+                            <th>No</th>
                             <th>Nama Barang</th>
                             <th>Satuan Stok Barang</th>
                             <th>Stok</th>
@@ -32,6 +44,7 @@
                         @if(count($barangStokMinimal) > 0)
                             @foreach($barangStokMinimal as $barang)
                                 <tr>
+                                    <td>{{ ($barangStokMinimal->currentPage() - 1) * $barangStokMinimal->perPage() + $loop->iteration }}</td>
                                     <td>{{ $barang->nama_barang }}</td>
                                     <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
                                     <td>{{ $barang->stok }}</td>
@@ -39,13 +52,41 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="3">Tidak Ada Stok Mendekati/Sudah Minimum!</td> 
+                                <td colspan="4">Tidak Ada Stok Mendekati/Sudah Minimum!</td> 
                             </tr>
                         @endif
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination controls -->
+            <div class="pagination" style="margin-top: 20px;">
+                <!-- Previous page button -->
+                @if($barangStokMinimal->currentPage() > 1)
+                    <a href="{{ $barangStokMinimal->previousPageUrl() }}" class="btn btn-primary" style="margin-right: 10px;">Previous</a>
+                @endif
+
+                <!-- Next page button -->
+                @if($barangStokMinimal->hasMorePages())
+                    <a href="{{ $barangStokMinimal->nextPageUrl() }}" class="btn btn-primary">Next</a>
+                @endif
+            </div>
+
         </div>
     </div>
 </div>
+
+<script>
+    // JavaScript to handle changing items per page
+    $(document).ready(function() {
+        $('#perPage').change(function() {
+            var perPage = $(this).val();
+            var currentUrl = window.location.href;
+            var newUrl = new URL(currentUrl);
+            newUrl.searchParams.set('perPage', perPage); // Set the perPage parameter
+            window.location.href = newUrl.toString(); // Redirect to the updated URL
+        });
+    });
+</script>
+
 @endsection
