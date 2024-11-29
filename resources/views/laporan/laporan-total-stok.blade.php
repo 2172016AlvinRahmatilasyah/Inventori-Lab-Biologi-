@@ -20,13 +20,15 @@
 
         <div class="card-body">
             <!-- Dropdown to select number of items per page -->
-            <div class="form-group">
-                <label for="perPage">Tampilkan per halaman:</label>
-                <select name="perPage" id="perPage" class="form-control">
-                    <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
-                    <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
-                    <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
-                </select>
+            <div class="col-md-6 mb-3">
+                <form id="perPageForm" class="d-flex mt-3">
+                    <label for="perPage" class="mr-2">Items per Page:</label>
+                    <select name="perPage" id="perPage" class="form-control w-auto">
+                        <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
+                    </select>
+                </form>
             </div>
 
             <!-- Table displaying data -->
@@ -41,8 +43,8 @@
                             <th>Satuan Stok</th>
                             <th>Kadaluarsa</th>
                             <th>Lokasi</th>
-                            <th>Tanggal Ditambah</th>
-                            <th>Tanggal Diupdate</th>
+                            {{-- <th>Tanggal Ditambah</th>
+                            <th>Tanggal Diupdate</th> --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -56,8 +58,8 @@
                                     <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
                                     <td>{{ $barang->kadaluarsa }}</td>
                                     <td>{{ $barang->lokasi }}</td>
-                                    <td>{{ $barang->created_at }}</td>
-                                    <td>{{ $barang->updated_at }}</td>
+                                    {{-- <td>{{ $barang->created_at }}</td>
+                                    <td>{{ $barang->updated_at }}</td> --}}
                                 </tr>
                             @endforeach
                             <tr>

@@ -57,9 +57,9 @@
                             <tr>
                                 <th>Id</th>
                                 <th>Jenis Pengeluaran</th>
-                                <th>Tanggal Ditambah</th>
-                                <th>Tanggal Diupdate</th>
-                                <th colspan="3">Action</th>
+                                {{-- <th>Tanggal Ditambah</th>
+                                <th>Tanggal Diupdate</th> --}}
+                                <th colspan="2">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -68,8 +68,8 @@
                                     <tr>
                                         <td>{{ $jenis->id }}</td>
                                         <td>{{ $jenis->jenis}}</td>
-                                        <td>{{ $jenis->created_at }}</td>
-                                        <td>{{ $jenis->updated_at }}</td>
+                                        {{-- <td>{{ $jenis->created_at }}</td>
+                                        <td>{{ $jenis->updated_at }}</td> --}}
                                         <td><a href="/edit-jenis-barang-keluar/{{ $jenis->id }}" class="btn btn-primary btn-sm">Edit</a></td>
                                         <td><a href="/delete-jenis-barang-keluar/{{ $jenis->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
                                     </tr>

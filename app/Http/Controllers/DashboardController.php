@@ -16,62 +16,94 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+
+    private function getDateRange(Request $request, $filter = 'current_month')
     {
-        $filter = $request->get('filter', 'current_month'); // Default ke bulan ini
+        // Mengambil tanggal saat ini
         $startDate = null;
         $endDate = null;
+        $thisYear = Carbon::now()->year;
+        $thisMonth = Carbon::now()->month;
 
+        // Inisialisasi tanggal mulai dan akhir berdasarkan filter
         switch ($filter) {
             case 'current_month':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
+                // Show the current month
+                $startMonth = $thisMonth;
+                $endMonth = $thisMonth;
+                $startYear = $thisYear;
+                $endYear = $thisYear;
                 break;
+
             case 'current_year':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now()->endOfYear();
+                // Show the current year
+                $startMonth = 1;  // January
+                $endMonth = 12;   // December
+                $startYear = $thisYear;
+                $endYear = $thisYear;
                 break;
+
             case 'last_30_days':
+                // For the last 30 days (not dependent on year/month)
                 $startDate = Carbon::now()->subDays(30);
                 $endDate = Carbon::now();
                 break;
+
             case 'last_60_days':
+                // For the last 60 days
                 $startDate = Carbon::now()->subDays(60);
                 $endDate = Carbon::now();
                 break;
+
             case 'last_90_days':
+                // For the last 90 days
                 $startDate = Carbon::now()->subDays(90);
                 $endDate = Carbon::now();
                 break;
-            case 'last_12_months':
-                $startDate = Carbon::now()->subMonths(12);
-                $endDate = Carbon::now();
-                break;
-            case 'month_to_date':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now();
-                break;
+
             case 'previous_month':
-                $startDate = Carbon::now()->subMonth()->startOfMonth();
-                $endDate = Carbon::now()->subMonth()->endOfMonth();
+                // Show the previous month
+                $startMonth = Carbon::now()->subMonth()->month;
+                $endMonth = $startMonth;
+                $startYear = Carbon::now()->subMonth()->year;
+                $endYear = $startYear;
                 break;
+
             case 'previous_year':
-                $startDate = Carbon::now()->subYear()->startOfYear();
-                $endDate = Carbon::now()->subYear()->endOfYear();
+                // Show the previous year
+                $startMonth = 1; // January
+                $endMonth = 12;  // December
+                $startYear = Carbon::now()->subYear()->year;
+                $endYear = $startYear;
                 break;
-            case 'year_to_date':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now();
-                break;
-            case 'custom_dates':
-                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
-                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
+
+            default:
+                // Default filter - current month
+                $startMonth = $thisMonth;
+                $endMonth = $thisMonth;
+                $startYear = $thisYear;
+                $endYear = $thisYear;
                 break;
         }
 
-        if (!$startDate || !$endDate) {
-            return redirect()->back()->with('error', 'Invalid date range selected.');
-        }
+        // Mengembalikan hasil
+        return compact('startDate', 'endDate', 'thisYear', 'thisMonth', 'startMonth',
+                        'endMonth', 'startYear', 'endYear'
+                      );
+    }
+
+    public function index(Request $request)
+    {
+        $filter = $request->get('filter', 'current_month');
+
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
+        $startYear = $dates['startYear'];
+        $endYear = $dates['endYear'];
+        $startMonth = $dates['startMonth'];
+        $endMonth = $dates['endMonth'];
 
         // Fetch data based on the selected filter
         $barangMasuk = PenerimaanBarang::whereBetween('created_at', [$startDate, $endDate])->count();
@@ -81,121 +113,66 @@ class DashboardController extends Controller
         $twoMonthsLater = Carbon::now()->addMonths(2);
         $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
         $totalStok = Barang::sum('stok');
-        $totalSaldoAwal = SaldoAwal::whereBetween('created_at', [$startDate, $endDate])->sum('saldo_awal');
-        $totalSaldoTerima = SaldoAwal::whereBetween('created_at', [$startDate, $endDate])->sum('total_terima');
-        $totalSaldoKeluar = SaldoAwal::whereBetween('created_at', [$startDate, $endDate])->sum('total_keluar');
-        $saldoAwal = SaldoAwal::whereBetween('created_at', [$startDate, $endDate])->get();
+        
+        // If the filter is based on a date range (e.g., 'last_30_days'), use that range
+        if (isset($startDate) && isset($endDate)) {
+            $allSaldoAwals = SaldoAwal::with('barang')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get();
+        } else {
+            // Otherwise, filter by year and month
+            $allSaldoAwals = SaldoAwal::with('barang')
+                ->where('tahun', '>=', $startYear)
+                ->where('tahun', '<=', $endYear)
+                ->where('bulan', '>=', $startMonth)
+                ->where('bulan', '<=', $endMonth)
+                ->get();
+        }
+        $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
+        $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
+        $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
 
         // Prepare data for the report
         $data = [
-            'title' => 'Laporan',
+             'title' => 'Laporan',
              'date' => Carbon::now()->toFormattedDateString(),
              'filter' => $filter,
              'user' => Auth::user()->name,
-             'barangMasukBulanIni' => $barangMasuk,
-             'barangKeluarBulanIni' => $barangKeluar,
-             'totalStok' => $saldoAwal->sum('stok'),
+             'barangMasuk' => $barangMasuk,
+             'barangKeluar' => $barangKeluar,
+             'totalStok' => $totalStok,
              'barangList' => $this->getBarangList($barangMasuk, $barangKeluar),
-             'barangStokMinimal' => $this->getStokMinimal(),
-             'barangKadaluarsaMendekati' => $this->getBarangKadaluarsa(),
-             'totalSaldoAwalBulanIni' => $saldoAwal->sum('saldo_awal'),
-             'totalSaldoTerimaBulanIni' => $saldoAwal->sum('total_terima'),
-             'totalSaldoKeluarBulanIni' => $saldoAwal->sum('total_keluar'),
-             'all_saldo_awals' => $saldoAwal
+             'barangStokMinimal' => $barangStokMinimal,
+             'barangKadaluarsaMendekati' => $barangKadaluarsaMendekati,
+             'totalSaldoAwal' => $totalSaldoAwal,
+             'totalSaldoTerima' => $totalSaldoTerima,
+             'totalSaldoKeluar' => $totalSaldoKeluar,
+            //  'all_saldo_awals' => $saldoAwal,
+             'totalPerubahanPersediaan'=>$totalPerubahanPersediaan
         ];
 
-        // Check if PDF download is requested
-        if ($request->get('download_pdf')) {
-            // Generate PDF using the view
-            $pdf = Pdf::loadView('laporan.laporan-keseluruhan', $data);
-
-            // Download the PDF
-            return $pdf->download('laporan-keseluruhan.pdf');
-        }
-
         // Otherwise, return the view
-        return view('dashboard', compact(
-            'filter',
-            'startDate',
-            'endDate',
-            'totalSaldoAwal',
-            'totalSaldoTerima',
-            'totalSaldoKeluar',
-            'barangMasuk',
-            'barangKeluar',
-            'totalPerubahanPersediaan',
-            'barangStokMinimal',
-            'barangKadaluarsaMendekati',
-            'totalStok',
-            'saldoAwal'
-        ));
+        return view('dashboard', $data);
     }
 
 
     public function showBarangMasuk(Request $request)
     {
         // Mengambil filter dari request
-        $filter = $request->get('filter', 'current_month'); // Default ke bulan ini
-        $startDate = null;
-        $endDate = null;
+        $filter = $request->get('filter', 'current_month');
 
-        // Menentukan rentang tanggal sesuai filter
-        switch ($filter) {
-            case 'current_month':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
-                break;
-            case 'current_year':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now()->endOfYear();
-                break;
-            case 'last_30_days':
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-            case 'last_60_days':
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-            case 'last_90_days':
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-            case 'last_12_months':
-                $startDate = Carbon::now()->subMonths(12);
-                $endDate = Carbon::now();
-                break;
-            case 'month_to_date':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now();
-                break;
-            case 'previous_month':
-                $startDate = Carbon::now()->subMonth()->startOfMonth();
-                $endDate = Carbon::now()->subMonth()->endOfMonth();
-                break;
-            case 'previous_year':
-                $startDate = Carbon::now()->subYear()->startOfYear();
-                $endDate = Carbon::now()->subYear()->endOfYear();
-                break;
-            case 'year_to_date':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now();
-                break;
-            case 'custom_dates':
-                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
-                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
-                break;
-        }
-
-        if (!$startDate || !$endDate) {
-            return redirect()->back()->with('error', 'Invalid date range selected.');
-        }
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangMasuk = DetailPenerimaanBarang::with('barang')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get();
-
+        $all_master_penerimaans = PenerimaanBarang::with('barang')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
         // Siapkan data untuk laporan
         $data = [
             'title' => 'Laporan Barang Masuk',
@@ -203,6 +180,7 @@ class DashboardController extends Controller
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangMasuk' => $barangMasuk,
+            'penerimaanBarang' => $all_master_penerimaans,
         ];
 
         return view('laporan.laporan-barang-masuk', $data);
@@ -213,60 +191,11 @@ class DashboardController extends Controller
     {
         // Mengambil filter dari request
         $filter = $request->get('filter', 'current_month');
-        $startDate = null;
-        $endDate = null;
 
-        // Menentukan rentang tanggal sesuai filter
-        switch ($filter) {
-            case 'current_month':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
-                break;
-            case 'current_year':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now()->endOfYear();
-                break;
-            case 'last_30_days':
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-            case 'last_60_days':
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-            case 'last_90_days':
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-            case 'last_12_months':
-                $startDate = Carbon::now()->subMonths(12);
-                $endDate = Carbon::now();
-                break;
-            case 'month_to_date':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now();
-                break;
-            case 'previous_month':
-                $startDate = Carbon::now()->subMonth()->startOfMonth();
-                $endDate = Carbon::now()->subMonth()->endOfMonth();
-                break;
-            case 'previous_year':
-                $startDate = Carbon::now()->subYear()->startOfYear();
-                $endDate = Carbon::now()->subYear()->endOfYear();
-                break;
-            case 'year_to_date':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now();
-                break;
-            case 'custom_dates':
-                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
-                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
-                break;
-        }
-
-        if (!$startDate || !$endDate) {
-            return redirect()->back()->with('error', 'Invalid date range selected.');
-        }
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangMasuk = DetailPenerimaanBarang::with('barang')
@@ -293,61 +222,12 @@ class DashboardController extends Controller
     public function showBarangKeluar(Request $request)
     {
         // Mengambil filter dari request
-        $filter = $request->get('filter', 'current_month'); // Default ke bulan ini
-        $startDate = null;
-        $endDate = null;
+        $filter = $request->get('filter', 'current_month');
 
-        // Menentukan rentang tanggal sesuai filter
-        switch ($filter) {
-            case 'current_month':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
-                break;
-            case 'current_year':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now()->endOfYear();
-                break;
-            case 'last_30_days':
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-            case 'last_60_days':
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-            case 'last_90_days':
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-            case 'last_12_months':
-                $startDate = Carbon::now()->subMonths(12);
-                $endDate = Carbon::now();
-                break;
-            case 'month_to_date':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now();
-                break;
-            case 'previous_month':
-                $startDate = Carbon::now()->subMonth()->startOfMonth();
-                $endDate = Carbon::now()->subMonth()->endOfMonth();
-                break;
-            case 'previous_year':
-                $startDate = Carbon::now()->subYear()->startOfYear();
-                $endDate = Carbon::now()->subYear()->endOfYear();
-                break;
-            case 'year_to_date':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now();
-                break;
-            case 'custom_dates':
-                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
-                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
-                break;
-        }
-
-        if (!$startDate || !$endDate) {
-            return redirect()->back()->with('error', 'Invalid date range selected.');
-        }
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangKeluar = DetailPengeluaranBarang::with('barang')
@@ -369,60 +249,11 @@ class DashboardController extends Controller
     {
         // Mengambil filter dari request
         $filter = $request->get('filter', 'current_month');
-        $startDate = null;
-        $endDate = null;
 
-        // Menentukan rentang tanggal sesuai filter
-        switch ($filter) {
-            case 'current_month':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
-                break;
-            case 'current_year':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now()->endOfYear();
-                break;
-            case 'last_30_days':
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-            case 'last_60_days':
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-            case 'last_90_days':
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-            case 'last_12_months':
-                $startDate = Carbon::now()->subMonths(12);
-                $endDate = Carbon::now();
-                break;
-            case 'month_to_date':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now();
-                break;
-            case 'previous_month':
-                $startDate = Carbon::now()->subMonth()->startOfMonth();
-                $endDate = Carbon::now()->subMonth()->endOfMonth();
-                break;
-            case 'previous_year':
-                $startDate = Carbon::now()->subYear()->startOfYear();
-                $endDate = Carbon::now()->subYear()->endOfYear();
-                break;
-            case 'year_to_date':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now();
-                break;
-            case 'custom_dates':
-                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
-                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
-                break;
-        }
-
-        if (!$startDate || !$endDate) {
-            return redirect()->back()->with('error', 'Invalid date range selected.');
-        }
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangKeluar = DetailPengeluaranBarang::with('barang')
@@ -472,19 +303,6 @@ class DashboardController extends Controller
         })->filter(); // Filter null values from the result
     }
 
-
-
-    public function getStokMinimal()
-    {
-        return Barang::where('stok', '<=', 20)->get();
-    }
-
-    public function getBarangKadaluarsa()
-    {
-        $twoMonthsLater = Carbon::now()->addMonths(2);
-        return Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
-    }
-
     public function showBarangKeluarBulanIni()
     {
         $startOfMonth = Carbon::now()->startOfMonth();
@@ -505,64 +323,13 @@ class DashboardController extends Controller
 
     public function showPerubahanPersediaan(Request $request)
     {
-        $filter = $request->input('filter', 'current_month'); // Default filter is current_month
+       // Mengambil filter dari request
+       $filter = $request->get('filter', 'current_month');
 
-        switch ($filter) {
-            case 'current_month':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
-                break;
-
-            case 'current_year':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now()->endOfYear();
-                break;
-
-            case 'last_30_days':
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_60_days':
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_90_days':
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_12_months':
-                $startDate = Carbon::now()->subMonths(12);
-                $endDate = Carbon::now();
-                break;
-
-            case 'previous_month':
-                $startDate = Carbon::now()->subMonth()->startOfMonth();
-                $endDate = Carbon::now()->subMonth()->endOfMonth();
-                break;
-
-            case 'previous_year':
-                $startDate = Carbon::now()->subYear()->startOfYear();
-                $endDate = Carbon::now()->subYear()->endOfYear();
-                break;
-
-            case 'year_to_date':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now();
-                break;
-
-            case 'month_to_date':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now();
-                break;
-
-            default:
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
-                break;
-        }
+       // Mendapatkan rentang tanggal berdasarkan filter
+       $dates = $this->getDateRange($request, $filter);
+       $startDate = $dates['startDate'];
+       $endDate = $dates['endDate'];
 
         // Query the data for both incoming and outgoing goods
         $detailPenerimaan = DetailPenerimaanBarang::with([
@@ -591,60 +358,11 @@ class DashboardController extends Controller
     {
         // Mengambil filter dari request
         $filter = $request->get('filter', 'current_month');
-        $startDate = null;
-        $endDate = null;
 
-        // Menentukan rentang tanggal sesuai filter
-        switch ($filter) {
-            case 'current_month':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now()->endOfMonth();
-                break;
-            case 'current_year':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now()->endOfYear();
-                break;
-            case 'last_30_days':
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-            case 'last_60_days':
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-            case 'last_90_days':
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-            case 'last_12_months':
-                $startDate = Carbon::now()->subMonths(12);
-                $endDate = Carbon::now();
-                break;
-            case 'month_to_date':
-                $startDate = Carbon::now()->startOfMonth();
-                $endDate = Carbon::now();
-                break;
-            case 'previous_month':
-                $startDate = Carbon::now()->subMonth()->startOfMonth();
-                $endDate = Carbon::now()->subMonth()->endOfMonth();
-                break;
-            case 'previous_year':
-                $startDate = Carbon::now()->subYear()->startOfYear();
-                $endDate = Carbon::now()->subYear()->endOfYear();
-                break;
-            case 'year_to_date':
-                $startDate = Carbon::now()->startOfYear();
-                $endDate = Carbon::now();
-                break;
-            case 'custom_dates':
-                $startDate = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
-                $endDate = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
-                break;
-        }
-
-        if (!$startDate || !$endDate) {
-            return redirect()->back()->with('error', 'Invalid date range selected.');
-        }
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         // Query the data for both incoming and outgoing goods
@@ -725,70 +443,18 @@ class DashboardController extends Controller
 
     public function showSaldo($type, Request $request)
     {
-        $filter = $request->input('filter', 'current_month'); // Default filter is 'current_month'
-        $thisYear = Carbon::now()->year;
-        $thisMonth = Carbon::now()->month;
+        // Mengambil filter dari request
+        $filter = $request->get('filter', 'current_month');
 
-        // Initialize start and end dates for the filter
-        switch ($filter) {
-            case 'current_month':
-                // Show the current month
-                $startMonth = $thisMonth;
-                $endMonth = $thisMonth;
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
-
-            case 'current_year':
-                // Show the current year
-                $startMonth = 1;  // January
-                $endMonth = 12;   // December
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
-
-            case 'last_30_days':
-                // For the last 30 days (not dependent on year/month)
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_60_days':
-                // For the last 60 days
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_90_days':
-                // For the last 90 days
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-
-            case 'previous_month':
-                // Show the previous month
-                $startMonth = Carbon::now()->subMonth()->month;
-                $endMonth = $startMonth;
-                $startYear = Carbon::now()->subMonth()->year;
-                $endYear = $startYear;
-                break;
-
-            case 'previous_year':
-                // Show the previous year
-                $startMonth = 1; // January
-                $endMonth = 12;  // December
-                $startYear = Carbon::now()->subYear()->year;
-                $endYear = $startYear;
-                break;
-
-            default:
-                // Default filter - current month
-                $startMonth = $thisMonth;
-                $endMonth = $thisMonth;
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
-        }
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
+        $startYear = $dates['startYear'];
+        $endYear = $dates['endYear'];
+        $startMonth = $dates['startMonth'];
+        $endMonth = $dates['endMonth'];
+        
 
         // If the filter is based on a date range (e.g., 'last_30_days'), use that range
         if (isset($startDate) && isset($endDate)) {
@@ -804,76 +470,28 @@ class DashboardController extends Controller
                 ->where('bulan', '<=', $endMonth)
                 ->get();
         }
-
-        return view('laporan.laporan-saldo-awal', compact('allSaldoAwals', 'type', 'filter'));
+        $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
+        $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
+        $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
+    
+        // Mengirim data ke view
+        return view('laporan.laporan-saldo-awal', 
+                    compact('allSaldoAwals', 'type', 'filter', 'totalSaldoAwal', 
+                            'totalSaldoTerima', 'totalSaldoKeluar'));
     }
+    
     public function downloadSaldoAwalPdf($type, Request $request)
     {
-        // Get the filter parameter from the request
-        $filter = $request->input('filter', 'current_month'); // Default filter is 'current_month'
-        $thisYear = Carbon::now()->year;
-        $thisMonth = Carbon::now()->month;
+        $filter = $request->get('filter', 'current_month');
 
-        // Initialize start and end dates for the filter
-        switch ($filter) {
-            case 'current_month':
-                // Show the current month
-                $startMonth = $thisMonth;
-                $endMonth = $thisMonth;
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
-
-            case 'current_year':
-                // Show the current year
-                $startMonth = 1;  // January
-                $endMonth = 12;   // December
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
-
-            case 'last_30_days':
-                // For the last 30 days (not dependent on year/month)
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_60_days':
-                // For the last 60 days
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_90_days':
-                // For the last 90 days
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-
-            case 'previous_month':
-                // Show the previous month
-                $startMonth = Carbon::now()->subMonth()->month;
-                $endMonth = $startMonth;
-                $startYear = Carbon::now()->subMonth()->year;
-                $endYear = $startYear;
-                break;
-
-            case 'previous_year':
-                // Show the previous year
-                $startMonth = 1; // January
-                $endMonth = 12;  // December
-                $startYear = Carbon::now()->subYear()->year;
-                $endYear = $startYear;
-                break;
-
-            default:
-                // Default filter - current month
-                $startMonth = $thisMonth;
-                $endMonth = $thisMonth;
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
-        }
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
+        $startYear = $dates['startYear'];
+        $endYear = $dates['endYear'];
+        $startMonth = $dates['startMonth'];
+        $endMonth = $dates['endMonth'];
 
         // If the filter is based on a date range (e.g., 'last_30_days'), use that range
         if (isset($startDate) && isset($endDate)) {

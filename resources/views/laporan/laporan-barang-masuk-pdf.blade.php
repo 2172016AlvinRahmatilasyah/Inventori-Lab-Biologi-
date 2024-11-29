@@ -59,6 +59,8 @@
             <tr>
                 <th>Id detail</th>
                 <th>Id master</th>
+                <th>Invoice</th>
+                <th>Tanggal</th>
                 <th>SupKonProy</th>
                 <th>Nama Staff</th>
                 <th>Jenis Penerimaan</th>
@@ -68,8 +70,8 @@
                 <th>Jumlah Diterima</th>
                 <th>Harga</th>
                 <th>Total Harga</th>
-                <th>Tanggal Ditambah</th>
-                <th>Tanggal Diupdate</th>
+                {{-- <th>Tanggal Ditambah</th>
+                <th>Tanggal Diupdate</th> --}}
             </tr>
         </thead>
         <tbody>
@@ -78,6 +80,8 @@
                     <tr>
                         <td>{{ $item->id }}</td>
                         <td>{{ $item->PenerimaanBarang->id ?? 'N/A' }}</td>
+                        <td>{{ $item->PenerimaanBarang->invoice ?? 'N/A'}}</td>
+                        <td>{{ $item->PenerimaanBarang->tanggal ?? 'N/A'}}</td>
                         <td>{{ $item->PenerimaanBarang->supkonpro->nama ?? 'N/A' }}</td>
                         <td>{{ $item->PenerimaanBarang->user->name ?? 'N/A'}}</td>
                         <td>{{ $item->PenerimaanBarang->jenispenerimaanbarang->jenis  ?? 'N/A' }}</td>
@@ -87,8 +91,8 @@
                         <td>{{ $item->jumlah_diterima }}</td>
                         <td>{{ number_format($item->harga, 0, ',', '.') ?? 'N/A'}}</td>
                         <td>{{ number_format($item->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
-                        <td>{{ $item->created_at }}</td>
-                        <td>{{ $item->updated_at }}</td>
+                        {{-- <td>{{ $item->created_at }}</td>
+                        <td>{{ $item->updated_at }}</td> --}}
                     </tr>
                     </tr>
                 @endforeach

@@ -57,9 +57,9 @@
                             <tr>
                                 <th>Id</th>
                                 <th>Jenis Penerimaan</th>
-                                <th>Tanggal Ditambah</th>
-                                <th>Tanggal Diupdate</th>
-                                <th colspan="3">Action</th>
+                                {{-- <th>Tanggal Ditambah</th>
+                                <th>Tanggal Diupdate</th> --}}
+                                <th colspan="2">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -68,8 +68,8 @@
                                     <tr>
                                         <td>{{ $jenis_penerimaan->id }}</td>
                                         <td>{{ $jenis_penerimaan->jenis}}</td>
-                                        <td>{{ $jenis_penerimaan->created_at }}</td>
-                                        <td>{{ $jenis_penerimaan->updated_at }}</td>
+                                        {{-- <td>{{ $jenis_penerimaan->created_at }}</td>
+                                        <td>{{ $jenis_penerimaan->updated_at }}</td> --}}
                                         <td><a href="/edit-jenis-barang-masuk/{{ $jenis_penerimaan->id }}" class="btn btn-primary btn-sm">Edit</a></td>
                                         <td><a href="/delete-jenis-barang-masuk/{{ $jenis_penerimaan->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
                                     </tr>

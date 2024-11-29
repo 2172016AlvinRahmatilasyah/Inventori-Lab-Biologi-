@@ -59,6 +59,8 @@
                 <tr>
                     <th>Id detail</th>
                     <th>Id master</th>
+                    <th>Invoice</th>
+                    <th>Tanggal</th>
                     <th>SupKonProy</th>
                     <th>Nama Staff</th>
                     <th>Jenis Pengeluaran</th>
@@ -78,6 +80,8 @@
                         <tr>
                             <td>{{ $item->id }}</td>
                             <td>{{ $item->PengeluaranBarang->id ?? 'N/A' }}</td>
+                            <td>{{ $item->PengeluaranBarang->invoice ?? 'N/A'}}</td>
+                            <td>{{ $item->PengeluaranBarang->tanggal ?? 'N/A'}}</td>
                             <td>{{ $item->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>
                             <td>{{ $item->PengeluaranBarang->user->name ?? 'N/A'}}</td>
                             <td>{{ $item->PengeluaranBarang->jenispengeluaranbarang->jenis  ?? 'N/A' }}</td>

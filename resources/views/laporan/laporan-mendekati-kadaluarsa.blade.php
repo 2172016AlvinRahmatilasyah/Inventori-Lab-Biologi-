@@ -20,13 +20,15 @@
 
         <div class="card-body">
             <!-- Dropdown to select number of items per page -->
-            <div class="form-group">
-                <label for="perPage">Tampilkan per halaman:</label>
-                <select name="perPage" id="perPage" class="form-control">
-                    <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
-                    <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
-                    <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
-                </select>
+            <div class="col-md-6 mb-3">
+                <form id="perPageForm" class="d-flex mt-3">
+                    <label for="perPage" class="mr-2">Items per Page:</label>
+                    <select name="perPage" id="perPage" class="form-control w-auto">
+                        <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
+                    </select>
+                </form>
             </div>
 
             <div class="table-responsive">

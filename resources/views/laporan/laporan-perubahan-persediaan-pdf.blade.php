@@ -59,6 +59,8 @@
                 <tr>
                     <th>Id detail</th>
                     <th>Id master</th>
+                    <th>Invoice</th>
+                    <th>Tanggal</th>
                     <th>SupKonProy</th>
                     <th>Nama Staff</th>
                     <th>Jenis Penerimaan</th>
@@ -78,6 +80,8 @@
                         <tr>
                             <td>{{ $penerimaan->id }}</td>
                             <td>{{ $penerimaan->PenerimaanBarang->id ?? 'N/A' }}</td>
+                            <td>{{ $penerimaan->invoice }}</td>
+                            <td>{{ $penerimaan->tanggal }}</td>
                             <td>{{ $penerimaan->PenerimaanBarang->supkonpro->nama ?? 'N/A' }}</td>
                             <td>{{ $penerimaan->PenerimaanBarang->user->name ?? 'N/A' }}</td>
                             <td>{{ $penerimaan->PenerimaanBarang->jenispenerimaanbarang->jenis ?? 'N/A' }}</td>
@@ -105,6 +109,8 @@
                 <tr>
                     <th>Id detail</th>
                     <th>Id master</th>
+                    <th>Invoice</th>
+                    <th>Tanggal</th>
                     <th>SupKonProy</th>
                     <th>Nama Staff</th>
                     <th>Jenis Pengeluaran</th>
@@ -124,6 +130,8 @@
                         <tr>
                             <td>{{ $pengeluaran->id }}</td>
                             <td>{{ $pengeluaran->PengeluaranBarang->id ?? 'N/A' }}</td>
+                            <td>{{ $pengeluaran->invoice }}</td>
+                            <td>{{ $pengeluaran->tanggal }}</td>
                             <td>{{ $pengeluaran->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>
                             <td>{{ $pengeluaran->PengeluaranBarang->user->name ?? 'N/A' }}</td>
                             <td>{{ $pengeluaran->PengeluaranBarang->jenispengeluaranbarang->jenis ?? 'N/A' }}</td>

@@ -14,13 +14,15 @@ use Illuminate\Support\Facades\DB;
 
 class PenerimaanBarangController extends Controller
 {
-    public function loadAllMasterPenerimaanBarang(){
+    public function loadAllPenerimaanBarang(){
+        $all_detail_penerimaans = DetailPenerimaanBarang::all();
         $all_master_penerimaans = PenerimaanBarang::all();
         $all_supkonpros = supkonpro::all();
         $all_users = User::all();
         $all_jenis_penerimaans = JenisPenerimaan::all();
         
-        return view('barang-masuk.index',compact('all_master_penerimaans', 'all_supkonpros', 'all_users', 'all_jenis_penerimaans'));
+        return view('barang-masuk.index',compact('all_master_penerimaans', 
+                    'all_detail_penerimaans','all_supkonpros', 'all_users', 'all_jenis_penerimaans'));
     }
     
     public function MasterBarangMasukSearch(Request $request)
@@ -60,53 +62,70 @@ class PenerimaanBarangController extends Controller
     }
 
 
-    public function AddBarangMasuk(Request $request)
-    {   
+    public function addBarangMasuk(Request $request)
+    {
+        // Validasi input
         $request->validate([
-            'jenis_id' => 'required|exists:jenis_penerimaan_barangs,id',
-            'supkonpro_id' => 'required|exists:supkonpros,id',
+            'jenis_id' => 'required',
+            'supkonpro_id' => 'required',
             'user_id' => 'required|exists:users,id',
-            'nama_pengantar' => 'required|string|max:255',
-            'keterangan' => 'required|string',
-            'barang_id' => 'required|exists:barangs,id',
-            'jumlah_diterima' => 'required',
-            'harga' => 'required',  
-            'total_harga' => 'required', 
+            'nama_pengantar' => 'required|string',
+            'barang_id' => 'required|array',
+            'jumlah_diterima' => 'required|array',
+            'harga' => 'required|array',
+            'total_harga' => 'required|array',
+            'tanggal' => 'required|date',
+            'invoice' => 'required|string',  // Pastikan invoice diterima
         ]);
-        
-        // Clean up harga and total_harga to ensure they are valid numbers
-        $harga = str_replace('.', '', $request->input('harga'));
-        $total_harga = str_replace('.', '', $request->input('total_harga'));
 
-        try {
-            // Save the new PenerimaanBarang
-            $new_penerimaan_barang = new PenerimaanBarang();
-            $new_penerimaan_barang->jenis_id = $request->jenis_id;
-            $new_penerimaan_barang->supkonpro_id = $request->supkonpro_id; 
-            $new_penerimaan_barang->user_id = $request->user_id;
-            $new_penerimaan_barang->nama_pengantar = $request->nama_pengantar; 
-            $new_penerimaan_barang->keterangan = $request->keterangan;
-            $new_penerimaan_barang->save();
+        // Membuat PenerimaanBarang
+        $barangMasuk = new PenerimaanBarang();
+        $barangMasuk->jenis_id = $request->jenis_id;
+        $barangMasuk->supkonpro_id = $request->supkonpro_id;
+        $barangMasuk->nama_pengantar = $request->nama_pengantar;
+        $barangMasuk->tanggal = $request->tanggal;
+        $barangMasuk->invoice = $request->invoice;
+        $barangMasuk->keterangan = $request->keterangan ?? '';
+        $barangMasuk->user_id = $request->user_id;
+        $barangMasuk->save();
 
-            // Save the new DetailPenerimaanBarang
-            $new_detail_penerimaan_barang = new DetailPenerimaanBarang();
-            $new_detail_penerimaan_barang->master_penerimaan_barang_id = $new_penerimaan_barang->id;
-            $new_detail_penerimaan_barang->barang_id = $request->barang_id;
-            $new_detail_penerimaan_barang->jumlah_diterima = $request->jumlah_diterima;
-            $new_detail_penerimaan_barang->harga = $harga; // Use cleaned harga
-            $new_detail_penerimaan_barang->total_harga = $total_harga; // Use cleaned total_harga
-            $new_detail_penerimaan_barang->save();
-
-            // Update the stock in barangs table
-            $barang = Barang::findOrFail($request->barang_id); // Fetch the barang by ID
-            $barang->stok += $request->jumlah_diterima; // Increment the stock
-            $barang->save(); // Save the updated stock back to the database
-
-            return redirect('/master-barang-masuk/' . $request->jenis)->with('success', 'Data Added Successfully');
-        } catch (\Exception $e) {
-            return redirect('/tambah-barang-masuk')->with('fail', $e->getMessage());
+        // Insert detail barang
+        foreach ($request->barang_id as $key => $barangId) {
+            $detail = new DetailPenerimaanBarang();
+            $detail->master_penerimaan_barang_id = $barangMasuk->id;
+            $detail->barang_id = $barangId;
+            $detail->jumlah_diterima = $request->jumlah_diterima[$key];
+            $detail->harga = str_replace(',', '', $request->harga[$key]);
+            $detail->total_harga = str_replace(',', '', $request->total_harga[$key]);
+            $detail->save();
         }
+       // Loop through each barang_id in the request
+        foreach ($request->barang_id as $key => $barangId) {
+            $barang = Barang::findOrFail($barangId);  // Fetch each barang by its ID
+            $barang->stok += $request->jumlah_diterima[$key];  // Increment the stock by the quantity received
+            $barang->save();  // Save the updated stock back to the database
+        }
+
+        return redirect()->route('master-barang-masuk')->with('success', 
+                                 'Barang Masuk berhasil ditambahkan.');
     }
+
+    public function generateInvoicePenerimaan(Request $request)
+    {
+            $tanggal = $request->tanggal;
+
+            // Ambil tanggal dalam format Y-m-d
+            $date = \Carbon\Carbon::parse($tanggal);
+
+            // Ambil berapa banyak penerimaan barang yang sudah ada pada tanggal tersebut
+            $count = PenerimaanBarang::whereDate('created_at', $date->toDateString())->count();
+
+            // Nomor urut dimulai dari 1
+            $noUrut = str_pad($count + 1, 2, '0', STR_PAD_LEFT);  // Contoh: 01, 02, ...
+
+            return response()->json(['noUrut' => $noUrut]);
+    }
+
 
     public function deleteMasterBarang($id)
     {

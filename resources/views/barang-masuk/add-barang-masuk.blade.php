@@ -22,6 +22,21 @@
         <div class="card-body">
             <form action="{{ route('AddBarangMasuk') }}" method="post">
                 @csrf
+                <!-- Input Tanggal -->
+                <div class="mb-3">
+                    <label for="tanggal" class="form-label">Tanggal Penerimaan</label>
+                    <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ old('tanggal') }}" required>
+                    @error('tanggal')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Input Invoice -->
+                <div class="mb-3">
+                    <label for="invoice" class="form-label">Invoice</label>
+                    <input type="text" name="invoice" id="invoice" class="form-control" readonly>
+                </div>
+
                 <div class="mb-3">
                     <label for="jenis_id" class="form-label">Jenis Barang Masuk</label>
                     <select name="jenis_id" class="form-control select2" id="jenis_id">
@@ -37,6 +52,7 @@
                     @enderror
                 </div>
 
+                <!-- SupKonPro -->
                 <div class="mb-3">
                     <label for="supkonpro_id" class="form-label">SupKonProy</label>
                     <select name="supkonpro_id" class="form-control select2" id="supkonpro_id">
@@ -66,51 +82,37 @@
                 
                 <div class="mb-3">
                     <label for="nama_pengantar" class="form-label">Nama Pengantar</label>
-                    <input type="text" name="nama_pengantar" id="nama_pengantar" value="{{ old('nama_pengantar') }}" class="form-control" placeholder="Enter Nama pengantar">
+                    <input type="text" name="nama_pengantar" id="nama_pengantar" value="{{ old('nama_pengantar') }}" class="form-control" placeholder="Enter Nama Pengantar">
                     @error('nama_pengantar')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
 
-                <div class="mb-3">
-                    <label for="barang_id" class="form-label">Nama Barang</label>
-                    <select name="barang_id" class="form-control select2" id="barang_id">
-                        <option value="">Pilih Nama Barang</option>
-                        @foreach ($all_barangs as $barang)
-                            <option value="{{ $barang->id }}" data-id="{{ $barang->id }}">
-                                {{ $barang->nama_barang }} (ID: {{ $barang->id }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('supkonpro_id')
-                        <span class="text-danger">{{$message}}</span>
-                    @enderror
-                </div>
+                <!-- Dynamic Barang Inputs -->
+                <div id="barang-container">
+                    <div class="barang-entry mb-3">
+                        <label for="barang_id" class="form-label">Nama Barang</label>
+                        <select name="barang_id[]" class="form-control select2 barang-select">
+                            <option value="">Pilih Nama Barang</option>
+                            @foreach ($all_barangs as $barang)
+                                <option value="{{ $barang->id }}">
+                                    {{ $barang->nama_barang }} (ID: {{ $barang->id }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <label for="jumlah_diterima" class="form-label">Jumlah Diterima</label>
+                        <input type="number" name="jumlah_diterima[]" class="form-control jumlah-diterima" placeholder="Enter jumlah">
                 
-                <div class="mb-3">
-                    <label for="jumlah_diterima" class="form-label">Jumlah Diterima</label>
-                    <input type="decimal" name="jumlah_diterima" id="jumlah_diterima" class="form-control" value="{{ old('jumlah_diterima') }}" placeholder="Enter jumlah">
-                    @error('jumlah_diterima')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
+                        <label for="harga" class="form-label">Harga</label>
+                        <input type="text" name="harga[]" class="form-control harga" placeholder="Enter harga">
+                
+                        <label for="total_harga" class="form-label">Total Harga</label>
+                        <input type="text" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga">
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label for="harga" class="form-label">Harga</label>
-                    <input type="text" name="harga" id="harga" class="form-control" value="{{ old('harga') }}" placeholder="Enter harga">
-                    @error('harga')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label for="total_harga" class="form-label">Total Harga</label>
-                    <input type="text" name="total_harga" id="total_harga" class="form-control" value="{{ old('total_harga') }}" placeholder="Enter total harga" readonly>
-                    @error('total_harga')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div>
-
+        
+                <button type="button" id="add-barang-btn" class="btn btn-secondary mb-3">+ Barang</button>
+                
                 <div class="mb-3">
                     <label for="keterangan" class="form-label">Keterangan</label>
                     <input type="text" name="keterangan" id="keterangan" value="{{ old('keterangan') }}" class="form-control" placeholder="Enter keterangan">
@@ -118,8 +120,9 @@
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
-                
+
                 <button type="submit" class="btn btn-primary w-100">Save</button>
+                
             </form>
         </div>
     </div>
@@ -130,37 +133,62 @@
 <script>
     $(document).ready(function() {
         $('.select2').select2();
+        $('#tanggal').on('change', function() {
+            var tanggal = $(this).val();  // Format: YYYY-MM-DD
+            if (tanggal) {
+                // Format tanggal menjadi YYMMDD
+                var dateParts = tanggal.split('-');
+                var formattedDate = dateParts[2].slice(-2) + dateParts[1] + dateParts[0].slice(-2); // Format: DDMMYY
 
-        // Function to calculate total harga
-        function calculateTotal() {
-            let jumlahDiterima = parseFloat($('#jumlah_diterima').val()) || 0;
-            let harga = parseFloat(removeThousandsSeparator($('#harga').val())) || 0;
-            let totalHarga = jumlahDiterima * harga;
-            $('#total_harga').val(formatNumber(totalHarga));
-        }
-
-        // Function to remove thousands separator from string
-        function removeThousandsSeparator(value) {
-            return value.replace(/\./g, '');
-        }
-
-        // Function to format number with thousands separator
-        function formatNumber(value) {
-            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        // Event listeners for changes
-        $('#jumlah_diterima, #harga').on('input', function() {
-            calculateTotal();
+                // Menghitung nomor urut berdasarkan tanggal yang dipilih
+                $.ajax({
+                    url: "{{ route('generateInvoicePenerimaan') }}",
+                    method: "GET",
+                    data: { tanggal: tanggal },
+                    success: function(response) {
+                        var noUrut = response.noUrut;
+                        $('#invoice').val(formattedDate + noUrut);  // Gabungkan tanggal + nomor urut
+                    }
+                });
+            }
+        });
+        // Add new barang input field
+        $('#add-barang-btn').click(function() {
+            $('#barang-container').append(`
+                <div class="barang-entry mb-3">
+                    <label for="barang_id" class="form-label">Nama Barang</label>
+                    <select name="barang_id[]" class="form-control select2 barang-select">
+                        <option value="">Pilih Nama Barang</option>
+                        @foreach ($all_barangs as $barang)
+                            <option value="{{ $barang->id }}" data-id="{{ $barang->id }}">
+                                {{ $barang->nama_barang }} (ID: {{ $barang->id }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <label for="jumlah_diterima" class="form-label">Jumlah Diterima</label>
+                    <input type="number" name="jumlah_diterima[]" class="form-control jumlah-diterima" placeholder="Enter jumlah">
+                    
+                    <label for="harga" class="form-label">Harga</label>
+                    <input type="text" name="harga[]" class="form-control harga" placeholder="Enter harga">
+                    
+                    <label for="total_harga" class="form-label">Total Harga</label>
+                    <input type="text" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga">
+                </div>
+            `);
+            $('.select2').select2();
         });
 
-        // Format the initial value of harga and total_harga
-        $('#harga').on('blur', function() {
-            $(this).val(formatNumber(removeThousandsSeparator($(this).val())));
-        });
-
-        $('#total_harga').on('blur', function() {
-            $(this).val(formatNumber(removeThousandsSeparator($(this).val())));
+        // Calculate total harga when harga or jumlah diterima changes
+        $(document).on('input', '.jumlah-diterima, .harga', function() {
+            var totalHarga = 0;
+            $('.barang-entry').each(function() {
+                var jumlahDiterima = $(this).find('.jumlah-diterima').val();
+                var harga = $(this).find('.harga').val().replace(/\./g, '');
+                if (jumlahDiterima && harga) {
+                    totalHarga = jumlahDiterima * parseFloat(harga);
+                    $(this).find('.total-harga').val(totalHarga.toLocaleString());
+                }
+            });
         });
     });
 </script>

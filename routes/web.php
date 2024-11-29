@@ -18,7 +18,7 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
+Route::get('/dashboard', [DashboardController::class, 'index', ])
     ->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -79,7 +79,6 @@ Route::middleware('auth')->group(function () {
     Route::get('detail-barang/{id}', [BarangController::class, 'detailTransaksiBarang'])
                ->name('barang.detail');
 
-
     Route::get('saldo-awal', [SaldoAwalController::class, 'loadAllSaldoAwals'])->name('saldo-awal');
     Route::get('saldo-awal-search', [SaldoAwalController::class, 'search'])->name('saldoawals.search');
     Route::get('saldoawals', [SaldoAwalController::class, 'loadAllSaldoAwals']);
@@ -108,7 +107,7 @@ Route::middleware('auth')->group(function () {
     Route::get('delete-kelola-user/{id}/{role}', [UserController::class, 'deleteUser'])->name('user.delete');
 
     //master barang masuk:
-    Route::get('master-barang-masuk', [PenerimaanBarangController::class, 'loadAllMasterPenerimaanBarang'])->name('master-barang-masuk');
+    Route::get('master-barang-masuk', [PenerimaanBarangController::class, 'loadAllPenerimaanBarang'])->name('master-barang-masuk');
     Route::get('master-barang-masuk-search', [PenerimaanBarangController::class, 'MasterBarangMasukSearch'])->name('master-barang-masuk.search');
     Route::get('tambah-barang-masuk', [PenerimaanBarangController::class, 'loadAddBarangMasukForm']);
     Route::post('tambah-barang-masuk', [PenerimaanBarangController::class, 'AddBarangMasuk'])->name('AddBarangMasuk');
@@ -116,6 +115,8 @@ Route::middleware('auth')->group(function () {
     Route::get('edit-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'loadEditBarangMasukForm']);
     Route::put('edit-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'EditPenerimaanBarang'])
                 ->name('EditPenerimaanBarang');
+    Route::get('/generate-invoice-penerimaan', [PenerimaanBarangController::class, 'generateInvoicePenerimaan'])
+                ->name('generateInvoicePenerimaan');
     //detail barang masuk:
     Route::get('detail-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'detailMasterBarang'])->name('detail-penerimaan-barang');
     Route::get('index-detail-barang-masuk', [PenerimaanBarangController::class, 'loadAllDetailPenerimaanBarang'])->name('index-detail-barang-masuk');
@@ -130,7 +131,7 @@ Route::middleware('auth')->group(function () {
    
 
     //master barang keluar:
-    Route::get('master-barang-keluar', [PengeluaranBarangController::class, 'loadAllMasterPengeluaranBarang'])
+    Route::get('master-barang-keluar', [PengeluaranBarangController::class, 'loadAllPengeluaranBarang'])
                ->name('master-barang-keluar');
     Route::get('master-barang-keluar-search', [PengeluaranBarangController::class, 'MasterBarangKeluarSearch'])
                ->name('master-barang-keluar.search');
@@ -140,6 +141,8 @@ Route::middleware('auth')->group(function () {
     Route::get('edit-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'loadEditBarangKeluarForm']);
     Route::put('edit-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'EditPengeluaranBarang'])
                 ->name('EditPengeluaranBarang');
+    Route::get('/generate-invoice-pengeluaran', [PengeluaranBarangController::class, 'generateInvoicePengeluaran'])
+                ->name('generateInvoicePengeluaran');
     //detail barang keluar:
     Route::get('detail-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'detailPengeluaranBarang'])
                ->name('detail-pengeluaran-barang');

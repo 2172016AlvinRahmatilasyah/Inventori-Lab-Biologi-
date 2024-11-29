@@ -60,32 +60,46 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Id</th>
+                                <th>Id master</th>
+                                <th>Id detail</th>
+                                <th>Invoice</th>
+                                <th>Tanggal</th>
                                 <th>SupKonProy</th>
                                 <th>Nama Staff</th>
                                 <th>Jenis Pengeluaran</th>
                                 <th>Nama Pengambil</th>
                                 <th>Keterangan</th>
-                                <th>Tanggal Ditambah</th>
-                                <th>Tanggal Diupdate</th>
+                                <th>Nama Barang</th>
+                                <th>Jumlah Keluar</th>
+                                <th>Harga</th>
+                                <th>Total Harga</th>
+                                {{-- <th>Tanggal Ditambah</th>
+                                <th>Tanggal Diupdate</th> --}}
                                 <th colspan="3">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if(isset($all_master_pengeluarans) && count($all_master_pengeluarans) > 0)
-                                @foreach ($all_master_pengeluarans as $master_barang)
+                            @if(isset($all_detail_pengeluarans) && count($all_detail_pengeluarans) > 0)
+                                @foreach ($all_detail_pengeluarans as $barang)
                                     <tr>
-                                        <td>{{ $master_barang->id }}</td>
-                                        <td>{{ $master_barang->supkonpro->nama ?? 'N/A' }}</td>
-                                        <td>{{ $master_barang->user->name }}</td>
-                                        <td>{{ $master_barang->jenisPengeluaranBarang->jenis  ?? 'N/A' }}</td>
-                                        <td>{{ $master_barang->nama_pengambil }}</td>
-                                        <td>{{ $master_barang->keterangan }}</td>
-                                        <td>{{ $master_barang->created_at }}</td>
-                                        <td>{{ $master_barang->updated_at }}</td>
-                                        <td><a href="/edit-pengeluaran-barang/{{ $master_barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
-                                        <td><a href="/delete-pengeluaran-barang/{{ $master_barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
-                                        <td><a href="/detail-pengeluaran-barang/{{ $master_barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
+                                        <td>{{ $barang->pengeluaranBarang->id }}</td>
+                                        <td>{{ $barang->id }}</td>
+                                        <td>{{ $barang->pengeluaranBarang->invoice }}</td>
+                                        <td>{{ $barang->pengeluaranBarang->tanggal }}</td>
+                                        <td>{{ $barang->pengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>
+                                        <td>{{ $barang->pengeluaranBarang->user->name }}</td>
+                                        <td>{{ $barang->pengeluaranBarang->jenisPengeluaranBarang->jenis  ?? 'N/A' }}</td>
+                                        <td>{{ $barang->pengeluaranBarang->nama_pengambil }}</td>
+                                        <td>{{ $barang->pengeluaranBarang->keterangan }}</td>
+                                        <td>{{ $barang->barang->nama_barang ?? 'N/A' }}</td>
+                                        <td>{{ $barang->jumlah_keluar ?? 'N/A' }}</td>
+                                        <td>{{ $barang->harga ?? 'N/A'}}</td>
+                                        <td>{{ $barang->total_harga ?? 'N/A'}}</td>
+                                        {{-- <td>{{ $master_barang->created_at }}</td>
+                                        <td>{{ $master_barang->updated_at }}</td> --}}
+                                        <td><a href="/edit-pengeluaran-barang/{{ $barang->pengeluaranBarang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
+                                        <td><a href="/delete-pengeluaran-barang/{{ $barang->pengeluaranBarang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
+                                        {{-- <td><a href="/detail-pengeluaran-barang/{{ $barang->pengeluaranBarang->id }}" class="btn btn-info btn-sm">Detail</a></td> --}}
                                     </tr>
                                     </tr>
                                 @endforeach

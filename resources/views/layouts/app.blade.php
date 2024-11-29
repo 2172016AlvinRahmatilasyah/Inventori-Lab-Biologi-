@@ -78,8 +78,8 @@
                 </a>
                 <div id="collapseBarangMasuk" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="{{ url('/master-barang-masuk') }}">Master Barang Masuk</a>
-                        <a class="collapse-item" href="{{ url('/index-detail-barang-masuk') }}">Detail Barang Masuk</a>
+                        <a class="collapse-item" href="{{ url('/master-barang-masuk') }}">Barang Masuk</a>
+                        {{-- <a class="collapse-item" href="{{ url('/index-detail-barang-masuk') }}">Detail Barang Masuk</a> --}}
                         <a class="collapse-item" href="{{ url('/jenis-barang-masuk') }}">Jenis Barang Masuk</a>
                     </div>
                 </div>
@@ -99,8 +99,8 @@
                 </a>
                 <div id="collapseBarangKeluar" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="{{ url('/master-barang-keluar') }}">Master Barang Keluar</a>
-                        <a class="collapse-item" href="{{ url('/index-detail-barang-keluar') }}">Detail Barang Keluar</a>
+                        <a class="collapse-item" href="{{ url('/master-barang-keluar') }}">Barang Keluar</a>
+                        {{-- <a class="collapse-item" href="{{ url('/index-detail-barang-keluar') }}">Detail Barang Keluar</a> --}}
                         <a class="collapse-item" href="{{ url('/jenis-barang-keluar') }}">Jenis Barang Keluar</a>
                     </div>
                 </div>

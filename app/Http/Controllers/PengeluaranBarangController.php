@@ -17,14 +17,15 @@ use Illuminate\Support\Facades\DB;
 
 class PengeluaranBarangController extends Controller
 {
-    public function loadAllMasterPengeluaranBarang(){
+    public function loadAllPengeluaranBarang(){
+        $all_detail_pengeluarans = detailPengeluaranBarang::all();
         $all_master_pengeluarans = PengeluaranBarang::all();
         $all_supkonpros = supkonpro::all();
         $all_users = User::all();
         $all_jenis_pengeluarans = JenisPengeluaran::all();
         
-        return view('barang-keluar.index',compact('all_master_pengeluarans', 'all_supkonpros', 'all_users', 
-                    'all_jenis_pengeluarans'));
+        return view('barang-keluar.index',compact('all_master_pengeluarans', 'all_supkonpros', 
+                    'all_detail_pengeluarans','all_users', 'all_jenis_pengeluarans'));
     }
     
     public function MasterBarangKeluarSearch(Request $request)
@@ -64,51 +65,112 @@ class PengeluaranBarangController extends Controller
     }
 
 
-    public function AddBarangKeluar(Request $request)
-    {   
-        $request->validate([
-            'jenis_id' => 'required|exists:jenis_pengeluaran_barangs,id',
-            'supkonpro_id' => 'required|exists:supkonpros,id',
-            'user_id' => 'required|exists:users,id',
-            'nama_pengambil' => 'required|string|max:255',
-            'keterangan' => 'required|string',
-            'barang_id' => 'required|exists:barangs,id',
-            'jumlah_keluar' => 'required',
-            'harga' => 'required',  
-            'total_harga' => 'required', 
-        ]);
+    // public function AddBarangKeluar(Request $request)
+    // {   
+    //     $request->validate([
+    //         'jenis_id' => 'required|exists:jenis_pengeluaran_barangs,id',
+    //         'supkonpro_id' => 'required|exists:supkonpros,id',
+    //         'user_id' => 'required|exists:users,id',
+    //         'nama_pengambil' => 'required|string|max:255',
+    //         'keterangan' => 'required|string',
+    //         'barang_id' => 'required|exists:barangs,id',
+    //         'jumlah_keluar' => 'required',
+    //         'harga' => 'required',  
+    //         'total_harga' => 'required', 
+    //     ]);
         
-        $harga = str_replace('.', '', $request->input('harga'));
-        $total_harga = str_replace('.', '', $request->input('total_harga'));
+    //     $harga = str_replace('.', '', $request->input('harga'));
+    //     $total_harga = str_replace('.', '', $request->input('total_harga'));
 
-        try {
-            $new_pengeluaran_barang = new PengeluaranBarang();
-            $new_pengeluaran_barang->jenis_id = $request->jenis_id;
-            $new_pengeluaran_barang->supkonpro_id = $request->supkonpro_id; 
-            $new_pengeluaran_barang->user_id = $request->user_id;
-            $new_pengeluaran_barang->nama_pengambil = $request->nama_pengambil; 
-            $new_pengeluaran_barang->keterangan = $request->keterangan;
-            $new_pengeluaran_barang->save();
-
-           
-            $new_detail_pengeluaran_barang = new DetailPengeluaranBarang();
-            $new_detail_pengeluaran_barang->master_pengeluaran_barang_id = $new_pengeluaran_barang->id;
-            $new_detail_pengeluaran_barang->barang_id = $request->barang_id;
-            $new_detail_pengeluaran_barang->jumlah_keluar = $request->jumlah_keluar;
-            $new_detail_pengeluaran_barang->harga = $harga; 
-            $new_detail_pengeluaran_barang->total_harga = $total_harga; 
-            $new_detail_pengeluaran_barang->save();
+    //     try {
+    //         $new_pengeluaran_barang = new PengeluaranBarang();
+    //         $new_pengeluaran_barang->jenis_id = $request->jenis_id;
+    //         $new_pengeluaran_barang->supkonpro_id = $request->supkonpro_id; 
+    //         $new_pengeluaran_barang->user_id = $request->user_id;
+    //         $new_pengeluaran_barang->nama_pengambil = $request->nama_pengambil; 
+    //         $new_pengeluaran_barang->keterangan = $request->keterangan;
+    //         $new_pengeluaran_barang->save();
 
            
-            $barang = Barang::findOrFail($request->barang_id); 
-            $barang->stok -= $request->jumlah_keluar; 
-            $barang->save(); 
+    //         $new_detail_pengeluaran_barang = new DetailPengeluaranBarang();
+    //         $new_detail_pengeluaran_barang->master_pengeluaran_barang_id = $new_pengeluaran_barang->id;
+    //         $new_detail_pengeluaran_barang->barang_id = $request->barang_id;
+    //         $new_detail_pengeluaran_barang->jumlah_keluar = $request->jumlah_keluar;
+    //         $new_detail_pengeluaran_barang->harga = $harga; 
+    //         $new_detail_pengeluaran_barang->total_harga = $total_harga; 
+    //         $new_detail_pengeluaran_barang->save();
 
-            return redirect('/master-barang-keluar/' . $request->jenis)->with('success', 'Data Added Successfully');
-        } catch (\Exception $e) {
-            return redirect('/tambah-barang-keluar')->with('fail', $e->getMessage());
+           
+    //         $barang = Barang::findOrFail($request->barang_id); 
+    //         $barang->stok -= $request->jumlah_keluar; 
+    //         $barang->save(); 
+
+    //         return redirect('/master-barang-keluar/' . $request->jenis)->with('success', 'Data Added Successfully');
+    //     } catch (\Exception $e) {
+    //         return redirect('/tambah-barang-keluar')->with('fail', $e->getMessage());
+    //     }
+    // }
+
+    public function addBarangKeluar(Request $request)
+    {
+        $request->validate([
+            'jenis_id' => 'required',
+            'supkonpro_id' => 'required',
+            'user_id' => 'required|exists:users,id',
+            'nama_pengambil' => 'required|string',
+            'barang_id' => 'required|array',
+            'jumlah_keluar' => 'required|array',
+            'harga' => 'required|array',
+            'total_harga' => 'required|array',
+            'tanggal' => 'required|date',
+            'invoice' => 'required|string',  
+        ]);
+
+        $barangKeluar = new PengeluaranBarang();
+        $barangKeluar->jenis_id = $request->jenis_id;
+        $barangKeluar->supkonpro_id = $request->supkonpro_id;
+        $barangKeluar->nama_pengambil = $request->nama_pengambil;
+        $barangKeluar->tanggal = $request->tanggal;
+        $barangKeluar->invoice = $request->invoice;
+        $barangKeluar->keterangan = $request->keterangan ?? '';
+        $barangKeluar->user_id = $request->user_id;
+        $barangKeluar->save();
+
+        foreach ($request->barang_id as $key => $barangId) {
+            $detail = new detailPengeluaranBarang();
+            $detail->master_pengeluaran_barang_id = $barangKeluar->id;
+            $detail->barang_id = $barangId;
+            $detail->jumlah_keluar = $request->jumlah_keluar[$key];
+            $detail->harga = str_replace(',', '', $request->harga[$key]);
+            $detail->total_harga = str_replace(',', '', $request->total_harga[$key]);
+            $detail->save();
         }
+
+        foreach ($request->barang_id as $key => $barangId) {
+            $barang = Barang::findOrFail($barangId);  
+            $barang->stok -= $request->jumlah_keluar[$key]; 
+            $barang->save();
+        }
+
+        return redirect()->route('master-barang-keluar')->with('success', 
+                                 'Barang Keluar berhasil ditambahkan.');
     }
+
+    
+        public function generateInvoicePengeluaran(Request $request)
+        {
+            $tanggal = $request->tanggal;
+
+            // Ambil tanggal dalam format Y-m-d
+            $date = \Carbon\Carbon::parse($tanggal);
+
+            $count = PengeluaranBarang::whereDate('created_at', $date->toDateString())->count();
+
+            // Nomor urut dimulai dari 1
+            $noUrut2 = str_pad($count + 1, 2, '0', STR_PAD_LEFT);  // Contoh: 01, 02, ...
+
+            return response()->json(['noUrut' => $noUrut2]);
+        }
 
     public function deletePengeluaranBarang($id)
     {

@@ -15,92 +15,133 @@
 <script src="{{ asset('template/vendor/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('template/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
 
-{{-- <script src="{{ asset('template/js/demo/datatables-demo.js') }}"></script> --}}
-{{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> --}}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
-    <div class="container-fluid">
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="card">
+        <div class="card-header d-flex align-items-center">
+            <h2>Daftar Barang</h2>
+            <a href="/add-barang" class="btn btn-success btn-sm ml-auto">Tambah Barang Baru</a>
+        </div>
 
-        <!-- Page Heading -->
-        {{-- <h1 class="h3 mb-2 text-gray-800">Data Jenis Barang</h1> --}}
-
-        <!-- DataTales Example -->
-        <div class="card">
-            <div class="card-header d-flex align-items-center">
-                <h2>Daftar Barang</h2>
-                <a href="/add-barang" class="btn btn-success btn-sm ml-auto">Tambah Barang Baru</a>
+        <!-- Flash message for success or failure -->
+        @if(Session::has('success'))
+            <div class="alert alert-success">
+                {{ Session::get('success') }}
             </div>
-            
-        
-            {{-- Flash message for success or failure --}}
-            @if(Session::has('success'))
-                <div class="alert alert-success">
-                    {{ Session::get('success') }}
-                </div>
-            @endif
-        
-            @if(Session::has('fail'))
-                <div class="alert alert-danger">
-                    {{ Session::get('fail') }}
-                </div>
-            @endif
-        
-            <div class="mb-3">
-                <form action="{{ route('barangs.search') }}" method="GET" class="d-flex mt-3">
-                    <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
+        @endif
+
+        @if(Session::has('fail'))
+            <div class="alert alert-danger">
+                {{ Session::get('fail') }}
+            </div>
+        @endif
+
+        <!-- Row for Search and Items per Page Filters -->
+        <div class="row mb-3">
+            <!-- Search Form -->
+            <div class="col-md-6">
+                <form action="{{ route('barangs.search') }}" method="GET" class="d-flex mt-3 ml-3">
+                    <input type="text" name="query" class="form-control w-75" placeholder="Search here">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
-                    <a href="{{ route('kelola-barang') }}" class="btn btn-secondary ml-3 ">Reset</a>
+                    <a href="{{ route('kelola-barang') }}" class="btn btn-secondary ml-3">Reset</a>
                 </form>
             </div>
-            
-            
-        
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Id</th>
-                                <th>Nama Barang</th>
-                                <th>Jenis Barang</th>
-                                <th>Stok</th>
-                                <th>Satuan Stok</th>
-                                <th>Kadaluarsa</th>
-                                <th>Lokasi</th>
-                                <th>Tanggal Ditambah</th>
-                                <th>Tanggal Diupdate</th>
-                                <th colspan="3">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(isset($all_barangs) && count($all_barangs) > 0)
-                                @foreach ($all_barangs as $barang)
-                                    <tr>
-                                        <td>{{ $barang->id }}</td>
-                                        <td>{{ $barang->nama_barang }}</td>
-                                        <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
-                                        <td>{{ $barang->stok }}</td>
-                                        <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td> <!-- Ambil satuan_stok dari relasi -->
-                                        <td>{{ $barang->kadaluarsa }}</td>
-                                        <td>{{ $barang->lokasi }}</td>
-                                        <td>{{ $barang->created_at }}</td>
-                                        <td>{{ $barang->updated_at }}</td>
-                                        <td><a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
-                                        {{-- <td><a href="/delete-barang/{{ $barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
-                                        <td><a href="/detail-barang/{{ $barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
-                                    </tr>
-                                    </tr>
-                                @endforeach
-                            @else
-                                <tr>
-                                    <td colspan="8">Barang tidak ditemukan !</td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
+
+            <!-- Items per Page Filter -->
+            <div class="col-md-6">
+                <form id="perPageForm" class="d-flex mt-3">
+                    <label for="perPage" class="mr-2">Items per Page:</label>
+                    <select name="perPage" id="perPage" class="form-control w-auto">
+                        <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
+                    </select>
+                </form>
             </div>
         </div>
 
+        <!-- Data Table -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Barang</th>
+                            <th>Jenis Barang</th>
+                            <th>Stok</th>
+                            <th>Satuan Stok</th>
+                            <th>Kadaluarsa</th>
+                            <th>Lokasi</th>
+                            <th colspan="3">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(isset($all_barangs) && count($all_barangs) > 0)
+                            @php
+                                $offset = ($all_barangs->currentPage() - 1) * $all_barangs->perPage(); 
+                            @endphp
+
+                            @foreach ($all_barangs as $barang)
+                                <tr>
+                                    <td>{{ $offset + $loop->iteration }}</td> <!-- Adjusted iteration to account for offset -->
+                                    <td>{{ $barang->nama_barang }}</td>
+                                    <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
+                                    <td>{{ $barang->stok }}</td>
+                                    <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
+                                    <td>{{ $barang->kadaluarsa }}</td>
+                                    <td>{{ $barang->lokasi }}</td>
+                                    <td><a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
+                                    <td><a href="/detail-barang/{{ $barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="8">Barang tidak ditemukan!</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination d-flex justify-content-between mt-3">
+            <!-- Previous Button -->
+            @if($all_barangs->currentPage() > 1)
+                <a href="{{ $all_barangs->previousPageUrl() }}" class="btn btn-primary">Previous</a>
+            @endif
+
+            <!-- Next Button -->
+            @if($all_barangs->hasMorePages())
+                <a href="{{ $all_barangs->nextPageUrl() }}" class="btn btn-primary">Next</a>
+            @endif
+        </div>
+
     </div>
+</div>
+
+<script>
+    // JavaScript to handle changing items per page
+    $(document).ready(function() {
+        $('#perPage').change(function() {
+            var perPage = $(this).val();
+            var currentPage = '{{ $all_barangs->currentPage() }}'; // Get current page
+
+            // Create a new URL object
+            var currentUrl = window.location.href;
+            var newUrl = new URL(currentUrl);
+
+            // Set perPage parameter and preserve the current page number
+            newUrl.searchParams.set('perPage', perPage);
+            newUrl.searchParams.set('page', currentPage); // Keep the current page
+
+            // Redirect to the new URL with updated perPage
+            window.location.href = newUrl.toString();
+        });
+    });
+</script>
+
 @endsection

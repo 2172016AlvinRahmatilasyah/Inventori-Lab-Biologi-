@@ -18,8 +18,10 @@ use App\Models\PengeluaranBarang;
 class BarangController extends Controller
 {
     
-    public function loadAllBarangs(){
-        $all_barangs = barang::all();
+    public function loadAllBarangs(Request $request){
+        $perPage = $request->input('perPage', 25);
+        $all_barangs = Barang::with('jenisBarang')
+                        ->paginate($perPage);
         return view('kelola-barang.index',compact('all_barangs'));
     }
 
