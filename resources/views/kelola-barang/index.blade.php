@@ -62,6 +62,23 @@
             </div>
         </div>
 
+        <!-- Jenis Barang Filter -->
+        <div class="col-md-6">
+            <form action="{{ route('kelola-barang') }}" method="GET" class="d-flex mt-3">
+                <label for="jenisBarang" class="mr-2">Jenis Barang:</label>
+                <select name="jenisBarang" id="jenisBarang" class="form-control w-auto">
+                    <option value="">Semua</option>
+                    @foreach($jenis_barangs as $jenis)
+                        <option value="{{ $jenis->id }}" 
+                            {{ request('jenisBarang') == $jenis->id ? 'selected' : '' }}>
+                            {{ $jenis->nama_jenis_barang }} - {{ $jenis->satuan_stok }}
+                        </option>
+                    @endforeach
+                </select>                
+                <button type="submit" class="btn btn-primary ml-2">Filter</button>
+            </form>
+        </div>
+
         <!-- Data Table -->
         <div class="card-body">
             <div class="table-responsive">
@@ -70,12 +87,15 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Barang</th>
+                            <th>No Catalog</th>
                             <th>Jenis Barang</th>
                             <th>Stok</th>
                             <th>Satuan Stok</th>
                             <th>Kadaluarsa</th>
                             <th>Lokasi</th>
-                            <th colspan="3">Action</th>
+                            <th>Status Barang</th>
+                            <th>Plate</th>
+                            <th colspan="2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,16 +103,19 @@
                             @php
                                 $offset = ($all_barangs->currentPage() - 1) * $all_barangs->perPage(); 
                             @endphp
-
+                    
                             @foreach ($all_barangs as $barang)
                                 <tr>
-                                    <td>{{ $offset + $loop->iteration }}</td> <!-- Adjusted iteration to account for offset -->
+                                    <td>{{ $offset + $loop->iteration }}</td> 
                                     <td>{{ $barang->nama_barang }}</td>
+                                    <td>{{ $barang->no_catalog }}</td>
                                     <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
                                     <td>{{ $barang->stok }}</td>
                                     <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
                                     <td>{{ $barang->kadaluarsa }}</td>
                                     <td>{{ $barang->lokasi }}</td>
+                                    <td>{{ $barang->status_barang }}</td>
+                                    <td>{{ $barang->plate }}</td>
                                     <td><a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
                                     <td><a href="/detail-barang/{{ $barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
                                 </tr>
@@ -102,7 +125,7 @@
                                 <td colspan="8">Barang tidak ditemukan!</td>
                             </tr>
                         @endif
-                    </tbody>
+                    </tbody>                    
                 </table>
             </div>
         </div>
@@ -124,24 +147,30 @@
 </div>
 
 <script>
-    // JavaScript to handle changing items per page
-    $(document).ready(function() {
-        $('#perPage').change(function() {
-            var perPage = $(this).val();
-            var currentPage = '{{ $all_barangs->currentPage() }}'; // Get current page
+  $(document).ready(function() {
+    $('#perPage').change(function() {
+        var perPage = $(this).val();
+        var currentPage = '{{ $all_barangs->currentPage() }}'; // Get current page
 
-            // Create a new URL object
-            var currentUrl = window.location.href;
-            var newUrl = new URL(currentUrl);
+        // Create a new URL object
+        var currentUrl = window.location.href;
+        var newUrl = new URL(currentUrl);
 
-            // Set perPage parameter and preserve the current page number
-            newUrl.searchParams.set('perPage', perPage);
-            newUrl.searchParams.set('page', currentPage); // Keep the current page
+        // Set perPage parameter and preserve the current page number
+        newUrl.searchParams.set('perPage', perPage);
+        newUrl.searchParams.set('page', currentPage); // Keep the current page
 
-            // Redirect to the new URL with updated perPage
-            window.location.href = newUrl.toString();
-        });
+        // Preserve jenisBarang parameter
+        var jenisBarang = $('#jenisBarang').val();
+        if (jenisBarang) {
+            newUrl.searchParams.set('jenisBarang', jenisBarang);
+        }
+
+        // Redirect to the new URL with updated perPage and jenisBarang
+        window.location.href = newUrl.toString();
     });
+});
 </script>
+
 
 @endsection

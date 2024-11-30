@@ -4,44 +4,19 @@
     <meta charset="UTF-8">
     <title>Laporan {{ $type }}</title>
     <style>
-        @page {
-            size: A4 landscape; /* Set the page size to A4 Landscape */
-            margin: 10mm;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            margin: 0;
-        }
-
-        h1, h3 {
-            text-align: center;
-            margin: 10px 0;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
-
         table, th, td {
             border: 1px solid black;
-            text-align: center;
+        }
+        th, td {
             padding: 8px;
+            text-align: center;
         }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        td {
-            word-wrap: break-word;
-        }
-
-        p {
-            margin: 5px 0;
+        h1, h3{
+            text-align: center;
         }
     </style>
 </head>
@@ -51,6 +26,7 @@
     
     <p>Tanggal laporan dibuat: {{ $date }}</p>
     <p>Pembuat: {{ $user }}</p>
+    <p>Berdasarkan: {{ $filter }}</p>
     <br>
     
     <h3>Data {{ $type }}</h3>

@@ -18,12 +18,28 @@ use App\Models\PengeluaranBarang;
 class BarangController extends Controller
 {
     
-    public function loadAllBarangs(Request $request){
+    public function loadAllBarangs(Request $request) {
         $perPage = $request->input('perPage', 25);
-        $all_barangs = Barang::with('jenisBarang')
-                        ->paginate($perPage);
-        return view('kelola-barang.index',compact('all_barangs'));
+        $jenisBarangId = $request->input('jenisBarang'); // Ambil filter jenis barang
+        $jenis_barangs = jenis_barang::all(); // Ambil semua jenis barang untuk dropdown
+    
+        // Query untuk mengambil barang dengan filter jenis barang
+        $query = Barang::with('jenisBarang'); // Mengambil data barang beserta relasi jenisBarang
+    
+        if ($jenisBarangId) {
+            // Filter barang berdasarkan jenis barang
+            $query->whereHas('jenisBarang', function($q) use ($jenisBarangId) {
+                $q->where('id', $jenisBarangId);
+            });
+        }
+    
+        $all_barangs = $query->paginate($perPage)->appends(request()->except('page')); // Menampilkan barang dengan pagination dan mempertahankan parameter query
+    
+        return view('kelola-barang.index', compact('all_barangs', 'jenis_barangs'));
     }
+    
+    
+      
 
     public function loadAddBarangForm(){
         $jenis_barangs = jenis_barang::all();

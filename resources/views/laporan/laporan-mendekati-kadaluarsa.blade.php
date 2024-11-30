@@ -72,6 +72,9 @@
             </div>
         </div>
     </div>
+    <form method="get" action="{{ route('laporan-mendekati-kadaluarsa-pdf') }}">
+        <button type="submit" class="btn btn-danger">Download PDF</button>
+    </form>
 </div>
 
 <script>
@@ -79,10 +82,18 @@
     $(document).ready(function() {
         $('#perPage').change(function() {
             var perPage = $(this).val();
+            var currentPage = '{{ $barangKadaluarsaMendekati->currentPage() }}'; // Ambil halaman saat ini
+
+            // Buat objek URL baru berdasarkan URL saat ini
             var currentUrl = window.location.href;
             var newUrl = new URL(currentUrl);
-            newUrl.searchParams.set('perPage', perPage); // Set the perPage parameter
-            window.location.href = newUrl.toString(); // Redirect to the updated URL
+
+            // Setel parameter 'perPage' dan pertahankan halaman saat ini
+            newUrl.searchParams.set('perPage', perPage);
+            newUrl.searchParams.set('page', currentPage); // Tetapkan halaman yang aktif
+
+            // Arahkan ulang ke URL yang diperbarui
+            window.location.href = newUrl.toString();
         });
     });
 </script>

@@ -38,6 +38,8 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Barang</th>
+                            <th>No Catalog</th>
+                            <th>Jenis Barang</th>
                             <th>Satuan Stok Barang</th>
                             <th>Stok</th>
                         </tr>
@@ -48,6 +50,8 @@
                                 <tr>
                                     <td>{{ ($barangStokMinimal->currentPage() - 1) * $barangStokMinimal->perPage() + $loop->iteration }}</td>
                                     <td>{{ $barang->nama_barang }}</td>
+                                    <td>{{ $barang->no_catalog }}</td>
+                                    <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
                                     <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
                                     <td>{{ $barang->stok }}</td>
                                 </tr>
@@ -76,6 +80,9 @@
 
         </div>
     </div>
+    <form method="get" action="{{ route('laporan-stok-minimum-pdf') }}">
+        <button type="submit" class="btn btn-danger">Download PDF</button>
+    </form>
 </div>
 
 <script>
@@ -83,12 +90,21 @@
     $(document).ready(function() {
         $('#perPage').change(function() {
             var perPage = $(this).val();
+            var currentPage = '{{ $barangStokMinimal->currentPage() }}'; // Ambil halaman saat ini
+
+            // Buat objek URL baru berdasarkan URL saat ini
             var currentUrl = window.location.href;
             var newUrl = new URL(currentUrl);
-            newUrl.searchParams.set('perPage', perPage); // Set the perPage parameter
-            window.location.href = newUrl.toString(); // Redirect to the updated URL
+
+            // Setel parameter 'perPage' dan pertahankan halaman saat ini
+            newUrl.searchParams.set('perPage', perPage);
+            newUrl.searchParams.set('page', currentPage); // Tetapkan halaman yang aktif
+
+            // Arahkan ulang ke URL yang diperbarui
+            window.location.href = newUrl.toString();
         });
     });
+
 </script>
 
 @endsection

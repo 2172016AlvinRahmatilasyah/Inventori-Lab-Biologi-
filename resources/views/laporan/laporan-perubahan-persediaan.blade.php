@@ -76,8 +76,8 @@
                             <th>Jumlah Diterima</th>
                             <th>Harga</th>
                             <th>Total Harga</th>
-                            <th>Tanggal Ditambah</th>
-                            <th>Tanggal Diupdate</th>
+                            {{-- <th>Tanggal Ditambah</th>
+                            <th>Tanggal Diupdate</th> --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -86,8 +86,8 @@
                                 <tr>
                                     <td>{{ $penerimaan->id }}</td>
                                     <td>{{ $penerimaan->PenerimaanBarang->id ?? 'N/A' }}</td>
-                                    <td>{{ $penerimaan->invoice }}</td>
-                                    <td>{{ $penerimaan->tanggal }}</td>
+                                    <td>{{ $penerimaan->PenerimaanBarang->invoice ?? 'N/A'}}</td>
+                                    <td>{{ $penerimaan->PenerimaanBarang->tanggal?? 'N/A' }}</td>
                                     <td>{{ $penerimaan->PenerimaanBarang->supkonpro->nama ?? 'N/A' }}</td>
                                     <td>{{ $penerimaan->PenerimaanBarang->user->name ?? 'N/A' }}</td>
                                     <td>{{ $penerimaan->PenerimaanBarang->jenispenerimaanbarang->jenis ?? 'N/A' }}</td>
@@ -97,8 +97,8 @@
                                     <td>{{ $penerimaan->jumlah_diterima }}</td>
                                     <td>{{ number_format($penerimaan->harga, 0, ',', '.') ?? 'N/A' }}</td>
                                     <td>{{ number_format($penerimaan->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
-                                    <td>{{ $penerimaan->created_at }}</td>
-                                    <td>{{ $penerimaan->updated_at }}</td>
+                                    {{-- <td>{{ $penerimaan->created_at }}</td>
+                                    <td>{{ $penerimaan->updated_at }}</td> --}}
                                 </tr>
                             @endforeach
                         @else
@@ -130,8 +130,8 @@
                             <th>Jumlah Keluar</th>
                             <th>Harga</th>
                             <th>Total Harga</th>
-                            <th>Tanggal Ditambah</th>
-                            <th>Tanggal Diupdate</th>
+                            {{-- <th>Tanggal Ditambah</th>
+                            <th>Tanggal Diupdate</th> --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -140,8 +140,8 @@
                                 <tr>
                                     <td>{{ $pengeluaran->id }}</td>
                                     <td>{{ $pengeluaran->PengeluaranBarang->id ?? 'N/A' }}</td>
-                                    <td>{{ $pengeluaran->invoice }}</td>
-                                    <td>{{ $pengeluaran->tanggal }}</td>
+                                    <td>{{ $pengeluaran->PengeluaranBarang->invoice ?? 'N/A'}}</td>
+                                    <td>{{ $pengeluaran->PengeluaranBarang->tanggal ?? 'N/A'}}</td>
                                     <td>{{ $pengeluaran->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>
                                     <td>{{ $pengeluaran->PengeluaranBarang->user->name ?? 'N/A' }}</td>
                                     <td>{{ $pengeluaran->PengeluaranBarang->jenispengeluaranbarang->jenis ?? 'N/A' }}</td>
@@ -151,8 +151,8 @@
                                     <td>{{ $pengeluaran->jumlah_keluar }}</td>
                                     <td>{{ number_format($pengeluaran->harga, 0, ',', '.') ?? 'N/A' }}</td>
                                     <td>{{ number_format($pengeluaran->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
-                                    <td>{{ $pengeluaran->created_at }}</td>
-                                    <td>{{ $pengeluaran->updated_at }}</td>
+                                    {{-- <td>{{ $pengeluaran->created_at }}</td>
+                                    <td>{{ $pengeluaran->updated_at }}</td> --}}
                                 </tr>
                             @endforeach
                         @else

@@ -24,31 +24,37 @@ Route::get('/dashboard', [DashboardController::class, 'index', ])
 Route::middleware('auth')->group(function () {
     // Route::get('generate-report', [DashboardController::class, 'generateReport'])
     // ->name('generateReport');
-    
+    //laporan barang masuk
     Route::get('laporan-barang-masuk', [DashboardController::class, 'showBarangMasuk'])
         ->name('laporan-barang-masuk');
     Route::get('laporan-barang-masuk-pdf', [DashboardController::class, 'downloadBarangMasukPdf'])
         ->name('laporan-barang-masuk-pdf');
-    
+    //laporan barang keluar
     Route::get('laporan-barang-keluar', [DashboardController::class, 'showBarangKeluar'])
                 ->name('laporan-barang-keluar');
     Route::get('laporan-barang-keluar-pdf', [DashboardController::class, 'downloadBarangKeluarPdf'])
                 ->name('laporan-barang-keluar-pdf');
-
+    //laporan perubahan persediaan
     Route::get('/laporan-perubahan-persediaan', [DashboardController::class, 
                 'showPerubahanPersediaan'])->name('laporan-perubahan-persediaan');
     Route::get('laporan-perubahan-persediaan-pdf', [DashboardController::class, 
                 'downloadPerubahanPersediaanPdf'])->name('laporan-perubahan-persediaan-pdf');
-
+    //laporan stok minimum
     Route::get('laporan-stok-minimum', [DashboardController::class, 'showBarangStokMinimal'])
                 ->name('laporan-stok-minimum');
-
+    Route::get('laporan-stok-minimum-pdf', [DashboardController::class, 'downloadBarangStokMinimalPdf'])
+        ->name('laporan-stok-minimum-pdf');
+    //laporan mendekati kadaluarsa
     Route::get('laporan-mendekati-kadaluarsa', [DashboardController::class, 
                 'showKadaluarsa'])->name('laporan-mendekati-kadaluarsa');
-                
+    Route::get('laporan-mendekati-kadaluarsa-pdf', [DashboardController::class, 
+                'downloadKadaluarsaPdf'])->name('laporan-mendekati-kadaluarsa-pdf');
+    //laporan total stok
     Route::get('/laporan-total-stok', [DashboardController::class, 'showTotalStok'])
                 ->name('laporan-total-stok');
-
+    Route::get('laporan-total-stok-pdf', [DashboardController::class, 
+                'downloadTotalStokPdf'])->name('laporan-total-stok-pdf');
+    //laporan saldo awal
     Route::get('/laporan-saldo/{type}', [DashboardController::class, 'showSaldo'])->name('laporan-saldo');
     Route::get('/laporan-saldo-awal-pdf/{type}', [DashboardController::class, 
                 'downloadSaldoAwalPdf'])->name('laporan-saldo-awal-pdf');

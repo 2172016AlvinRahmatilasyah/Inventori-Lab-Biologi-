@@ -19,78 +19,65 @@ class DashboardController extends Controller
 
     private function getDateRange(Request $request, $filter = 'current_month')
     {
-        // Mengambil tanggal saat ini
+        // Default values
         $startDate = null;
         $endDate = null;
+        $startMonth = null;
+        $endMonth = null;
+        $startYear = null;
+        $endYear = null;
         $thisYear = Carbon::now()->year;
         $thisMonth = Carbon::now()->month;
 
-        // Inisialisasi tanggal mulai dan akhir berdasarkan filter
-        switch ($filter) {
-            case 'current_month':
-                // Show the current month
-                $startMonth = $thisMonth;
-                $endMonth = $thisMonth;
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
-
-            case 'current_year':
-                // Show the current year
-                $startMonth = 1;  // January
-                $endMonth = 12;   // December
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
-
-            case 'last_30_days':
-                // For the last 30 days (not dependent on year/month)
-                $startDate = Carbon::now()->subDays(30);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_60_days':
-                // For the last 60 days
-                $startDate = Carbon::now()->subDays(60);
-                $endDate = Carbon::now();
-                break;
-
-            case 'last_90_days':
-                // For the last 90 days
-                $startDate = Carbon::now()->subDays(90);
-                $endDate = Carbon::now();
-                break;
-
-            case 'previous_month':
-                // Show the previous month
-                $startMonth = Carbon::now()->subMonth()->month;
-                $endMonth = $startMonth;
-                $startYear = Carbon::now()->subMonth()->year;
-                $endYear = $startYear;
-                break;
-
-            case 'previous_year':
-                // Show the previous year
-                $startMonth = 1; // January
-                $endMonth = 12;  // December
-                $startYear = Carbon::now()->subYear()->year;
-                $endYear = $startYear;
-                break;
-
-            default:
-                // Default filter - current month
-                $startMonth = $thisMonth;
-                $endMonth = $thisMonth;
-                $startYear = $thisYear;
-                $endYear = $thisYear;
-                break;
+        // Handle custom dates filter
+        if ($filter === 'custom_dates') {
+            $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
+            $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
+            $startYear = $startDate->year;
+            $endYear = $endDate->year;
+            $startMonth = $startDate->month;
+            $endMonth = $endDate->month;
+        } else {
+            // Inisialisasi tanggal mulai dan akhir berdasarkan filter lainnya
+            switch ($filter) {
+                case 'current_month':
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    break;
+                case 'current_year':
+                    $startDate = Carbon::now()->startOfYear();
+                    $endDate = Carbon::now()->endOfYear();
+                    break;
+                case 'last_30_days':
+                    $startDate = Carbon::now()->subDays(30);
+                    $endDate = Carbon::now();
+                    break;
+                case 'last_60_days':
+                    $startDate = Carbon::now()->subDays(60);
+                    $endDate = Carbon::now();
+                    break;
+                case 'last_90_days':
+                    $startDate = Carbon::now()->subDays(90);
+                    $endDate = Carbon::now();
+                    break;
+                case 'previous_month':
+                    $startDate = Carbon::now()->subMonth()->startOfMonth();
+                    $endDate = Carbon::now()->subMonth()->endOfMonth();
+                    break;
+                case 'previous_year':
+                    $startDate = Carbon::now()->subYear()->startOfYear();
+                    $endDate = Carbon::now()->subYear()->endOfYear();
+                    break;
+                default:
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    break;
+            }
         }
 
-        // Mengembalikan hasil
-        return compact('startDate', 'endDate', 'thisYear', 'thisMonth', 'startMonth',
-                        'endMonth', 'startYear', 'endYear'
-                      );
+        return compact('startDate', 'endDate', 'thisYear', 'thisMonth', 'startMonth', 'endMonth', 'startYear', 'endYear');
     }
+
 
     public function index(Request $request)
     {
@@ -100,20 +87,16 @@ class DashboardController extends Controller
         $dates = $this->getDateRange($request, $filter);
         $startDate = $dates['startDate'];
         $endDate = $dates['endDate'];
-        $startYear = $dates['startYear'];
-        $endYear = $dates['endYear'];
-        $startMonth = $dates['startMonth'];
-        $endMonth = $dates['endMonth'];
 
-        // Fetch data based on the selected filter
-        $barangMasuk = PenerimaanBarang::whereBetween('created_at', [$startDate, $endDate])->count();
-        $barangKeluar = PengeluaranBarang::whereBetween('created_at', [$startDate, $endDate])->count();
+        // Fetch data berdasarkan rentang tanggal yang dipilih
+        $barangMasuk = PenerimaanBarang::whereBetween('tanggal', [$startDate, $endDate])->count();
+        $barangKeluar = PengeluaranBarang::whereBetween('tanggal', [$startDate, $endDate])->count();
         $totalPerubahanPersediaan = $barangMasuk + $barangKeluar;
         $barangStokMinimal = Barang::where('stok', '<=', 20)->get();
         $twoMonthsLater = Carbon::now()->addMonths(2);
         $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
         $totalStok = Barang::sum('stok');
-        
+
         // If the filter is based on a date range (e.g., 'last_30_days'), use that range
         if (isset($startDate) && isset($endDate)) {
             $allSaldoAwals = SaldoAwal::with('barang')
@@ -122,38 +105,42 @@ class DashboardController extends Controller
         } else {
             // Otherwise, filter by year and month
             $allSaldoAwals = SaldoAwal::with('barang')
-                ->where('tahun', '>=', $startYear)
-                ->where('tahun', '<=', $endYear)
-                ->where('bulan', '>=', $startMonth)
-                ->where('bulan', '<=', $endMonth)
+                ->where('tahun', '>=', $dates['startYear'])
+                ->where('tahun', '<=', $dates['endYear'])
+                ->where('bulan', '>=', $dates['startMonth'])
+                ->where('bulan', '<=', $dates['endMonth'])
                 ->get();
         }
+
+        // Menghitung total saldo
         $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
         $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
         $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
 
         // Prepare data for the report
         $data = [
-             'title' => 'Laporan',
-             'date' => Carbon::now()->toFormattedDateString(),
-             'filter' => $filter,
-             'user' => Auth::user()->name,
-             'barangMasuk' => $barangMasuk,
-             'barangKeluar' => $barangKeluar,
-             'totalStok' => $totalStok,
-             'barangList' => $this->getBarangList($barangMasuk, $barangKeluar),
-             'barangStokMinimal' => $barangStokMinimal,
-             'barangKadaluarsaMendekati' => $barangKadaluarsaMendekati,
-             'totalSaldoAwal' => $totalSaldoAwal,
-             'totalSaldoTerima' => $totalSaldoTerima,
-             'totalSaldoKeluar' => $totalSaldoKeluar,
-            //  'all_saldo_awals' => $saldoAwal,
-             'totalPerubahanPersediaan'=>$totalPerubahanPersediaan
+            'title' => 'Laporan',
+            'date' => Carbon::now()->toFormattedDateString(),
+            'filter' => $filter,
+            'user' => Auth::user()->name,
+            'barangMasuk' => $barangMasuk,
+            'barangKeluar' => $barangKeluar,
+            'totalStok' => $totalStok,
+            'barangList' => $this->getBarangList($barangMasuk, $barangKeluar),
+            'barangStokMinimal' => $barangStokMinimal,
+            'barangKadaluarsaMendekati' => $barangKadaluarsaMendekati,
+            'totalSaldoAwal' => $totalSaldoAwal,
+            'totalSaldoTerima' => $totalSaldoTerima,
+            'totalSaldoKeluar' => $totalSaldoKeluar,
+            'totalPerubahanPersediaan' => $totalPerubahanPersediaan,
+            'allSaldoAwals' => $allSaldoAwals, // Kirim data yang sudah dimodifikasi
         ];
 
-        // Otherwise, return the view
+        // Return the view
         return view('dashboard', $data);
     }
+
+
 
 
     public function showBarangMasuk(Request $request)
@@ -404,27 +391,64 @@ class DashboardController extends Controller
 
     public function showBarangStokMinimal(Request $request)
     {
-        // Get the page size from the request, default to 25 if not provided
         $perPage = $request->input('perPage', 25); 
-    
-        // Query with pagination
+
         $barangStokMinimal = Barang::with('jenisBarang')
-            ->where('stok', '<=', 10) // Example condition, adjust as needed
-            ->paginate($perPage); // Paginate results
-    
+            ->where('stok', '<=', 10) 
+            ->paginate($perPage)
+            ->appends(request()->except('page'));
+
         return view('laporan.laporan-stok-minimum', compact('barangStokMinimal'));
     }
-    
+
+    public function downloadBarangStokMinimalPdf(Request $request)
+    {
+        $barangStokMinimal = Barang::with('jenisBarang')
+            ->where('stok', '<=', 10) // Menyaring barang yang stoknya kurang dari atau sama dengan 10
+            ->get(); // Mengambil semua data tanpa pagination
+
+        // Siapkan data untuk laporan
+        $data = [
+            'date' => Carbon::now()->toFormattedDateString(),
+            'user' => Auth::user()->name,
+            'barangStokMinimal' => $barangStokMinimal
+        ];
+
+        // Generate PDF dengan view 'laporan-stok-minimum-pdf'
+        $pdf = PDF::loadView('laporan.laporan-stok-minimum-pdf', $data);
+        
+        // Download PDF dengan nama file yang dinamis
+        return $pdf->download('laporan-stok-minimum-' . Carbon::now()->format('Y-m-d') . '.pdf');
+    }
 
     public function showKadaluarsa(Request $request)
     {
-        $perPage = $request->input('perPage', 25); // Default to 25 if not specified
+        $perPage = $request->input('perPage', 25); 
         $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', Carbon::now()->addDays(30)) // Example filter for approaching expiry
-            ->paginate($perPage);
-
+            ->paginate($perPage)
+            ->appends(request()->except('page'));
         return view('laporan.laporan-mendekati-kadaluarsa', compact('barangKadaluarsaMendekati'));
     }
 
+    public function downloadKadaluarsaPdf(Request $request)
+    {
+    
+        $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', Carbon::now()->addDays(30)) // Example filter for approaching expiry
+            ->get(); // Mengambil semua data tanpa pagination
+
+        // Siapkan data untuk laporan
+        $data = [
+            'date' => Carbon::now()->toFormattedDateString(),
+            'user' => Auth::user()->name,
+            'barangKadaluarsaMendekati' => $barangKadaluarsaMendekati
+        ];
+
+        // Generate PDF dengan view 'laporan-stok-minimum-pdf'
+        $pdf = PDF::loadView('laporan.laporan-mendekati-kadaluarsa-pdf', $data);
+        
+        // Download PDF dengan nama file yang dinamis
+        return $pdf->download('laporan-mendekati-kadaluarsa-' . Carbon::now()->format('Y-m-d') . '.pdf');
+    }
 
     public function showTotalStok(Request $request)
     {
@@ -433,13 +457,43 @@ class DashboardController extends Controller
     
         // Paginate the data based on the perPage value
         $allBarangs = Barang::with('jenisBarang') // Assuming "jenisBarang" is a relation on Barang model
-            ->paginate($perPage);
-    
+            ->paginate($perPage)
+            ->appends(request()->except('page'));
         // Get the total stock of all items
         $totalStokSemuaBarang = Barang::sum('stok'); // Sum of the 'stok' field from all barang
     
         return view('laporan.laporan-total-stok', compact('allBarangs', 'totalStokSemuaBarang'));
     }
+
+    public function downloadTotalStokPdf(Request $request)
+    {
+        // Mendapatkan nilai perPage dari request, default 25 jika tidak ada
+        $perPage = $request->input('perPage', 25);
+
+        // Mengambil data barang sesuai dengan jumlah per halaman
+        $allBarangs = Barang::with('jenisBarang')
+            ->paginate($perPage)
+            ->appends(request()->except('page', 'perPage')); // Menjaga parameter lainnya
+
+        // Mendapatkan total stok seluruh barang
+        $totalStokSemuaBarang = Barang::sum('stok');
+
+        // Siapkan data untuk laporan
+        $data = [
+            'date' => Carbon::now()->toFormattedDateString(),
+            'user' => Auth::user()->name,
+            'allBarangs' => $allBarangs,
+            'totalStokSemuaBarang' => $totalStokSemuaBarang,
+        ];
+
+        // Generate PDF dengan view 'laporan-total-stok-pdf'
+        $pdf = PDF::loadView('laporan.laporan-total-stok-pdf', $data);
+        
+        // Download PDF dengan nama file yang dinamis
+        return $pdf->download('laporan-total-stok-' . Carbon::now()->format('Y-m-d') . '.pdf');
+    }
+
+
 
     public function showSaldo($type, Request $request)
     {

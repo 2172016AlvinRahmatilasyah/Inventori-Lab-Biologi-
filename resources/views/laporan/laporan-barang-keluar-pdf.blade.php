@@ -51,14 +51,15 @@
     
     <p>Tanggal laporan dibuat: {{ $date }}</p>
     <p>Pembuat: {{ $user }}</p>
+    <p>Berdasarkan: {{ $filter }}</p>
     <br>
     
     <h3>Data Barang Keluar</h3>
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Id detail</th>
                     <th>Id master</th>
+                    <th>Id detail</th>
                     <th>Invoice</th>
                     <th>Tanggal</th>
                     <th>SupKonProy</th>
@@ -78,8 +79,8 @@
                 @if(isset($barangKeluar) && count($barangKeluar) > 0)
                 @foreach ($barangKeluar as $item)
                         <tr>
-                            <td>{{ $item->id }}</td>
                             <td>{{ $item->PengeluaranBarang->id ?? 'N/A' }}</td>
+                            <td>{{ $item->id }}</td>
                             <td>{{ $item->PengeluaranBarang->invoice ?? 'N/A'}}</td>
                             <td>{{ $item->PengeluaranBarang->tanggal ?? 'N/A'}}</td>
                             <td>{{ $item->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>

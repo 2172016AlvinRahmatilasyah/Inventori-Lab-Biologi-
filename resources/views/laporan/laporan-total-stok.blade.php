@@ -39,8 +39,8 @@
                             <th>Id</th>
                             <th>Nama Barang</th>
                             <th>Jenis Barang</th>
-                            <th>Stok</th>
                             <th>Satuan Stok</th>
+                            <th>Stok</th>
                             <th>Kadaluarsa</th>
                             <th>Lokasi</th>
                             {{-- <th>Tanggal Ditambah</th>
@@ -54,8 +54,8 @@
                                     <td>{{ $loop->iteration + (($allBarangs->currentPage() - 1) * $allBarangs->perPage()) }}</td>
                                     <td>{{ $barang->nama_barang }}</td>
                                     <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
-                                    <td>{{ $barang->stok }}</td>
                                     <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
+                                    <td>{{ $barang->stok }}</td>
                                     <td>{{ $barang->kadaluarsa }}</td>
                                     <td>{{ $barang->lokasi }}</td>
                                     {{-- <td>{{ $barang->created_at }}</td>
@@ -89,17 +89,29 @@
             </div>
         </div>
     </div>
+    <form method="get" action="{{ route('laporan-total-stok-pdf') }}">
+        <input type="hidden" name="perPage" value="{{ request('perPage', 25) }}">
+        <button type="submit" class="btn btn-danger">Download PDF</button>
+    </form>
+    
 </div>
 
 <script>
-    // JavaScript to handle changing items per page
     $(document).ready(function() {
         $('#perPage').change(function() {
             var perPage = $(this).val();
+            var currentPage = '{{ $allBarangs->currentPage() }}'; // Ambil halaman saat ini
+
+            // Buat objek URL baru berdasarkan URL saat ini
             var currentUrl = window.location.href;
             var newUrl = new URL(currentUrl);
-            newUrl.searchParams.set('perPage', perPage); // Set the perPage parameter
-            window.location.href = newUrl.toString(); // Redirect to the updated URL
+
+            // Setel parameter 'perPage' dan pertahankan halaman saat ini
+            newUrl.searchParams.set('perPage', perPage);
+            newUrl.searchParams.set('page', currentPage); // Tetapkan halaman yang aktif
+
+            // Arahkan ulang ke URL yang diperbarui
+            window.location.href = newUrl.toString();
         });
     });
 </script>
