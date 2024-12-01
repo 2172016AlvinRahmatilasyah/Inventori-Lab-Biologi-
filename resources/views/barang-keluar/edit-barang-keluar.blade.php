@@ -20,12 +20,31 @@
             <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
         @endif
         <div class="card-body">
-            <form action="{{ route('EditPengeluaranBarang', ['id' => $masterPengeluaran->id]) }}" method="post">
-
+            <form action="{{ route('EditPengeluaranBarang', ['id' => $detail_pengeluaran->id]) }}" method="post">
                 @csrf
                 @method('PUT') 
                 <input type="hidden" name="masterPengeluaran_id" value="{{ $masterPengeluaran->id }}">
+                <input type="hidden" name="detail_pengeluaran_id" value="{{ $detail_pengeluaran->id }}">
                 
+                <div class="mb-3">
+                    <label for="tanggal" class="form-label">Tanggal Pengeluaran</label>
+                    <input type="date" name="tanggal" id="tanggal" class="form-control" 
+                        value="{{ $masterPengeluaran->tanggal }}">
+                    @error('tanggal')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+                
+                <!-- Input Invoice -->
+                <div class="mb-3">
+                    <label for="invoice" class="form-label">Invoice</label>
+                    <input type="text" name="invoice" id="invoice" class="form-control" readonly
+                    value="{{ $masterPengeluaran->invoice }}">
+                    @error('invoice')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
                 <div class="mb-3">
                     <label for="jenis_id" class="form-label">Jenis Barang Keluar</label>
                     <select name="jenis_id" class="form-control select2" id="jenis_id">
@@ -68,14 +87,14 @@
                     @enderror
                 </div>
 
-                <input type="hidden" name="barang_id" value="{{ optional($masterPengeluaran->detailpengeluaranbarang->first())->barang_id }}">
+                <input type="hidden" name="barang_id" value="{{ optional($detail_pengeluaran)->barang_id }}">
                 <div class="mb-3">
                     <label for="barang_id" class="form-label">Nama Barang</label>
                     <select name="barang_id" class="form-control select2" id="barang_id" disabled>
                         <option value="">Pilih Nama Barang</option>
                         @foreach ($all_barangs as $barang)
                             <option value="{{ $barang->id }}" 
-                                {{ optional($masterPengeluaran->detailpengeluaranbarang->first())->barang_id == $barang->id ? 'selected' : '' }}>
+                                {{ $barang->id == optional($detail_pengeluaran)->barang_id ? 'selected' : '' }}>
                                 {{ $barang->nama_barang }} (ID: {{ $barang->id }})
                             </option>
                         @endforeach
@@ -85,13 +104,10 @@
                     @enderror
                 </div>
                 
-                
-                
-                
                 <div class="mb-3">
                     <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
                     <input type="number" name="jumlah_keluar" id="jumlah_keluar" class="form-control" 
-                           value="{{ $masterPengeluaran->detailpengeluaranbarang->first()->jumlah_keluar ?? '' }}"
+                           value="{{ $detail_pengeluaran->jumlah_keluar }}"
                            placeholder="Enter jumlah" step="any">
                     @error('jumlah_keluar')
                         <span class="text-danger">{{ $message }}</span>

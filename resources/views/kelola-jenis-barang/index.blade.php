@@ -47,7 +47,7 @@
         
             <div class="mb-3">
                 <form action="{{ route('jenis-barangs.search') }}" method="GET" class="d-flex mt-3">
-                    <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
+                    <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here" value="{{ request()->get('query') }}">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
                     <a href="{{ route('kelola-jenis-barang') }}" class="btn btn-secondary ml-3 ">Reset</a>
                 </form>
@@ -78,7 +78,7 @@
                                         {{-- <td>{{ $jenisbarang->created_at }}</td>
                                         <td>{{ $jenisbarang->updated_at }}</td> --}}
                                         <td><a href="/edit-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
-                                        {{-- <td><a href="/delete-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
+                                        <td><a href="/delete-jenis-barang/{{ $jenisbarang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
                                         <td><a href="{{ route('detail-jenis-barang', $jenisbarang->id) }}" class="btn btn-info btn-sm">Detail</a></td>
                                     </tr>
                                     </tr>

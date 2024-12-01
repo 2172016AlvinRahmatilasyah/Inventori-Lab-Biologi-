@@ -17,35 +17,94 @@ use Illuminate\Support\Facades\DB;
 
 class PengeluaranBarangController extends Controller
 {
-    public function loadAllPengeluaranBarang(){
-        $all_detail_pengeluarans = detailPengeluaranBarang::all();
-        $all_master_pengeluarans = PengeluaranBarang::all();
+    // public function loadAllPengeluaranBarang(){
+    //     $all_detail_pengeluarans = detailPengeluaranBarang::orderBy('created_at', 'desc')->get();
+    //     $all_master_pengeluarans = PengeluaranBarang::orderBy('created_at', 'desc')->get();
+    //     $all_supkonpros = supkonpro::all();
+    //     $all_users = User::all();
+    //     $all_jenis_pengeluarans = JenisPengeluaran::all();
+        
+    //     return view('barang-keluar.index',compact('all_master_pengeluarans', 'all_supkonpros', 
+    //                 'all_detail_pengeluarans','all_users', 'all_jenis_pengeluarans'));
+    // }
+    
+    public function loadAllPengeluaranBarang(Request $request)
+    {
+        // Ambil jumlah item per halaman dari request, default 5
+        $perPage = $request->input('perPage', 5);
+        
+        // Mengambil data berdasarkan pagination
+        $all_detail_pengeluarans = detailPengeluaranBarang::orderBy('created_at', 'desc')
+            ->paginate($perPage)  // Apply pagination based on 'perPage'
+            ->appends(request()->except('page')); // Maintain other query parameters like search or filters
+
+        // Ambil data untuk dropdown
         $all_supkonpros = supkonpro::all();
         $all_users = User::all();
         $all_jenis_pengeluarans = JenisPengeluaran::all();
-        
+        $all_master_pengeluarans = PengeluaranBarang::all();
+
+        // Return view dengan data yang sudah dipaginasi
         return view('barang-keluar.index',compact('all_master_pengeluarans', 'all_supkonpros', 
-                    'all_detail_pengeluarans','all_users', 'all_jenis_pengeluarans'));
+                     'all_detail_pengeluarans','all_users', 'all_jenis_pengeluarans'));
     }
-    
-    public function MasterBarangKeluarSearch(Request $request)
+
+    // public function MasterBarangKeluarSearch(Request $request)
+    // {
+    //     $query = $request->input('query');
+
+    //     $all_master_pengeluarans = PengeluaranBarang::whereHas('supkonpro', function ($q) use ($query) {
+    //             $q->where('nama', 'like', "%$query%");
+    //         })
+    //         ->orWhereHas('user', function ($q) use ($query) {
+    //             $q->where('name', 'like', "%$query%");
+    //         })
+    //         ->orWhereHas('jenisPengeluaranBarang', function ($q) use ($query) {
+    //             $q->where('jenis', 'like', "%$query%");
+    //         })
+    //         ->orWhere('nama_pengambil', 'like', "%$query%")
+    //         ->orWhere('keterangan', 'like', "%$query%")
+    //         ->get();
+
+    //     return view('barang-keluar.index', compact('all_master_pengeluarans'));
+    // }
+
+    public function BarangKeluarSearch(Request $request)
     {
+        // Ambil query pencarian dari input
         $query = $request->input('query');
+        
+        // Menentukan jumlah item per halaman (pagination)
+        $perPage = $request->input('perPage', 5);
 
-        $all_master_pengeluarans = PengeluaranBarang::whereHas('supkonpro', function ($q) use ($query) {
-                $q->where('nama', 'like', "%$query%");
-            })
-            ->orWhereHas('user', function ($q) use ($query) {
-                $q->where('name', 'like', "%$query%");
-            })
-            ->orWhereHas('jenisPengeluaranBarang', function ($q) use ($query) {
-                $q->where('jenis', 'like', "%$query%");
-            })
-            ->orWhere('nama_pengambil', 'like', "%$query%")
-            ->orWhere('keterangan', 'like', "%$query%")
-            ->get();
+        // Lakukan pencarian berdasarkan berbagai field yang diinginkan
+        $all_detail_pengeluarans = detailPengeluaranBarang::whereHas('pengeluaranBarang', function ($q) use ($query) {
+            // Pencarian pada tabel master_penerimaan_barangs
+            $q->where('invoice', 'like', "%$query%")
+                ->orWhere('tanggal', 'like', "%$query%")
+                ->orWhere('keterangan', 'like', "%$query%")
+                ->orWhereHas('supkonpro', function ($q) use ($query) {
+                    $q->where('nama', 'like', "%$query%");  // Nama supkonpro
+                })
+                ->orWhereHas('user', function ($q) use ($query) {
+                    $q->where('name', 'like', "%$query%");  // Nama user
+                })
+                ->orWhereHas('jenispengeluaranbarang', function ($q) use ($query) {
+                    $q->where('jenis', 'like', "%$query%"); 
+                })
+                ->orWhere('nama_pengambil', 'like', "%$query%"); 
+        })
+        ->orWhereHas('barang', function ($q) use ($query) {
+            $q->where('nama_barang', 'like', "%$query%");  // Pencarian di tabel barang
+        })
+        
+        ->orWhere('jumlah_keluar', 'like', "%$query%")
+        ->orWhere('harga', 'like', "%$query%")
+        ->orWhere('total_harga', 'like', "%$query%")
+        ->paginate($perPage)  // Menggunakan paginate untuk hasil pencarian
+        ->appends(request()->except('page')); // Menjaga parameter lain seperti search atau filters
 
-        return view('barang-keluar.index', compact('all_master_pengeluarans'));
+        return view('barang-keluar.index', compact('all_detail_pengeluarans'));
     }
 
 
@@ -157,14 +216,14 @@ class PengeluaranBarangController extends Controller
     }
 
     
-        public function generateInvoicePengeluaran(Request $request)
+    public function generateInvoicePengeluaran(Request $request)
         {
             $tanggal = $request->tanggal;
 
             // Ambil tanggal dalam format Y-m-d
             $date = \Carbon\Carbon::parse($tanggal);
 
-            $count = PengeluaranBarang::whereDate('created_at', $date->toDateString())->count();
+            $count = PengeluaranBarang::whereDate('tanggal', $date->toDateString())->count();
 
             // Nomor urut dimulai dari 1
             $noUrut2 = str_pad($count + 1, 2, '0', STR_PAD_LEFT);  // Contoh: 01, 02, ...
@@ -172,43 +231,72 @@ class PengeluaranBarangController extends Controller
             return response()->json(['noUrut' => $noUrut2]);
         }
 
+    // public function deletePengeluaranBarang($id)
+    // {
+    //     try {
+    //         // Start a transaction to ensure data consistency
+    //         DB::beginTransaction();
+            
+    //         // Retrieve all associated detail records
+    //         $details = DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $id)->get();
+
+    //         // Iterate over each detail to adjust the stock
+    //         foreach ($details as $detail) {
+    //             $barang = Barang::find($detail->barang_id);
+
+    //             if ($barang) {
+    //                 // Increase the stock back based on the jumlah_keluar
+    //                 $barang->stok += $detail->jumlah_keluar;
+    //                 $barang->save();
+    //             }
+    //         }
+
+    //         // Delete the detail records associated with this master record
+    //         DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $id)->delete();
+
+    //         // Delete the master PengeluaranBarang record
+    //         PengeluaranBarang::where('id', $id)->delete();
+
+    //         // Commit the transaction
+    //         DB::commit();
+            
+    //         return redirect('/master-barang-keluar')->with('success', 'Deleted successfully!');
+    //     } catch (\Exception $e) {
+    //         // Rollback the transaction on failure
+    //         DB::rollBack();
+    //         return redirect('/master-barang-keluar')->with('fail', $e->getMessage());
+    //     }
+    // }
+
     public function deletePengeluaranBarang($id)
     {
         try {
-            // Start a transaction to ensure data consistency
+            // Begin a transaction to ensure data consistency
             DB::beginTransaction();
-            
-            // Retrieve all associated detail records
-            $details = DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $id)->get();
 
-            // Iterate over each detail to adjust the stock
-            foreach ($details as $detail) {
-                $barang = Barang::find($detail->barang_id);
+            // Find the detail penerimaan barang record
+            $detail = DetailPengeluaranBarang::findOrFail($id);
 
-                if ($barang) {
-                    // Increase the stock back based on the jumlah_keluar
-                    $barang->stok += $detail->jumlah_keluar;
-                    $barang->save();
-                }
+            // Adjust the stock of the corresponding barang
+            $barang = Barang::find($detail->barang_id);
+            if ($barang) {
+                $barang->stok += $detail->jumlah_keluar;  // Decrease the stock
+                $barang->save();  // Save updated stock
             }
 
-            // Delete the detail records associated with this master record
-            DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $id)->delete();
-
-            // Delete the master PengeluaranBarang record
-            PengeluaranBarang::where('id', $id)->delete();
+            // Delete the detail record
+            $detail->delete();
 
             // Commit the transaction
             DB::commit();
-            
-            return redirect('/master-barang-keluar')->with('success', 'Deleted successfully!');
+
+            return redirect('/master-barang-keluar')->with('success', 'Detail barang berhasil dihapus.');
         } catch (\Exception $e) {
             // Rollback the transaction on failure
             DB::rollBack();
-            return redirect('/master-barang-keluar')->with('fail', $e->getMessage());
+            return redirect('/master-barang-keluar')->with('fail', 'Gagal menghapus detail barang: ' . $e->getMessage());
         }
     }
-
 
     public function detailPengeluaranBarang($id)
     {
@@ -317,13 +405,13 @@ class PengeluaranBarangController extends Controller
 
     public function loadEditBarangKeluarForm($id)
     {
-        $masterPengeluaran = PengeluaranBarang::with('detailpengeluaranbarang')->findOrFail($id);
+        $detail_pengeluaran = DetailPengeluaranBarang::findOrFail($id);
+        $masterPengeluaran = $detail_pengeluaran->pengeluaranBarang;
         $all_supkonpros = supkonpro::all();
         $all_users = User::all();
         $all_jenis_pengeluarans = JenisPengeluaran::all();
         $user = Auth::user(); 
         $all_barangs = barang::all();
-        $detail_pengeluaran = DetailPengeluaranBarang::all();
         
         return view('barang-keluar.edit-barang-keluar', compact(
             'masterPengeluaran', 'all_supkonpros', 'all_users', 'all_jenis_pengeluarans', 'user',
@@ -335,6 +423,9 @@ class PengeluaranBarangController extends Controller
     {   
         $request->validate([
             'masterPengeluaran_id' => 'required|exists:master_pengeluaran_barangs,id',
+            'detail_pengeluaran_id' => 'required|exists:detail_pengeluaran_barangs,id',
+            'tanggal' => 'required|exists:master_pengeluaran_barangs,tanggal',
+            'invoice' => 'required|exists:master_pengeluaran_barangs,invoice',
             'jenis_id' => 'required|exists:jenis_pengeluaran_barangs,id',
             'supkonpro_id' => 'required|exists:supkonpros,id',
             'nama_pengambil' => 'required|string|max:255',
@@ -350,21 +441,21 @@ class PengeluaranBarangController extends Controller
 
         try {
             // Ambil data detail pengeluaran lama
-            $detailPengeluaranBarang = DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $request->masterPengeluaran_id)
-                ->where('barang_id', $request->barang_id)
-                ->firstOrFail();
+            $detailPengeluaranBarang = DetailPengeluaranBarang::findOrFail($request->detail_pengeluaran_id);
 
             // Hitung selisih jumlah keluar
             $selisihJumlah = $request->jumlah_keluar - $detailPengeluaranBarang->jumlah_keluar;
 
             // Update pengeluaran master
-            PengeluaranBarang::where('id', $request->masterPengeluaran_id)->update([
+            PengeluaranBarang::where('id', $detailPengeluaranBarang->master_pengeluaran_barang_id)->update([
+                'tanggal' => $request->tanggal,
+                'invoice' => $request->invoice,
                 'jenis_id' => $request->jenis_id,
                 'supkonpro_id' => $request->supkonpro_id,
                 'nama_pengambil' => $request->nama_pengambil,
                 'keterangan' => $request->keterangan,
             ]);
-
+           
             // Update detail pengeluaran barang
             $detailPengeluaranBarang->update([
                 'jumlah_keluar' => $request->jumlah_keluar,
@@ -379,7 +470,7 @@ class PengeluaranBarangController extends Controller
 
             return redirect('/master-barang-keluar/')->with('success', 'Edit Successfully');
         } catch (\Exception $e) {
-            return redirect('/edit-pengeluaran-barang/' . $request->masterPengeluaran_id)->with('fail', $e->getMessage());
+            return redirect('/edit-pengeluaran-barang/' . $request->detail_pengeluaran_id)->with('fail', $e->getMessage());
         }
     }
 

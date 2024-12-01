@@ -22,10 +22,6 @@ class DashboardController extends Controller
         // Default values
         $startDate = null;
         $endDate = null;
-        $startMonth = null;
-        $endMonth = null;
-        $startYear = null;
-        $endYear = null;
         $thisYear = Carbon::now()->year;
         $thisMonth = Carbon::now()->month;
 
@@ -33,12 +29,8 @@ class DashboardController extends Controller
         if ($filter === 'custom_dates') {
             $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
             $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
-            $startYear = $startDate->year;
-            $endYear = $endDate->year;
-            $startMonth = $startDate->month;
-            $endMonth = $endDate->month;
         } else {
-            // Inisialisasi tanggal mulai dan akhir berdasarkan filter lainnya
+            // Initialize start and end dates based on other filters
             switch ($filter) {
                 case 'current_month':
                     $startDate = Carbon::now()->startOfMonth();
@@ -47,6 +39,10 @@ class DashboardController extends Controller
                 case 'current_year':
                     $startDate = Carbon::now()->startOfYear();
                     $endDate = Carbon::now()->endOfYear();
+                    break;
+                case 'year_to_date':
+                    $startDate = Carbon::now()->startOfYear();
+                    $endDate = Carbon::now();
                     break;
                 case 'last_30_days':
                     $startDate = Carbon::now()->subDays(30);
@@ -68,6 +64,14 @@ class DashboardController extends Controller
                     $startDate = Carbon::now()->subYear()->startOfYear();
                     $endDate = Carbon::now()->subYear()->endOfYear();
                     break;
+                case 'last_12_months':
+                    $startDate = Carbon::now()->subMonths(12)->startOfMonth();
+                    $endDate = Carbon::now();
+                    break;
+                case 'month_to_date':
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now();
+                    break;
                 default:
                     $startDate = Carbon::now()->startOfMonth();
                     $endDate = Carbon::now()->endOfMonth();
@@ -75,9 +79,8 @@ class DashboardController extends Controller
             }
         }
 
-        return compact('startDate', 'endDate', 'thisYear', 'thisMonth', 'startMonth', 'endMonth', 'startYear', 'endYear');
+        return compact('startDate', 'endDate', 'thisYear', 'thisMonth');
     }
-
 
     public function index(Request $request)
     {
@@ -88,36 +91,28 @@ class DashboardController extends Controller
         $startDate = $dates['startDate'];
         $endDate = $dates['endDate'];
 
-        // Fetch data berdasarkan rentang tanggal yang dipilih
+        //Fetch data berdasarkan rentang tanggal yang dipilih
         $barangMasuk = PenerimaanBarang::whereBetween('tanggal', [$startDate, $endDate])->count();
         $barangKeluar = PengeluaranBarang::whereBetween('tanggal', [$startDate, $endDate])->count();
         $totalPerubahanPersediaan = $barangMasuk + $barangKeluar;
+      
+        // Mengambil data stok minimal dan kadaluarsa
         $barangStokMinimal = Barang::where('stok', '<=', 20)->get();
         $twoMonthsLater = Carbon::now()->addMonths(2);
         $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
         $totalStok = Barang::sum('stok');
 
-        // If the filter is based on a date range (e.g., 'last_30_days'), use that range
-        if (isset($startDate) && isset($endDate)) {
-            $allSaldoAwals = SaldoAwal::with('barang')
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->get();
-        } else {
-            // Otherwise, filter by year and month
-            $allSaldoAwals = SaldoAwal::with('barang')
-                ->where('tahun', '>=', $dates['startYear'])
-                ->where('tahun', '<=', $dates['endYear'])
-                ->where('bulan', '>=', $dates['startMonth'])
-                ->where('bulan', '<=', $dates['endMonth'])
-                ->get();
-        }
+        // Mengambil data saldo awal
+        $allSaldoAwals = SaldoAwal::with('barang')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
 
         // Menghitung total saldo
         $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
         $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
         $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
 
-        // Prepare data for the report
+        // Prepare data untuk laporan
         $data = [
             'title' => 'Laporan',
             'date' => Carbon::now()->toFormattedDateString(),
@@ -140,9 +135,6 @@ class DashboardController extends Controller
         return view('dashboard', $data);
     }
 
-
-
-
     public function showBarangMasuk(Request $request)
     {
         // Mengambil filter dari request
@@ -156,6 +148,7 @@ class DashboardController extends Controller
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangMasuk = DetailPenerimaanBarang::with('barang')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc') 
             ->get();
         $all_master_penerimaans = PenerimaanBarang::with('barang')
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -187,6 +180,7 @@ class DashboardController extends Controller
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangMasuk = DetailPenerimaanBarang::with('barang')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc') 
             ->get();
 
         // Siapkan data untuk laporan
@@ -219,6 +213,7 @@ class DashboardController extends Controller
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangKeluar = DetailPengeluaranBarang::with('barang')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc') 
             ->get();
 
         // Siapkan data untuk laporan
@@ -245,6 +240,7 @@ class DashboardController extends Controller
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangKeluar = DetailPengeluaranBarang::with('barang')
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc') 
             ->get();
 
         // Siapkan data untuk laporan
@@ -290,24 +286,6 @@ class DashboardController extends Controller
         })->filter(); // Filter null values from the result
     }
 
-    public function showBarangKeluarBulanIni()
-    {
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-
-        $detailPengeluaran = DetailPengeluaranBarang::with([
-            'PengeluaranBarang.jenisPengeluaranBarang',
-            'PengeluaranBarang.user',
-            'PengeluaranBarang.supkonpro',
-            'barang'
-        ])
-        ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-        ->get();
-
-
-        return view('laporan.laporan-barang-keluar', compact('detailPengeluaran'));
-    }
-
     public function showPerubahanPersediaan(Request $request)
     {
        // Mengambil filter dari request
@@ -326,6 +304,7 @@ class DashboardController extends Controller
             'barang'
         ])
         ->whereBetween('created_at', [$startDate, $endDate])
+        ->orderBy('created_at', 'desc') 
         ->get();
 
         $detailPengeluaran = DetailPengeluaranBarang::with([
@@ -335,6 +314,7 @@ class DashboardController extends Controller
             'barang'
         ])
         ->whereBetween('created_at', [$startDate, $endDate])
+        ->orderBy('created_at', 'desc') 
         ->get();
 
         // Return to the view

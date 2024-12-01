@@ -63,8 +63,8 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Id detail</th>
                             <th>Id master</th>
+                            <th>Id detail</th>
                             <th>Invoice</th>
                             <th>Tanggal</th>
                             <th>SupKonProy</th>
@@ -84,8 +84,8 @@
                         @if(isset($detailPenerimaan) && count($detailPenerimaan) > 0)
                             @foreach ($detailPenerimaan as $penerimaan)
                                 <tr>
-                                    <td>{{ $penerimaan->id }}</td>
                                     <td>{{ $penerimaan->PenerimaanBarang->id ?? 'N/A' }}</td>
+                                    <td>{{ $penerimaan->id }}</td>
                                     <td>{{ $penerimaan->PenerimaanBarang->invoice ?? 'N/A'}}</td>
                                     <td>{{ $penerimaan->PenerimaanBarang->tanggal?? 'N/A' }}</td>
                                     <td>{{ $penerimaan->PenerimaanBarang->supkonpro->nama ?? 'N/A' }}</td>
@@ -117,8 +117,8 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Id detail</th>
                             <th>Id master</th>
+                            <th>Id detail</th>
                             <th>Invoice</th>
                             <th>Tanggal</th>
                             <th>SupKonProy</th>
@@ -138,8 +138,8 @@
                         @if(isset($detailPengeluaran) && count($detailPengeluaran) > 0)
                             @foreach ($detailPengeluaran as $pengeluaran)
                                 <tr>
-                                    <td>{{ $pengeluaran->id }}</td>
                                     <td>{{ $pengeluaran->PengeluaranBarang->id ?? 'N/A' }}</td>
+                                    <td>{{ $pengeluaran->id }}</td>
                                     <td>{{ $pengeluaran->PengeluaranBarang->invoice ?? 'N/A'}}</td>
                                     <td>{{ $pengeluaran->PengeluaranBarang->tanggal ?? 'N/A'}}</td>
                                     <td>{{ $pengeluaran->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>

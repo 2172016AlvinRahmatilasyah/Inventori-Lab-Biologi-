@@ -35,8 +35,8 @@
                     <th>Id</th>
                     <th>Nama Barang</th>
                     <th>Jumlah Stok</th>
-                    <th>Tanggal Ditambah</th>
-                    <th>Tanggal Diedit</th>
+                    {{-- <th>Tanggal Ditambah</th>
+                    <th>Tanggal Diedit</th> --}}
                     {{-- <th>Aksi</th> --}}
                 </tr>
             </thead>
@@ -46,8 +46,8 @@
                         <td>{{ $barang->id }}</td>
                         <td>{{ $barang->nama_barang }}</td>
                         <td>{{ $barang->stok }}</td>
-                        <td>{{ $barang->created_at }}</td>
-                        <td>{{ $barang->updated_at }}</td>
+                        {{-- <td>{{ $barang->created_at }}</td>
+                        <td>{{ $barang->updated_at }}</td> --}}
                         {{-- <td>
                             <a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a>
                             <a href="/delete-barang/{{ $barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>

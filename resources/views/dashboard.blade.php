@@ -43,13 +43,9 @@
                 <div class="col-auto">
                     <button type="submit" class="btn btn-primary">Filter</button>
                 </div>
-                {{-- <a href="{{ route('generateReport') }}?download_pdf=true" class="btn btn-success">Download PDF</a> --}}
             </div>
         </form>
         
-        
-        
-
         <!-- Content Row -->
         <div class="row">
             <!-- Laporan Barang Masuk -->
@@ -68,13 +64,12 @@
                 </a>
             </div>
 
-
             <!-- Laporan Barang Keluar -->
             <div class="col-xl-4 col-md-6 mb-4">
                 <a href="{{ route('laporan-barang-keluar') }}" style="text-decoration: none;">
-                    <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card border-left-dark shadow h-100 py-2">
                         <div class="card-body">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
                                 Laporan Barang Keluar
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -102,7 +97,6 @@
             </div>
 
         </div>
-
 
         <!-- Content Row -->
         <div class="row">
@@ -155,9 +149,6 @@
             </div>
         </div>
 
-
-    
-
         <h1 class="h3 mb-2 text-gray-800">Informasi</h1>
         <!-- Content Row -->
         <div class="row">
@@ -177,7 +168,6 @@
                     </div>
                 </a>
             </div>
-
 
             <!-- Laporan Stok Minimum dan Kadaluarsa -->
             <div class="col-xl-4 col-md-6 mb-4">

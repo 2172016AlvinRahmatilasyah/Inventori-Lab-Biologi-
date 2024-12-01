@@ -29,4 +29,12 @@ class DetailPenerimaanBarang extends Model
     {
         return $this->belongsTo(supkonpro::class, 'supkonpro_id');
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function jenispenerimaanbarang()
+    {
+        return $this->belongsTo(JenisPenerimaan::class, 'jenis_id');
+    }
 }

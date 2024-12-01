@@ -37,6 +37,7 @@
                     <input type="text" name="invoice" id="invoice" class="form-control" readonly>
                 </div>
 
+                <!-- Input Jenis Barang Keluar -->
                 <div class="mb-3">
                     <label for="jenis_id" class="form-label">Jenis Barang Keluar</label>
                     <select name="jenis_id" class="form-control select2" id="jenis_id">
@@ -53,14 +54,13 @@
                 </div>
 
                 <!-- SupKonPro -->
-                <div class="mb-3">
+                <div class="mb-3" id="supkonpro-container">
                     <label for="supkonpro_id" class="form-label">SupKonProy</label>
                     <select name="supkonpro_id" class="form-control select2" id="supkonpro_id">
                         <option value="">Pilih Jenis SupKonProy</option>
                         @foreach ($all_supkonpros as $supkonpro)
                             <option value="{{ $supkonpro->id }}" data-jenis="{{ $supkonpro->jenis }}">
-                                {{ $supkonpro->jenis }}  (Nama: {{ $supkonpro->nama }}) 
-                                (ID: {{ $supkonpro->id }})
+                                {{ $supkonpro->jenis }} (Nama: {{ $supkonpro->nama }}) (ID: {{ $supkonpro->id }})
                             </option>
                         @endforeach
                     </select>
@@ -135,6 +135,7 @@
 <script>
     $(document).ready(function() {
         $('.select2').select2();
+        
         $('#tanggal').on('change', function() {
             var tanggal = $(this).val();  // Format: YYYY-MM-DD
             if (tanggal) {

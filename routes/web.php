@@ -114,15 +114,17 @@ Route::middleware('auth')->group(function () {
 
     //master barang masuk:
     Route::get('master-barang-masuk', [PenerimaanBarangController::class, 'loadAllPenerimaanBarang'])->name('master-barang-masuk');
-    Route::get('master-barang-masuk-search', [PenerimaanBarangController::class, 'MasterBarangMasukSearch'])->name('master-barang-masuk.search');
+    Route::get('master-barang-masuk-search', [PenerimaanBarangController::class, 'BarangMasukSearch'])->name('master-barang-masuk.search');
     Route::get('tambah-barang-masuk', [PenerimaanBarangController::class, 'loadAddBarangMasukForm']);
     Route::post('tambah-barang-masuk', [PenerimaanBarangController::class, 'AddBarangMasuk'])->name('AddBarangMasuk');
-    Route::get('delete-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'deleteMasterBarang']);
+    // Route::get('delete-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'deleteMasterBarang']);
     Route::get('edit-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'loadEditBarangMasukForm']);
     Route::put('edit-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'EditPenerimaanBarang'])
                 ->name('EditPenerimaanBarang');
     Route::get('/generate-invoice-penerimaan', [PenerimaanBarangController::class, 'generateInvoicePenerimaan'])
                 ->name('generateInvoicePenerimaan');
+    Route::get('delete-detail-penerimaan-barang/{id}', [PenerimaanBarangController::class, 
+                'deleteDetailBarang'])->name('deleteDetailBarang');
     //detail barang masuk:
     Route::get('detail-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'detailMasterBarang'])->name('detail-penerimaan-barang');
     Route::get('index-detail-barang-masuk', [PenerimaanBarangController::class, 'loadAllDetailPenerimaanBarang'])->name('index-detail-barang-masuk');
@@ -139,16 +141,18 @@ Route::middleware('auth')->group(function () {
     //master barang keluar:
     Route::get('master-barang-keluar', [PengeluaranBarangController::class, 'loadAllPengeluaranBarang'])
                ->name('master-barang-keluar');
-    Route::get('master-barang-keluar-search', [PengeluaranBarangController::class, 'MasterBarangKeluarSearch'])
+    Route::get('master-barang-keluar-search', [PengeluaranBarangController::class, 'BarangKeluarSearch'])
                ->name('master-barang-keluar.search');
     Route::get('tambah-barang-keluar', [PengeluaranBarangController::class, 'loadAddBarangKeluarForm']);
     Route::post('tambah-barang-keluar', [PengeluaranBarangController::class, 'AddBarangKeluar'])->name('AddBarangKeluar');
-    Route::get('delete-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'deletePengeluaranBarang']);
+    // Route::get('delete-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'deletePengeluaranBarang']);
     Route::get('edit-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'loadEditBarangKeluarForm']);
     Route::put('edit-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'EditPengeluaranBarang'])
                 ->name('EditPengeluaranBarang');
     Route::get('/generate-invoice-pengeluaran', [PengeluaranBarangController::class, 'generateInvoicePengeluaran'])
                 ->name('generateInvoicePengeluaran');
+    Route::get('delete-detail-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 
+                'deletePengeluaranBarang'])->name('deletePengeluaranBarang');
     //detail barang keluar:
     Route::get('detail-pengeluaran-barang/{id}', [PengeluaranBarangController::class, 'detailPengeluaranBarang'])
                ->name('detail-pengeluaran-barang');

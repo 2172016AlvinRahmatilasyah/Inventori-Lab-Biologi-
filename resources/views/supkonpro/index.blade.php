@@ -39,7 +39,7 @@
                 <form action="{{ route('supkonpros.search', ['jenis' => strtolower($jenis)]) }}" 
                       method="GET" class="d-flex mt-3">
                     <input type="text" name="query" class="form-control w-50 ml-3" 
-                           placeholder="Search here">
+                           placeholder="Search here" value="{{ request()->get('query') }}">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
                     <a href="{{ route('supkonpro', ['jenis' => strtolower($jenis)]) }}" class="btn btn-secondary ml-3 ">Reset</a>
                 </form>

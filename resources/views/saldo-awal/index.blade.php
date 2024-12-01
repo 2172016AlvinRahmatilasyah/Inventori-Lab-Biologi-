@@ -37,7 +37,7 @@
 
         <div class="mb-3">
             <form action="{{ route('saldoawals.search') }}" method="GET" class="d-flex mt-3">
-                <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here">
+                <input type="text" name="query" class="form-control w-50 ml-3" placeholder="Search here" value="{{ request()->get('query') }}">
                 <button type="submit" class="btn btn-primary ml-2">Search</button>
                 <a href="{{ route('saldo-awal') }}" class="btn btn-secondary ml-3 ">Reset</a>
             </form>

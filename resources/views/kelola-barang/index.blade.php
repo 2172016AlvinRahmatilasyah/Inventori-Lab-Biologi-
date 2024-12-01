@@ -43,7 +43,7 @@
             <!-- Search Form -->
             <div class="col-md-6">
                 <form action="{{ route('barangs.search') }}" method="GET" class="d-flex mt-3 ml-3">
-                    <input type="text" name="query" class="form-control w-75" placeholder="Search here">
+                    <input type="text" name="query" class="form-control w-75" placeholder="Search here" value="{{ request('query') }}">
                     <button type="submit" class="btn btn-primary ml-2">Search</button>
                     <a href="{{ route('kelola-barang') }}" class="btn btn-secondary ml-3">Reset</a>
                 </form>
@@ -54,7 +54,7 @@
                 <form id="perPageForm" class="d-flex mt-3">
                     <label for="perPage" class="mr-2">Items per Page:</label>
                     <select name="perPage" id="perPage" class="form-control w-auto">
-                        <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
+                        <option value="10" {{ request('perPage') == '10' ? 'selected' : '' }}>10</option>
                         <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
                         <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
                     </select>
@@ -86,6 +86,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>Brand</th>
                             <th>Nama Barang</th>
                             <th>No Catalog</th>
                             <th>Jenis Barang</th>
@@ -95,7 +96,7 @@
                             <th>Lokasi</th>
                             <th>Status Barang</th>
                             <th>Plate</th>
-                            <th colspan="2">Action</th>
+                            <th colspan="3">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -107,6 +108,7 @@
                             @foreach ($all_barangs as $barang)
                                 <tr>
                                     <td>{{ $offset + $loop->iteration }}</td> 
+                                    <td>{{ $barang->brand }}</td>
                                     <td>{{ $barang->nama_barang }}</td>
                                     <td>{{ $barang->no_catalog }}</td>
                                     <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
@@ -118,6 +120,7 @@
                                     <td>{{ $barang->plate }}</td>
                                     <td><a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
                                     <td><a href="/detail-barang/{{ $barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
+                                    <td><a href="/delete-barang/{{ $barang->id }}" class="btn btn-danger btn-sm">Delete</a></td>
                                 </tr>
                             @endforeach
                         @else

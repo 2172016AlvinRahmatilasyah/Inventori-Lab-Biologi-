@@ -30,12 +30,33 @@
                     @csrf
                     @method('PUT') 
                     <input type="hidden" name="barang_id" value="{{ $barang->id }}">
+
                     <div class="mb-3">
-                        <label for="formGroupExampleInput" class="form-label">Nama Barang</label>
+                        <label for="brand" class="form-label">Nama Brand</label>
+                        <input type="text" name="brand" value="{{ $barang->brand }}" 
+                               class="form-control" id="formGroupExampleInput" 
+                               placeholder="Enter Nama Brand">
+                        @error('brand')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nama_barang" class="form-label">Nama Barang</label>
                         <input type="text" name="nama_barang" value="{{ $barang->nama_barang }}" 
                                class="form-control" id="formGroupExampleInput" 
                                placeholder="Enter Nama barang">
                         @error('nama_barang')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="no_catalog" class="form-label">No Catalog</label>
+                        <input type="text" name="no_catalog" value="{{ $barang->no_catalog }}" 
+                               class="form-control" id="formGroupExampleInput" 
+                               placeholder="Enter No Catalog">
+                        @error('no_catalog')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
@@ -46,11 +67,12 @@
                             <option value="">Pilih Jenis Barang</option>
                             @foreach ($jenis_barangs as $jenis_barang)
                                 <option value="{{ $jenis_barang->id }}" 
-                                    {{ old('jenis_barang_id', $barang->jenis_barang_id) == $jenis_barang->id ? 'selected' : '' }}>
+                                    {{ old('jenis_barang_id', $barang->jenis_barang_id) == $jenis_barang->id ? 'selected' : '' }}
+                                    data-nama-jenis-barang="{{ $jenis_barang->nama_jenis_barang }}">
                                     {{ $jenis_barang->nama_jenis_barang }} (ID: {{ $jenis_barang->id }})
                                 </option>
                             @endforeach
-                        </select>                        
+                        </select>                                             
                         @error('jenis_barang_id')
                             <span class="text-danger">{{$message}}</span>
                         @enderror
@@ -73,7 +95,7 @@
                         @error('kadaluarsa')
                             <span class="text-danger">{{$message}}</span>
                         @enderror
-                    </div>
+                    </div>                    
                     
                     <div class="mb-3">
                         <label for="lokasi" class="form-label">Lokasi</label>
@@ -83,6 +105,25 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
+
+                    <div class="mb-3">
+                        <label for="status_barang" class="form-label">Status Barang</label>
+                        <input type="text" name="status_barang" id="status_barang" class="form-control" 
+                         value="{{ $barang->status_barang }}" placeholder="Enter status barang">
+                        @error('status_barang')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="plate" class="form-label">Plate</label>
+                        <input type="text" name="plate" id="plate" class="form-control" 
+                         value="{{ $barang->plate }}" placeholder="Enter plate">
+                        @error('plate')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100">Save</button>
                 </form>
             </div>
@@ -94,23 +135,23 @@
         $(document).ready(function() {
             // Initialize select2 on the select element
             $('.select2').select2(); 
-            
-            // When a barang (item) is selected
+
+            // When a jenis_barang is selected
             $('#jenis_barang_id').change(function() {
-                // Get the selected option's data attributes
-                var namaJenisBarang = $(this).find(':selected').data('nama-jenis-barang');
-                var satuanStok = $(this).find(':selected').data('satuan_stok');
-    
-                // Optionally handle satuanStok (assuming a hidden input or display field exists)
-                // $('#stok').val(satuanStok || '');  // You can add a field for satuan_stok if needed
-    
-                // Check if the selected jenis_barang is "alat"
-                if (namaJenisBarang && namaJenisBarang.toLowerCase() === 'alat') {
+                var selectedOption = $(this).find(':selected');
+                var namaJenisBarang = selectedOption.data('nama-jenis-barang');
+
+                // If the selected jenis_barang is "kit", hide the kadaluarsa input
+                if (namaJenisBarang && namaJenisBarang.toLowerCase() === 'kit') {
                     $('#kadaluarsa-container').hide();  // Hide the kadaluarsa input
                 } else {
                     $('#kadaluarsa-container').show();  // Show the kadaluarsa input
                 }
             });
+
+            // Trigger the change event when the page loads to check the initial value
+            $('#jenis_barang_id').trigger('change');
         });
+
     </script>
 @endsection

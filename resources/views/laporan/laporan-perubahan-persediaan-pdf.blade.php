@@ -58,8 +58,8 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Id detail</th>
-                    <th>Id master</th>
+                    <th>Id Master</th>
+                    <th>Id Detail</th>
                     <th>Invoice</th>
                     <th>Tanggal</th>
                     <th>SupKonProy</th>
@@ -77,8 +77,8 @@
                 @if(isset($detailPenerimaan) && count($detailPenerimaan) > 0)
                     @foreach ($detailPenerimaan as $penerimaan)
                         <tr>
-                            <td>{{ $penerimaan->id }}</td>
                             <td>{{ $penerimaan->PenerimaanBarang->id ?? 'N/A' }}</td>
+                            <td>{{ $penerimaan->id }}</td>
                             <td>{{ $penerimaan->PenerimaanBarang->invoice }}</td>
                             <td>{{ $penerimaan->PenerimaanBarang->tanggal }}</td>
                             <td>{{ $penerimaan->PenerimaanBarang->supkonpro->nama ?? 'N/A' }}</td>
@@ -104,8 +104,8 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Id detail</th>
-                    <th>Id master</th>
+                    <th>Id Master</th>
+                    <th>Id Detail</th>
                     <th>Invoice</th>
                     <th>Tanggal</th>
                     <th>SupKonProy</th>
@@ -123,8 +123,8 @@
                 @if(isset($detailPengeluaran) && count($detailPengeluaran) > 0)
                     @foreach ($detailPengeluaran as $pengeluaran)
                         <tr>
-                            <td>{{ $pengeluaran->id }}</td>
                             <td>{{ $pengeluaran->PengeluaranBarang->id ?? 'N/A' }}</td>
+                            <td>{{ $pengeluaran->id }}</td>
                             <td>{{ $pengeluaran->PengeluaranBarang->invoice }}</td>
                             <td>{{ $pengeluaran->PengeluaranBarang->tanggal }}</td>
                             <td>{{ $pengeluaran->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>

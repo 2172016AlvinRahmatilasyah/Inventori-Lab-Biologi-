@@ -20,11 +20,35 @@
             <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
         @endif
         <div class="card-body">
-            <form action="{{ route('EditPenerimaanBarang', ['id' => $masterPenerimaan->id]) }}" method="post">
+            <form action="{{ route('EditPenerimaanBarang', ['id' => $detail_penerimaan->id]) }}" method="post">
                 @csrf
                 @method('PUT') 
                 <input type="hidden" name="masterPenerimaan_id" value="{{ $masterPenerimaan->id }}">
+                <input type="hidden" name="detail_penerimaan_id" value="{{ $detail_penerimaan->id }}">
+
+                <div class="mb-3">
+                    <label for="tanggal" class="form-label">Tanggal Penerimaan</label>
+                    <input type="date" name="tanggal" id="tanggal" class="form-control" 
+                        {{-- value="{{ isset($detail_penerimaan->penerimaanBarang) ? $detail_penerimaan->penerimaanBarang->tanggal : '' }}"> --}}
+                        value="{{ $masterPenerimaan->tanggal }}">
+                    @error('tanggal')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
                 
+
+                <!-- Input Invoice -->
+                <div class="mb-3">
+                    <label for="invoice" class="form-label">Invoice</label>
+                    <input type="text" name="invoice" id="invoice" class="form-control" readonly
+                    {{-- value="{{ isset($detail_penerimaan->penerimaanBarang) ? $detail_penerimaan->penerimaanBarang->invoice : '' }}" --}}
+                    value="{{ $masterPenerimaan->invoice }}">
+                    @error('invoice')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+
                 <div class="mb-3">
                     <label for="jenis_id" class="form-label">Jenis Barang Masuk</label>
                     <select name="jenis_id" class="form-control select2" id="jenis_id">
@@ -68,8 +92,7 @@
                     @enderror
                 </div>
                 
-                <input type="hidden" name="barang_id" value="{{ optional($masterPenerimaan->detailpenerimaanbarang->first())->barang_id }}">
-                <div class="mb-3">
+                {{-- <div class="mb-3">
                     <label for="barang_id" class="form-label">Nama Barang</label>
                     <select name="barang_id" class="form-control select2" id="barang_id" disabled>
                         <option value="">Pilih Nama Barang</option>
@@ -83,12 +106,29 @@
                     @error('barang_id')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
-                </div>
+                </div> --}}
+                
+                <input type="hidden" name="barang_id" value="{{ optional($detail_penerimaan)->barang_id }}">
+                    <div class="mb-3">
+                        <label for="barang_id" class="form-label">Nama Barang</label>
+                        <select name="barang_id" class="form-control select2" id="barang_id" disabled>
+                            <option value="">Pilih Nama Barang</option>
+                            @foreach ($all_barangs as $barang)
+                                <option value="{{ $barang->id }}" 
+                                    {{ $barang->id == optional($detail_penerimaan)->barang_id ? 'selected' : '' }}>
+                                    {{ $barang->nama_barang }} (ID: {{ $barang->id }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('barang_id')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
                      
                 <div class="mb-3">
                     <label for="jumlah_diterima" class="form-label">Jumlah Diterima</label>
                     <input type="number" name="jumlah_diterima" id="jumlah_diterima" class="form-control" 
-                           value="{{ $masterPenerimaan->detailpenerimaanbarang->first()->jumlah_diterima ?? '' }}"
+                           value="{{ $detail_penerimaan->jumlah_diterima }}"
                            placeholder="Enter jumlah" step="any">
                     @error('jumlah_diterima')
                         <span class="text-danger">{{ $message }}</span>
@@ -161,6 +201,25 @@
 
         $('#total_harga').on('blur', function() {
             $(this).val(formatNumber(removeThousandsSeparator($(this).val())));
+        });
+        $('#tanggal').on('change', function() {
+            var tanggal = $(this).val();  // Format: YYYY-MM-DD
+            if (tanggal) {
+                // Format tanggal menjadi YYMMDD
+                var dateParts = tanggal.split('-');
+                var formattedDate = dateParts[2].slice(-2) + dateParts[1] + dateParts[0].slice(-2); // Format: DDMMYY
+
+                // Menghitung nomor urut berdasarkan tanggal yang dipilih
+                $.ajax({
+                    url: "{{ route('generateInvoicePenerimaan') }}",
+                    method: "GET",
+                    data: { tanggal: tanggal },
+                    success: function(response) {
+                        var noUrut = response.noUrut;
+                        $('#invoice').val(formattedDate + noUrut);  // Gabungkan tanggal + nomor urut
+                    }
+                });
+            }
         });
     });
 </script>

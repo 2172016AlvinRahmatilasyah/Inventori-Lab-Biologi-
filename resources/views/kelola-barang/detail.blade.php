@@ -20,7 +20,7 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-header d-flex align-items-center">
-                <h2>Detail Transaksi Barang</h2>
+                <h2>Detail Transaksi Barang {{ $barang->nama_barang }}</h2>
                 {{-- <a href="/add-barang-masuk" class="btn btn-success btn-sm ml-auto">Tambah Barang Masuk</a> --}}
                 {{-- <a href="{{ route('AddBarangMasuk') }}" class="btn btn-success btn-sm ml-auto">Add Barang Masuk</a> --}}
             </div>
@@ -50,17 +50,20 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Id Master Masuk</th>
-                                <th>Jenis Penerimaan</th>
-                                <th>SupKonPro</th>
+                                <th>Id master</th>
+                                <th>Id detail</th>
+                                <th>Invoice</th>
+                                <th>Tanggal</th>
+                                <th>SupKonProy</th>
                                 <th>Nama Staff</th>
+                                <th>Jenis Penerimaan</th>
                                 <th>Nama Pengantar</th>
+                                <th>Keterangan</th>
                                 <th>Jumlah Diterima</th>
                                 <th>Harga</th>
                                 <th>Total Harga</th>
-                                <th>Keterangan</th>
-                                <th>Tanggal Ditambah</th>
-                                <th>Tanggal Diupdate</th>
+                                {{-- <th>Tanggal Ditambah</th>
+                                <th>Tanggal Diupdate</th> --}}
                             </tr>
                         </thead>
                         <tbody>
@@ -69,16 +72,19 @@
                                     @foreach ($master_barang->detailpenerimaanbarang as $detail)
                                         <tr>
                                             <td>{{ $master_barang->id }}</td>
-                                            <td>{{ $master_barang->jenispenerimaanbarang->jenis ?? 'N/A' }}</td>
+                                            <td>{{ $detail->id }}</td>
+                                            <td>{{ $master_barang->invoice }}</td>
+                                            <td>{{ $master_barang->tanggal }}</td>
                                             <td>{{ $master_barang->supkonpro->nama ?? 'N/A' }}</td>
                                             <td>{{ $master_barang->user->name }}</td>
+                                            <td>{{ $master_barang->jenispenerimaanbarang->jenis ?? 'N/A' }}</td>
                                             <td>{{ $master_barang->nama_pengantar }}</td>
+                                            <td>{{ $master_barang->keterangan }}</td>
                                             <td>{{ $detail->jumlah_diterima ?? 'N/A' }}</td>
                                             <td>{{number_format($detail->harga, 0, ',', '.') ?? 'N/A' }}</td>
                                             <td>{{number_format($detail->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
-                                            <td>{{ $master_barang->keterangan }}</td>
-                                            <td>{{ $master_barang->created_at }}</td>
-                                            <td>{{ $master_barang->updated_at }}</td>
+                                            {{-- <td>{{ $master_barang->created_at }}</td>
+                                            <td>{{ $master_barang->updated_at }}</td> --}}
                                         </tr>
                                     @endforeach
                                 @endforeach
@@ -88,8 +94,6 @@
                                 </tr>
                             @endif
                         </tbody>
-                        
-                        
                     </table>
                 </div>
             </div>
@@ -100,17 +104,20 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Id Master Keluar</th>
-                                <th>Jenis Pengeluaran</th>
-                                <th>SupKonPro</th>
+                                <th>Id master</th>
+                                <th>Id detail</th>
+                                <th>Invoice</th>
+                                <th>Tanggal</th>
+                                <th>SupKonProy</th>
                                 <th>Nama Staff</th>
+                                <th>Jenis Pengeluaran</th>
                                 <th>Nama Pengambil</th>
+                                <th>Keterangan</th>
                                 <th>Jumlah Keluar</th>
                                 <th>Harga</th>
                                 <th>Total Harga</th>
-                                <th>Keterangan</th>
-                                <th>Tanggal Ditambah</th>
-                                <th>Tanggal Diupdate</th>
+                                {{-- <th>Tanggal Ditambah</th>
+                                <th>Tanggal Diupdate</th> --}}
                             </tr>
                         </thead>
                         <tbody>
@@ -119,16 +126,19 @@
                                     @foreach ($master_barang2->detailpengeluaranbarang as $detail2)
                                         <tr>
                                             <td>{{ $master_barang2->id }}</td>
-                                            <td>{{ $master_barang2->jenispengeluaranbarang->jenis ?? 'N/A' }}</td>
+                                            <td>{{ $detail2->id }}</td>
+                                            <td>{{ $master_barang2->invoice }}</td>
+                                            <td>{{ $master_barang2->tanggal }}</td>
                                             <td>{{ $master_barang2->supkonpro->nama ?? 'N/A' }}</td>
                                             <td>{{ $master_barang2->user->name }}</td>
+                                            <td>{{ $master_barang2->jenispengeluaranbarang->jenis ?? 'N/A' }}</td>
                                             <td>{{ $master_barang2->nama_pengambil }}</td>
+                                            <td>{{ $master_barang2->keterangan }}</td>
                                             <td>{{ $detail2->jumlah_keluar ?? 'N/A' }}</td>
                                             <td>{{number_format($detail2->harga, 0, ',', '.') ?? 'N/A' }}</td>
                                             <td>{{number_format($detail2->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
-                                            <td>{{ $master_barang2->keterangan }}</td>
-                                            <td>{{ $master_barang2->created_at }}</td>
-                                            <td>{{ $master_barang2->updated_at }}</td>
+                                            {{-- <td>{{ $master_barang2->created_at }}</td>
+                                            <td>{{ $master_barang2->updated_at }}</td> --}}
                                         </tr>
                                     @endforeach
                                 @endforeach

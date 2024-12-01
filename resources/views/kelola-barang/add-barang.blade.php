@@ -31,10 +31,28 @@
             <form action="{{ route('AddBarang') }}" method="post">
                 @csrf
                 <div class="mb-3">
+                    <label for="brand" class="form-label">Nama Brand Barang</label>
+                    <input type="text" name="brand" id="brand" value="{{ old('brand') }}"
+                      class="form-control" placeholder="Enter brand barang">
+                    @error('brand')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
                     <label for="nama_barang" class="form-label">Nama Barang</label>
                     <input type="text" name="nama_barang" id="nama_barang" value="{{ old('nama_barang') }}"
                       class="form-control" placeholder="Enter Nama barang">
                     @error('nama_barang')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label for="no_catalog" class="form-label">No Catalog</label>
+                    <input type="text" name="no_catalog" id="no_catalog" value="{{ old('no_catalog') }}"
+                      class="form-control" placeholder="Enter No Catalog">
+                    @error('no_catalog')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
@@ -83,6 +101,24 @@
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
+
+                <div class="mb-3">
+                    <label for="status_barang" class="form-label">Status Barang</label>
+                    <input type="text" name="status_barang" id="status_barang" class="form-control" 
+                     value="{{ old('status_barang') }}" placeholder="Enter Status Barang">
+                    @error('status_barang')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label for="plate" class="form-label">Plate</label>
+                    <input type="text" name="plate" id="plate" class="form-control" 
+                     value="{{ old('plate') }}" placeholder="Enter Plate">
+                    @error('plate')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
                 
                 <button type="submit" class="btn btn-primary w-100">Save</button>
             </form>
@@ -107,7 +143,7 @@
             // $('#stok').val(satuanStok || '');  // You can add a field for satuan_stok if needed
 
             // Check if the selected jenis_barang is "alat"
-            if (namaJenisBarang && namaJenisBarang.toLowerCase() === 'alat') {
+            if (namaJenisBarang && namaJenisBarang.toLowerCase() === 'kit') {
                 $('#kadaluarsa-container').hide();  // Hide the kadaluarsa input
             } else {
                 $('#kadaluarsa-container').show();  // Show the kadaluarsa input
