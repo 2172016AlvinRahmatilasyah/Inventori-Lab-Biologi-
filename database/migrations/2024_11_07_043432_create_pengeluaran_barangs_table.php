@@ -18,6 +18,8 @@ return new class extends Migration
         });
         Schema::create('master_pengeluaran_barangs', function (Blueprint $table) {
             $table->id();
+            $table->string('invoice', 255);
+            $table->date('tanggal');
             $table->foreignId('jenis_id')->constrained('jenis_pengeluaran_barangs')->onDelete('cascade'); // Foreign key
             $table->foreignId('supkonpro_id')->constrained('supkonpros')->onDelete('cascade'); // Foreign key
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Foreign key
