@@ -124,7 +124,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/generate-invoice-penerimaan', [PenerimaanBarangController::class, 'generateInvoicePenerimaan'])
                 ->name('generateInvoicePenerimaan');
     Route::get('delete-detail-penerimaan-barang/{id}', [PenerimaanBarangController::class, 
-                'deleteDetailBarang'])->name('deleteDetailBarang');
+                'deletePenerimaanBarang'])->name('deletePenerimaanBarang');
     //detail barang masuk:
     Route::get('detail-penerimaan-barang/{id}', [PenerimaanBarangController::class, 'detailMasterBarang'])->name('detail-penerimaan-barang');
     Route::get('index-detail-barang-masuk', [PenerimaanBarangController::class, 'loadAllDetailPenerimaanBarang'])->name('index-detail-barang-masuk');

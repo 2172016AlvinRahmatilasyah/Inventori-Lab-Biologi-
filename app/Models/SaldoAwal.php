@@ -11,7 +11,7 @@ class SaldoAwal extends Model
     protected $fillable = [
         'barang_id',
         'tahun',
-        'bulam',
+        'bulan',
         'saldo_awal',
         'total_terima',
         'total_keluar',
@@ -19,7 +19,7 @@ class SaldoAwal extends Model
 
     ];
 
-    public function Barang()
+    public function barang()
     {
         return $this->belongsTo(Barang::class, 'barang_id');
     }

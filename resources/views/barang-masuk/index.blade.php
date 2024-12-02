@@ -99,7 +99,7 @@
                                     <td><a href="/edit-penerimaan-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
                                     {{-- <td><a href="/delete-penerimaan-barang/{{ $barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
                                     <td>
-                                        <a href="{{ route('deleteDetailBarang', $barang->id) }}" 
+                                        <a href="{{ route('deletePenerimaanBarang', $barang->id) }}" 
                                            class="btn btn-danger btn-sm" 
                                            onclick="return confirm('Apakah Anda yakin ingin menghapus detail ini?')">Delete</a>
                                     </td>

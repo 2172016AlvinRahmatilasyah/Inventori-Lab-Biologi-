@@ -9,6 +9,7 @@ use App\Models\JenisPenerimaan;
 use App\Models\supkonpro;
 use Illuminate\Http\Request;
 use App\Models\PenerimaanBarang;
+use App\Models\SaldoAwal;
 use App\Models\User;
 use Illuminate\Support\Facades\DB; 
 
@@ -80,7 +81,6 @@ class PenerimaanBarangController extends Controller
     }
 
 
-
     public function loadAddBarangMasukForm()
     {
         $all_master_penerimaans = PenerimaanBarang::all();
@@ -110,7 +110,9 @@ class PenerimaanBarangController extends Controller
             'harga' => 'required|array',
             'total_harga' => 'required|array',
             'tanggal' => 'required|date',
-            'invoice' => 'required|string',  // Pastikan invoice diterima
+            'invoice' => 'required|string',
+            'keterangan' => 'required|string',
+
         ]);
 
         // Membuat PenerimaanBarang
@@ -120,7 +122,7 @@ class PenerimaanBarangController extends Controller
         $barangMasuk->nama_pengantar = $request->nama_pengantar;
         $barangMasuk->tanggal = $request->tanggal;
         $barangMasuk->invoice = $request->invoice;
-        $barangMasuk->keterangan = $request->keterangan ?? '';
+        $barangMasuk->keterangan = $request->keterangan;
         $barangMasuk->user_id = $request->user_id;
         $barangMasuk->save();
 
@@ -133,8 +135,42 @@ class PenerimaanBarangController extends Controller
             $detail->harga = str_replace(',', '', $request->harga[$key]);
             $detail->total_harga = str_replace(',', '', $request->total_harga[$key]);
             $detail->save();
+
+            // Update saldo_awals table based on barang_id
+            $barang = Barang::findOrFail($barangId);
+            $barang->stok += $request->jumlah_diterima[$key];
+            $barang->save();
+
+            $tanggal = \Carbon\Carbon::parse($request->tanggal);
+            $bulan = $tanggal->month;  
+            $tahun = $tanggal->year; 
+
+            // Cek apakah saldo_awals sudah ada untuk bulan dan tahun tersebut dan barang_id yang sama
+            $saldoAwal = SaldoAwal::where('barang_id', $barangId)
+                                ->where('bulan', $bulan)
+                                ->where('tahun', $tahun)  // Pastikan juga sesuai dengan tahun
+                                ->first();
+            
+            if ($saldoAwal) {
+                // If exists, update total_keluar
+                $saldoAwal->total_keluar += str_replace(',', '', $request->total_harga[$key]);
+                $saldoAwal->saldo_akhir -= str_replace(',', '', $request->total_harga[$key]);
+                $saldoAwal->save();
+            } else {
+                // If not exists, create a new entry
+                $saldoAwal = new SaldoAwal();
+                $saldoAwal->barang_id = $barangId;
+                $saldoAwal->bulan = $bulan;
+                $saldoAwal->tahun = $tahun;  // Set tahun
+                $saldoAwal->total_terima = str_replace(',', '', $request->total_harga[$key]);
+                $saldoAwal->saldo_awal = 0; 
+                $saldoAwal->total_keluar = 0; 
+                $saldoAwal->saldo_akhir = $detail->total_harga; 
+                $saldoAwal->save();
+            }
         }
-       // Loop through each barang_id in the request
+
+        // Loop through each barang_id in the request
         foreach ($request->barang_id as $key => $barangId) {
             $barang = Barang::findOrFail($barangId);  // Fetch each barang by its ID
             $barang->stok += $request->jumlah_diterima[$key];  // Increment the stock by the quantity received
@@ -142,8 +178,9 @@ class PenerimaanBarangController extends Controller
         }
 
         return redirect()->route('master-barang-masuk')->with('success', 
-                                 'Barang Masuk berhasil ditambahkan.');
+                                    'Barang Masuk berhasil ditambahkan.');
     }
+
 
     public function generateInvoicePenerimaan(Request $request)
     {
@@ -161,45 +198,7 @@ class PenerimaanBarangController extends Controller
             return response()->json(['noUrut' => $noUrut]);
     }
 
-
-    // public function deleteMasterBarang($id)
-    // {
-    //     try {
-    //         // Begin a transaction to ensure data consistency
-    //         DB::beginTransaction();
-            
-    //         // Retrieve all associated detail records
-    //         $details = DetailPenerimaanBarang::where('master_penerimaan_barang_id', $id)->get();
-
-    //         // Iterate over each detail to adjust the stock
-    //         foreach ($details as $detail) {
-    //             $barang = Barang::find($detail->barang_id);
-
-    //             if ($barang) {
-    //                 // Deduct the jumlah_diterima from the stock
-    //                 $barang->stok -= $detail->jumlah_diterima;
-    //                 $barang->save();
-    //             }
-    //         }
-
-    //         // Delete the detail records associated with this master record
-    //         DetailPenerimaanBarang::where('master_penerimaan_barang_id', $id)->delete();
-            
-    //         // Delete the master PenerimaanBarang record
-    //         PenerimaanBarang::where('id', $id)->delete();
-            
-    //         // Commit the transaction
-    //         DB::commit();
-            
-    //         return redirect('/master-barang-masuk')->with('success', 'Deleted successfully!');
-    //     } catch (\Exception $e) {
-    //         // Rollback the transaction on failure
-    //         DB::rollBack();
-    //         return redirect('/master-barang-masuk')->with('fail', $e->getMessage());
-    //     }
-    // }
-
-    public function deleteDetailBarang($id)
+    public function deletePenerimaanBarang($id)
     {
         try {
             // Begin a transaction to ensure data consistency
@@ -211,12 +210,29 @@ class PenerimaanBarangController extends Controller
             // Adjust the stock of the corresponding barang
             $barang = Barang::find($detail->barang_id);
             if ($barang) {
-                $barang->stok -= $detail->jumlah_diterima;  // Decrease the stock
+                $barang->stok -= $detail->jumlah_diterima;  // Decrease stock by jumlah_diterima
                 $barang->save();  // Save updated stock
             }
 
             // Delete the detail record
             $detail->delete();
+
+            // Now, adjust the total_keluar on saldo_awals table
+            $saldoAwal = SaldoAwal::where('barang_id', $detail->barang_id)
+                ->where('bulan', \Carbon\Carbon::parse($detail->tanggal)->month)
+                ->where('tahun', \Carbon\Carbon::parse($detail->tanggal)->year) // Ensure it's the correct year
+                ->first();
+
+            if ($saldoAwal) {
+                // Subtract total_harga from total_keluar
+                $saldoAwal->total_keluar -= $detail->total_harga;
+
+                // Recalculate saldo_akhir using total_terima - total_keluar
+                $saldoAwal->saldo_akhir = $saldoAwal->total_terima - $saldoAwal->total_keluar;
+
+                // Save the updated saldo_awal record
+                $saldoAwal->save();
+            }
 
             // Commit the transaction
             DB::commit();
@@ -226,37 +242,6 @@ class PenerimaanBarangController extends Controller
             // Rollback the transaction on failure
             DB::rollBack();
             return redirect('/master-barang-masuk')->with('fail', 'Gagal menghapus detail barang: ' . $e->getMessage());
-        }
-    }
-
-    public function deleteMasterBarang($id)
-    {
-        try {
-            // Begin a transaction to ensure data consistency
-            DB::beginTransaction();
-
-            // Retrieve the master penerimaan barang record
-            $master = PenerimaanBarang::findOrFail($id);
-
-            // Check if there are still any remaining details associated with this master record
-            $details = DetailPenerimaanBarang::where('master_penerimaan_barang_id', $id)->get();
-
-            if ($details->isEmpty()) {
-                // If no more details, delete the master penerimaan barang record
-                $master->delete();
-                DB::commit();
-
-                return redirect('/master-barang-masuk')->with('success', 'Master penerimaan barang berhasil dihapus.');
-            } else {
-                // If there are still details, just return with an error message
-                DB::rollBack();
-                return redirect('/master-barang-masuk')->with('fail', 'Tidak dapat menghapus master penerimaan barang karena masih ada detail.');
-            }
-
-        } catch (\Exception $e) {
-            // Rollback the transaction on failure
-            DB::rollBack();
-            return redirect('/master-barang-masuk')->with('fail', 'Gagal menghapus master barang: ' . $e->getMessage());
         }
     }
 
@@ -402,18 +387,19 @@ class PenerimaanBarangController extends Controller
             'harga' => 'required',  
             'total_harga' => 'required', 
         ]);
-
+    
         // Menghapus titik di harga dan total_harga jika ada
         $harga = str_replace('.', '', $request->input('harga'));  // Menghapus titik dari harga
         $total_harga = str_replace('.', '', $request->input('total_harga'));  // Menghapus titik dari total_harga
-
+    
         try {
             // Ambil DetailPenerimaanBarang yang ingin diedit berdasarkan ID
             $detailPenerimaanBarang = DetailPenerimaanBarang::findOrFail($request->detail_penerimaan_id);
-
-            // Selisih jumlah diterima (untuk update stok barang)
+    
+            // Hitung selisih jumlah diterima (untuk update stok barang)
             $selisihJumlah = $request->jumlah_diterima - $detailPenerimaanBarang->jumlah_diterima;
-
+            $selisihTotalHarga = $total_harga - $detailPenerimaanBarang->total_harga; // Hitung selisih total_harga
+    
             // Update data di master penerimaan
             PenerimaanBarang::where('id', $detailPenerimaanBarang->master_penerimaan_barang_id)->update([
                 'tanggal' => $request->tanggal,
@@ -423,24 +409,41 @@ class PenerimaanBarangController extends Controller
                 'nama_pengantar' => $request->nama_pengantar,
                 'keterangan' => $request->keterangan,
             ]);
-
+    
             // Update detail penerimaan barang
             $detailPenerimaanBarang->update([
                 'jumlah_diterima' => $request->jumlah_diterima,
                 'harga' => $harga,  // Simpan harga tanpa titik
                 'total_harga' => $total_harga,  // Simpan total harga tanpa titik
             ]);
-
+    
             // Update stok barang yang terkait
             $barang = Barang::findOrFail($request->barang_id);
             $barang->stok += $selisihJumlah; // Tambahkan selisih jumlah
             $barang->save();
-
+    
+            // Update saldo_awal pada total_keluar
+            $tanggal = \Carbon\Carbon::parse($request->tanggal);
+            $bulan = $tanggal->month;  
+            $tahun = $tanggal->year; 
+    
+            // Cek apakah saldo_awals sudah ada untuk bulan dan tahun tersebut dan barang_id yang sama
+            $saldoAwal = SaldoAwal::where('barang_id', $request->barang_id)
+                                  ->where('bulan', $bulan)
+                                  ->where('tahun', $tahun)  // Pastikan juga sesuai dengan tahun
+                                  ->first();
+    
+            if ($saldoAwal) {
+                // Update saldo_awals berdasarkan selisih
+                $saldoAwal->total_keluar += $selisihTotalHarga; // Tambahkan selisih total_harga
+                $saldoAwal->saldo_akhir -= $selisihTotalHarga;  // Tambahkan selisih total_harga
+                $saldoAwal->save();
+            }
+    
             return redirect('/master-barang-masuk/')->with('success', 'Edit Successfully');
         } catch (\Exception $e) {
             return redirect('/edit-penerimaan-barang/' . $request->detail_penerimaan_id)->with('fail', $e->getMessage());
         }
     }
-
-
+    
 }
