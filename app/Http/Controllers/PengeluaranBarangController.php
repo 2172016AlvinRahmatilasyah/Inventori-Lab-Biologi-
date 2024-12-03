@@ -108,6 +108,7 @@ class PengeluaranBarangController extends Controller
             'tanggal' => 'required|date',
             'invoice' => 'required|string',
             'keterangan' => 'required|string',
+            'harga_invoice' => 'required',
         ]);
 
         // Menyimpan data pengeluaran barang
@@ -117,8 +118,9 @@ class PengeluaranBarangController extends Controller
         $barangKeluar->nama_pengambil = $request->nama_pengambil;
         $barangKeluar->tanggal = $request->tanggal;
         $barangKeluar->invoice = $request->invoice;
-        $barangKeluar->keterangan = $request->keterangan ?? '';
+        $barangKeluar->keterangan = $request->keterangan;
         $barangKeluar->user_id = $request->user_id;
+        $barangKeluar->harga_invoice = str_replace(',', '', $request->harga_invoice);
         $barangKeluar->save();
 
         // Menyimpan detail pengeluaran barang dan mengurangi stok
@@ -149,8 +151,8 @@ class PengeluaranBarangController extends Controller
 
             if ($saldoAwal) {
                 // Jika saldo_awals sudah ada, update saldo_terima
-                $saldoAwal->total_terima += str_replace(',', '', $request->total_harga[$key]);
-                $saldoAwal->saldo_akhir += str_replace(',', '', $request->total_harga[$key]);
+                $saldoAwal->total_keluar += str_replace(',', '', $request->jumlah_keluar[$key]);
+                $saldoAwal->saldo_akhir -= str_replace(',', '', $request->jumlah_keluar[$key]);
                 $saldoAwal->save();
             } else {
                 // Jika saldo_awals belum ada, buat saldo baru
@@ -158,10 +160,10 @@ class PengeluaranBarangController extends Controller
                 $saldoAwal->barang_id = $barangId;
                 $saldoAwal->bulan = $bulan;
                 $saldoAwal->tahun = $tahun;  // Set tahun
-                $saldoAwal->total_terima = str_replace(',', '', $request->total_harga[$key]);
+                $saldoAwal->total_keluar = str_replace(',', '', $request->jumlah_keluar[$key]);
                 $saldoAwal->saldo_awal = 0; 
-                $saldoAwal->total_keluar = 0; 
-                $saldoAwal->saldo_akhir = 0; 
+                $saldoAwal->total_terima = 0; 
+                $saldoAwal->saldo_akhir -=  $saldoAwal->total_keluar; 
                 $saldoAwal->save();
             }
         }
@@ -184,37 +186,45 @@ class PengeluaranBarangController extends Controller
             return response()->json(['noUrut' => $noUrut2]);
         }
 
-        public function deletePengeluaranBarang($id)
-        {
-            try {
+    public function deletePengeluaranBarang($id)
+    {
+         try {
                 // Begin a transaction to ensure data consistency
                 DB::beginTransaction();
         
                 // Find the detail pengeluaran barang record
                 $detail = DetailPengeluaranBarang::findOrFail($id);
         
+                // Find the corresponding master pengeluaran barang
+                $masterPengeluaran = PengeluaranBarang::findOrFail($detail->master_pengeluaran_barang_id);
+        
                 // Adjust the stock of the corresponding barang
                 $barang = Barang::find($detail->barang_id);
                 if ($barang) {
-                    $barang->stok += $detail->jumlah_keluar;  // Increase stock by jumlah_keluar (reverse the decrease)
+                    $barang->stok += $detail->jumlah_keluar;  // Increase stock by jumlah_keluar (because we're deleting)
                     $barang->save();  // Save updated stock
                 }
         
                 // Delete the detail record
                 $detail->delete();
         
-                // Now, adjust the total_terima on saldo_awals table
+                // Now, adjust the total_terima and total_keluar on saldo_awals table
+                // Get the correct month and year from master pengeluaran barang
+                $tanggalMaster = \Carbon\Carbon::parse($masterPengeluaran->tanggal);
+                $bulan = $tanggalMaster->month;
+                $tahun = $tanggalMaster->year;
+        
+                // Find the saldo_awal record based on barang_id, bulan, and tahun
                 $saldoAwal = SaldoAwal::where('barang_id', $detail->barang_id)
-                    ->where('bulan', \Carbon\Carbon::parse($detail->tanggal)->month)
-                    ->where('tahun', \Carbon\Carbon::parse($detail->tanggal)->year)  // Ensure it's the correct year
+                    ->where('bulan', $bulan)  // Correctly use month from master pengeluaran
+                    ->where('tahun', $tahun)  // Correctly use year from master pengeluaran
                     ->first();
         
                 if ($saldoAwal) {
-                    // Adjust total_terima by subtracting the total_harga (as it's deleted)
-                    $saldoAwal->total_terima -= $detail->total_harga;  // Subtract total_harga from total_terima
+                    // Subtract jumlah_keluar from total_keluar (as we're deleting the record)
+                    $saldoAwal->total_keluar -= $detail->jumlah_keluar;
         
-                    // Calculate saldo_akhir based on total_terima and total_keluar
-                    // saldo_akhir = total_terima - total_keluar
+                    // Recalculate saldo_akhir: total_terima - total_keluar
                     $saldoAwal->saldo_akhir = $saldoAwal->total_terima - $saldoAwal->total_keluar;
         
                     // Save the updated saldo_awal record
@@ -224,13 +234,14 @@ class PengeluaranBarangController extends Controller
                 // Commit the transaction
                 DB::commit();
         
-                return redirect('/master-barang-keluar')->with('success', 'Detail barang berhasil dihapus.');
+                return redirect('/master-barang-keluar')->with('success', 'Detail pengeluaran barang berhasil dihapus.');
             } catch (\Exception $e) {
                 // Rollback the transaction on failure
                 DB::rollBack();
-                return redirect('/master-barang-keluar')->with('fail', 'Gagal menghapus detail barang: ' . $e->getMessage());
-            }
-        }
+                return redirect('/master-barang-keluar')->with('fail', 'Gagal menghapus detail pengeluaran barang: ' . $e->getMessage());
+            }   
+    }    
+        
         
     public function detailPengeluaranBarang($id)
     {
@@ -414,8 +425,9 @@ class PengeluaranBarangController extends Controller
 
             if ($saldoAwal) {
                 // Update saldo_awals berdasarkan selisih
-                $saldoAwal->total_terima += $selisihTotalHarga; // Tambahkan selisih total_harga
-                $saldoAwal->saldo_akhir += $selisihTotalHarga;  // Tambahkan selisih total_harga
+                $saldoAwal->total_keluar += $selisihJumlah; // Tambahkan selisih total_harga
+                $saldoAwal->saldo_akhir = $saldoAwal->saldo_awal + $saldoAwal->total_terima - $saldoAwal->total_keluar;
+                // Tambahkan selisih total_harga
                 $saldoAwal->save();
             }
 

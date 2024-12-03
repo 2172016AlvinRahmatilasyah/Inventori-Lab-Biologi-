@@ -44,9 +44,15 @@
                         <div class="col-auto">
                             <button type="submit" class="btn btn-primary">Filter</button>
                         </div>
+                        <div class="col-auto">
+                            <!-- Tombol untuk Download PDF -->
+                            <a href="{{ route('laporan-saldo-awal-pdf', ['type' => $type])  }}?filter={{ request('filter') }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}" class="btn btn-danger">Download PDF</a>
+                        </div>
                             {{-- <a href="{{ route('generateReport') }}?download_pdf=true" class="btn btn-success">Download PDF</a> --}}
-                    </div>
+            </div>
         </form>
+    </div>
+
         <!-- Saldo Report Table -->
         <div class="card-body">
             <div class="table-responsive">
@@ -70,7 +76,7 @@
                                     <td>{{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</td>
                                     <td>{{ $saldo_awal->tahun }}</td>
                                     <td>{{ $saldo_awal->bulan }}</td>
-                                    <td>
+                                    <td style="text-align: right;">
                                         @if($type === 'saldo-awal')
                                             {{ number_format($saldo_awal->saldo_awal, 0, ',', '.') }}
                                         @elseif($type === 'saldo-terima')
@@ -93,12 +99,6 @@
             </div>
         </div>
     </div>
-    {{-- Download PDF --}}
-    <form method="get" action="{{ route('laporan-saldo-awal-pdf', ['type' => $type]) }}">
-        <input type="hidden" name="filter" value="{{ request('filter') }}">
-        <button type="submit" name="download_pdf" class="btn btn-danger">Download PDF</button>
-    </form>
-    
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {

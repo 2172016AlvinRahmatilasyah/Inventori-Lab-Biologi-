@@ -41,19 +41,25 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($barangs as $barang)
-                    <tr>
-                        <td>{{ $barang->id }}</td>
-                        <td>{{ $barang->nama_barang }}</td>
-                        <td>{{ $barang->stok }}</td>
-                        {{-- <td>{{ $barang->created_at }}</td>
-                        <td>{{ $barang->updated_at }}</td> --}}
-                        {{-- <td>
-                            <a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a>
-                            <a href="/delete-barang/{{ $barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
-                        </td> --}}
-                    </tr>
-                @endforeach
+                @if(isset($barangs) && count($barangs) > 0)
+                    @foreach ($barangs as $barang)
+                        <tr>
+                            <td>{{ $barang->id }}</td>
+                            <td>{{ $barang->nama_barang }}</td>
+                            <td style="text-align: right;">{{ $barang->stok }}</td>
+                            {{-- <td>{{ $barang->created_at }}</td>
+                            <td>{{ $barang->updated_at }}</td> --}}
+                            {{-- <td>
+                                <a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a>
+                                <a href="/delete-barang/{{ $barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                            </td> --}}
+                        </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="3">Data tidak ditemukan!</td>
+                        </tr>
+                    @endif
             </tbody>
         </table>
     @endif

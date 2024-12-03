@@ -24,11 +24,18 @@ class DashboardController extends Controller
         $endDate = null;
         $thisYear = Carbon::now()->year;
         $thisMonth = Carbon::now()->month;
-
+        $startMonth = null;
+        $endMonth = null;
+        $startYear = null;
+        $endYear = null;
         // Handle custom dates filter
         if ($filter === 'custom_dates') {
             $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
             $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
+            $startYear = $startDate->year;
+            $endYear = $endDate->year;
+            $startMonth = $startDate->month;
+            $endMonth = $endDate->month;
         } else {
             // Initialize start and end dates based on other filters
             switch ($filter) {
@@ -79,7 +86,7 @@ class DashboardController extends Controller
             }
         }
 
-        return compact('startDate', 'endDate', 'thisYear', 'thisMonth');
+        return compact('startDate', 'endDate', 'thisYear', 'thisMonth', 'startMonth', 'endMonth', 'startYear', 'endYear');
     }
 
     public function index(Request $request)
@@ -190,6 +197,8 @@ class DashboardController extends Controller
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangMasuk' => $barangMasuk,
+            'startDate' => $startDate->toFormattedDateString(),
+            'endDate' => $endDate->toFormattedDateString(),
         ];
 
         // Generate PDF
@@ -249,6 +258,8 @@ class DashboardController extends Controller
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangKeluar' => $barangKeluar,
+            'startDate' => $startDate->toFormattedDateString(),
+            'endDate' => $endDate->toFormattedDateString(),
         ];
 
         // Generate PDF
@@ -288,15 +299,15 @@ class DashboardController extends Controller
 
     public function showPerubahanPersediaan(Request $request)
     {
-       // Mengambil filter dari request
-       $filter = $request->get('filter', 'current_month');
+        // Mengambil filter dari request
+        $filter = $request->get('filter', 'current_month');
 
-       // Mendapatkan rentang tanggal berdasarkan filter
-       $dates = $this->getDateRange($request, $filter);
-       $startDate = $dates['startDate'];
-       $endDate = $dates['endDate'];
+        // Mendapatkan rentang tanggal berdasarkan filter
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
 
-        // Query the data for both incoming and outgoing goods
+        // Query data Penerimaan (Barang Masuk)
         $detailPenerimaan = DetailPenerimaanBarang::with([
             'PenerimaanBarang.jenisPenerimaanBarang',
             'PenerimaanBarang.user',
@@ -307,6 +318,7 @@ class DashboardController extends Controller
         ->orderBy('created_at', 'desc') 
         ->get();
 
+        // Query data Pengeluaran (Barang Keluar)
         $detailPengeluaran = DetailPengeluaranBarang::with([
             'PengeluaranBarang.jenisPengeluaranBarang',
             'PengeluaranBarang.user',
@@ -317,9 +329,13 @@ class DashboardController extends Controller
         ->orderBy('created_at', 'desc') 
         ->get();
 
-        // Return to the view
-        return view('laporan.laporan-perubahan-persediaan', compact('detailPenerimaan', 'detailPengeluaran', 'filter'));
+        // Gabungkan kedua data dan urutkan berdasarkan tanggal
+        $allData = $detailPenerimaan->merge($detailPengeluaran)->sortByDesc('created_at');
+
+        // Return ke view dengan data yang telah digabungkan
+        return view('laporan.laporan-perubahan-persediaan', compact('allData', 'filter'));
     }
+
 
     public function downloadPerubahanPersediaanPdf(Request $request)
     {
@@ -332,7 +348,6 @@ class DashboardController extends Controller
         $endDate = $dates['endDate'];
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
-        // Query the data for both incoming and outgoing goods
         $detailPenerimaan = DetailPenerimaanBarang::with([
             'PenerimaanBarang.jenisPenerimaanBarang',
             'PenerimaanBarang.user',
@@ -342,6 +357,7 @@ class DashboardController extends Controller
         ->whereBetween('created_at', [$startDate, $endDate])
         ->get();
 
+        // Mengambil data barang keluar sesuai rentang tanggal yang dipilih
         $detailPengeluaran = DetailPengeluaranBarang::with([
             'PengeluaranBarang.jenisPengeluaranBarang',
             'PengeluaranBarang.user',
@@ -351,6 +367,8 @@ class DashboardController extends Controller
         ->whereBetween('created_at', [$startDate, $endDate])
         ->get();
 
+        // Gabungkan data barang masuk dan keluar
+        $allData = $detailPenerimaan->merge($detailPengeluaran)->sortByDesc('created_at');
 
         // Siapkan data untuk laporan
         $data = [
@@ -359,13 +377,16 @@ class DashboardController extends Controller
             'user' => Auth::user()->name,
             'detailPenerimaan' => $detailPenerimaan,
             'detailPengeluaran' => $detailPengeluaran,
+            'startDate' => $startDate->toFormattedDateString(),
+            'endDate' => $endDate->toFormattedDateString(),
+            'allData' => $allData,
         ];
 
         // Generate PDF
         $pdf = PDF::loadView('laporan.laporan-perubahan-persediaan-pdf', $data);
         
         // Download PDF dengan nama file yang dinamis
-        return $pdf->download('laporan-barang-keluar-' . Carbon::now()->format('Y-m-d') . '.pdf');
+        return $pdf->download('laporan-perubahan-persediaan-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
 
 
@@ -392,6 +413,7 @@ class DashboardController extends Controller
             'date' => Carbon::now()->toFormattedDateString(),
             'user' => Auth::user()->name,
             'barangStokMinimal' => $barangStokMinimal
+            
         ];
 
         // Generate PDF dengan view 'laporan-stok-minimum-pdf'
@@ -473,8 +495,6 @@ class DashboardController extends Controller
         return $pdf->download('laporan-total-stok-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
 
-
-
     public function showSaldo($type, Request $request)
     {
         // Mengambil filter dari request
@@ -511,7 +531,7 @@ class DashboardController extends Controller
         // Mengirim data ke view
         return view('laporan.laporan-saldo-awal', 
                     compact('allSaldoAwals', 'type', 'filter', 'totalSaldoAwal', 
-                            'totalSaldoTerima', 'totalSaldoKeluar'));
+                            'totalSaldoTerima', 'totalSaldoKeluar', 'startDate'));
     }
     
     public function downloadSaldoAwalPdf($type, Request $request)
@@ -547,6 +567,8 @@ class DashboardController extends Controller
             'date' => Carbon::now()->toFormattedDateString(),
             'filter' => $filter,
             'user' => Auth::user()->name,
+            'startDate' => $startDate->toFormattedDateString(),
+            'endDate' => $endDate->toFormattedDateString(),
         ];
 
         // Load the view and pass all the data (merged compact variables with additional data)

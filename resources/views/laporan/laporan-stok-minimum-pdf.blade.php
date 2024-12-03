@@ -49,12 +49,12 @@
                             <td>{{ $barang->no_catalog }}</td>
                             <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
                             <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
-                            <td>{{ $barang->stok }}</td>
+                            <td style="text-align: right;">{{ $barang->stok }}</td>
                         </tr>
                     @endforeach
                 @else
                     <tr>
-                        <td colspan="4">Tidak Ada Stok Mendekati/Sudah Minimum!</td> 
+                        <td colspan="6">Tidak Ada Stok Mendekati/Sudah Minimum!</td> 
                     </tr>
                 @endif
             </tbody>

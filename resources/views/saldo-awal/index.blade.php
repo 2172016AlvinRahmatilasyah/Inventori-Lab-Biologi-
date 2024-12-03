@@ -80,10 +80,10 @@
                                     <td>{{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</td>
                                     <td>{{ $saldo_awal->tahun }}</td>
                                     <td>{{ $saldo_awal->bulan }}</td>
-                                    <td>{{ number_format($saldo_awal->saldo_awal, 0, ',', '.') }}</td>
-                                    <td>{{ number_format($saldo_awal->total_terima, 0, ',', '.') }}</td>
-                                    <td>{{ number_format($saldo_awal->total_keluar, 0, ',', '.') }}</td>
-                                    <td>{{ number_format($saldo_awal->saldo_akhir, 0, ',', '.') }}</td>
+                                    <td style="text-align: right;">{{ $saldo_awal->saldo_awal }}</td>
+                                    <td style="text-align: right;">{{ $saldo_awal->total_terima }}</td>
+                                    <td style="text-align: right;">{{ $saldo_awal->total_keluar }}</td>
+                                    <td style="text-align: right;">{{ $saldo_awal->saldo_akhir }}</td>
                                     <td>{{ $saldo_awal->created_at }}</td>
                                     <td>{{ $saldo_awal->updated_at }}</td>
                                 </tr>

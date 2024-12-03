@@ -52,6 +52,7 @@
     <p>Tanggal laporan dibuat: {{ $date }}</p>
     <p>Pembuat: {{ $user }}</p>
     <p>Berdasarkan: {{ $filter }}</p>
+    <p>Tanggal: {{ $startDate }} - {{ $endDate }}</p>
     <br>
     
     <h3>Data Barang Masuk</h3>
@@ -89,9 +90,9 @@
                         <td>{{ $item->PenerimaanBarang->nama_pengantar ?? 'N/A'}}</td>
                         <td>{{ $item->PenerimaanBarang->keterangan ?? 'N/A' }}</td>
                         <td>{{ $item->barang->nama_barang ?? 'N/A'}}</td>
-                        <td>{{ $item->jumlah_diterima }}</td>
-                        <td>{{ number_format($item->harga, 0, ',', '.') ?? 'N/A'}}</td>
-                        <td>{{ number_format($item->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
+                        <td style="text-align: right;">{{ $item->jumlah_diterima }}</td>
+                        <td style="text-align: right;">{{ number_format($item->harga, 0, ',', '.') ?? 'N/A'}}</td>
+                        <td style="text-align: right;">{{ number_format($item->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
                         {{-- <td>{{ $item->created_at }}</td>
                         <td>{{ $item->updated_at }}</td> --}}
                     </tr>

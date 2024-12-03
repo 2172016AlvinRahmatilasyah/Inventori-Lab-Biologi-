@@ -80,9 +80,9 @@
                                             <td>{{ $master_barang->jenispenerimaanbarang->jenis ?? 'N/A' }}</td>
                                             <td>{{ $master_barang->nama_pengantar }}</td>
                                             <td>{{ $master_barang->keterangan }}</td>
-                                            <td>{{ $detail->jumlah_diterima ?? 'N/A' }}</td>
-                                            <td>{{number_format($detail->harga, 0, ',', '.') ?? 'N/A' }}</td>
-                                            <td>{{number_format($detail->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
+                                            <td style="text-align: right;">{{ $detail->jumlah_diterima ?? 'N/A' }}</td>
+                                            <td style="text-align: right;">{{number_format($detail->harga, 0, ',', '.') ?? 'N/A' }}</td>
+                                            <td style="text-align: right;">{{number_format($detail->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
                                             {{-- <td>{{ $master_barang->created_at }}</td>
                                             <td>{{ $master_barang->updated_at }}</td> --}}
                                         </tr>
@@ -90,7 +90,7 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="11">Data tidak ditemukan!</td>
+                                    <td colspan="12">Data tidak ditemukan!</td>
                                 </tr>
                             @endif
                         </tbody>
@@ -134,9 +134,9 @@
                                             <td>{{ $master_barang2->jenispengeluaranbarang->jenis ?? 'N/A' }}</td>
                                             <td>{{ $master_barang2->nama_pengambil }}</td>
                                             <td>{{ $master_barang2->keterangan }}</td>
-                                            <td>{{ $detail2->jumlah_keluar ?? 'N/A' }}</td>
-                                            <td>{{number_format($detail2->harga, 0, ',', '.') ?? 'N/A' }}</td>
-                                            <td>{{number_format($detail2->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
+                                            <td style="text-align: right;">{{ $detail2->jumlah_keluar ?? 'N/A' }}</td>
+                                            <td style="text-align: right;">{{number_format($detail2->harga, 0, ',', '.') ?? 'N/A' }}</td>
+                                            <td style="text-align: right;">{{number_format($detail2->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
                                             {{-- <td>{{ $master_barang2->created_at }}</td>
                                             <td>{{ $master_barang2->updated_at }}</td> --}}
                                         </tr>
@@ -144,7 +144,7 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="11">Data tidak ada!</td>
+                                    <td colspan="12">Data tidak ada!</td>
                                 </tr>
                             @endif
                         </tbody>

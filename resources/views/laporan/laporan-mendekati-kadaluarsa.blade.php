@@ -19,16 +19,26 @@
         </div>     
 
         <div class="card-body">
-            <!-- Dropdown to select number of items per page -->
-            <div class="col-md-6 mb-3">
-                <form id="perPageForm" class="d-flex mt-3">
-                    <label for="perPage" class="mr-2">Items per Page:</label>
-                    <select name="perPage" id="perPage" class="form-control w-auto">
-                        <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
-                    </select>
-                </form>
+            <!-- Filter dan tombol download di dalam satu baris, berdekatan -->
+            <div class="d-flex mb-3">
+                <!-- Items per page filter -->
+                <div class="d-flex align-items-center mr-3">
+                    <form id="perPageForm" class="d-flex">
+                        <label for="perPage" class="mr-2">Items per Page:</label>
+                        <select name="perPage" id="perPage" class="form-control w-auto">
+                            <option value="25" {{ request('perPage') == '25' ? 'selected' : '' }}>25</option>
+                            <option value="50" {{ request('perPage') == '50' ? 'selected' : '' }}>50</option>
+                            <option value="100" {{ request('perPage') == '100' ? 'selected' : '' }}>100</option>
+                        </select>
+                    </form>
+                </div>
+
+                <!-- Download PDF button -->
+                <div>
+                    <form method="get" action="{{ route('laporan-mendekati-kadaluarsa-pdf') }}">
+                        <button type="submit" class="btn btn-danger">Download PDF</button>
+                    </form>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -72,9 +82,6 @@
             </div>
         </div>
     </div>
-    <form method="get" action="{{ route('laporan-mendekati-kadaluarsa-pdf') }}">
-        <button type="submit" class="btn btn-danger">Download PDF</button>
-    </form>
 </div>
 
 <script>

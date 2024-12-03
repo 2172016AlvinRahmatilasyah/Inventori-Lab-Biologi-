@@ -48,7 +48,10 @@
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Filter</button>
             </div>
-                {{-- <a href="{{ route('generateReport') }}?download_pdf=true" class="btn btn-success">Download PDF</a> --}}
+            <div class="col-auto">
+                <!-- Tombol untuk Download PDF -->
+                <a href="{{ route('laporan-barang-masuk-pdf') }}?filter={{ request('filter') }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}" class="btn btn-danger">Download PDF</a>
+            </div>
         </div>
     </form>
 
@@ -88,9 +91,9 @@
                                 <td>{{ $item->PenerimaanBarang->nama_pengantar ?? 'N/A'}}</td>
                                 <td>{{ $item->PenerimaanBarang->keterangan ?? 'N/A' }}</td>
                                 <td>{{ $item->barang->nama_barang ?? 'N/A'}}</td>
-                                <td>{{ $item->jumlah_diterima }}</td>
-                                <td>{{ number_format($item->harga, 0, ',', '.') ?? 'N/A'}}</td>
-                                <td>{{ number_format($item->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
+                                <td style="text-align: right;">{{ $item->jumlah_diterima }}</td>
+                                <td style="text-align: right;">{{ number_format($item->harga, 0, ',', '.') ?? 'N/A'}}</td>
+                                <td style="text-align: right;">{{ number_format($item->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
                                 {{-- <td>{{ $item->created_at }}</td>
                                 <td>{{ $item->updated_at }}</td> --}}
                             </tr>
@@ -104,13 +107,6 @@
             </table>
         </div>
     </div>
-
-    {{-- Download PDF --}}
-    <form method="get" action="{{ route('laporan-barang-masuk-pdf') }}">
-        <input type="hidden" name="filter" value="{{ request('filter') }}">
-        <button type="submit" name="download_pdf" class="btn btn-danger">Download PDF</button>
-    </form>    
-    
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {

@@ -27,6 +27,7 @@
     <p>Tanggal laporan dibuat: {{ $date }}</p>
     <p>Pembuat: {{ $user }}</p>
     <p>Berdasarkan: {{ $filter }}</p>
+    <p>Tanggal: {{ $startDate }} - {{ $endDate }}</p>
     <br>
     
     <h3>Data {{ $type }}</h3>
@@ -50,7 +51,7 @@
                             <td>{{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</td>
                             <td>{{ $saldo_awal->tahun }}</td>
                             <td>{{ $saldo_awal->bulan }}</td>
-                            <td>
+                            <td style="text-align: right;">
                                 @if($type === 'saldo-awal')
                                     {{ number_format($saldo_awal->saldo_awal, 0, ',', '.') }}
                                 @elseif($type === 'saldo-terima')

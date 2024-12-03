@@ -103,7 +103,7 @@
                             @endforeach
                         </select>
                         <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
-                        <input type="number" name="jumlah_keluar[]" class="form-control jumlah-keluar" placeholder="Enter jumlah">
+                        <input type="text" name="jumlah_keluar[]" class="form-control jumlah-keluar" placeholder="Enter jumlah">
                 
                         <label for="harga" class="form-label">Harga</label>
                         <input type="text" name="harga[]" class="form-control harga" placeholder="Enter harga">
@@ -123,6 +123,16 @@
                     @enderror
                 </div>
 
+                <div class="mb-3">
+                    <label for="harga_invoice" class="form-label">Harga Invoice</label>
+                    <input type="text" name="harga_invoice" id="harga_invoice" 
+                           value="{{ old('harga_invoice') }}" class="form-control" 
+                           placeholder="Enter Harga Invoice" readonly>
+                    @error('harga_invoice')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>                
+
                 <button type="submit" class="btn btn-primary w-100">Save</button>
                 
             </form>
@@ -134,8 +144,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Inisialisasi select2
         $('.select2').select2();
-        
+
+        // Ketika tanggal dipilih, format invoice otomatis
         $('#tanggal').on('change', function() {
             var tanggal = $(this).val();  // Format: YYYY-MM-DD
             if (tanggal) {
@@ -155,7 +167,8 @@
                 });
             }
         });
-        // Add new barang input field
+
+        // Menambahkan input barang baru
         $('#add-barang-btn').click(function() {
             $('#barang-container').append(`
                 <div class="barang-entry mb-3">
@@ -169,28 +182,36 @@
                         @endforeach
                     </select>
                     <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
-                        <input type="number" name="jumlah_keluar[]" class="form-control jumlah-keluar" placeholder="Enter jumlah">
-                
-                        <label for="harga" class="form-label">Harga</label>
-                        <input type="text" name="harga[]" class="form-control harga" placeholder="Enter harga">
-                
-                        <label for="total_harga" class="form-label">Total Harga</label>
-                        <input type="text" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga">
-                    </div>
+                    <input type="number" name="jumlah_keluar[]" class="form-control jumlah-keluar" placeholder="Enter jumlah">
+
+                    <label for="harga" class="form-label">Harga</label>
+                    <input type="text" name="harga[]" class="form-control harga" placeholder="Enter harga">
+
+                    <label for="total_harga" class="form-label">Total Harga</label>
+                    <input type="text" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga">
+                </div>
             `);
-            $('.select2').select2();
+            $('.select2').select2();  // Inisialisasi select2 pada input baru
         });
 
+        // Update harga total dan invoice ketika jumlah atau harga barang berubah
         $(document).on('input', '.jumlah-keluar, .harga', function() {
             var totalHarga = 0;
+            var totalInvoice = 0;
+
+            // Loop untuk setiap barang entry
             $('.barang-entry').each(function() {
-                var jumlahDiterima = $(this).find('.jumlah-keluar').val();
-                var harga = $(this).find('.harga').val().replace(/\./g, '');
-                if (jumlahDiterima && harga) {
-                    totalHarga = jumlahDiterima * parseFloat(harga);
-                    $(this).find('.total-harga').val(totalHarga.toLocaleString());
+                var jumlahKeluar = $(this).find('.jumlah-keluar').val();
+                var harga = $(this).find('.harga').val().replace(/\./g, '');  // Remove period for thousands separator
+                if (jumlahKeluar && harga) {
+                    var total = jumlahKeluar * parseFloat(harga);
+                    $(this).find('.total-harga').val(total.toLocaleString());  // Set total harga untuk setiap barang
+                    totalInvoice += total;  // Tambahkan ke total harga invoice
                 }
             });
+
+            // Update input harga_invoice dengan total seluruh barang
+            $('#harga_invoice').val(totalInvoice.toLocaleString());  // Format angka dengan koma sebagai pemisah ribuan
         });
     });
 </script>

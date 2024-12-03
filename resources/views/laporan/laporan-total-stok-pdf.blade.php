@@ -32,8 +32,8 @@
                 <th>Jenis Barang</th>
                 <th>Satuan Stok</th>
                 <th>Stok</th>
-                <th>Kadaluarsa</th>
-                <th>Lokasi</th>
+                {{-- <th>Kadaluarsa</th>
+                <th>Lokasi</th> --}}
             </tr>
         </thead>
         <tbody>
@@ -43,14 +43,18 @@
                     <td>{{ $barang->nama_barang }}</td>
                     <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
                     <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
-                    <td>{{ $barang->stok }}</td>
-                    <td>{{ $barang->kadaluarsa }}</td>
-                    <td>{{ $barang->lokasi }}</td>
+                    <td style="text-align: right;">{{ $barang->stok }}</td>
+                    {{-- <td>{{ $barang->kadaluarsa }}</td>
+                    <td>{{ $barang->lokasi }}</td> --}}
                 </tr>
-            @endforeach
+                @endforeach
+                <tr>
+                    <td colspan="4"><strong>Total Stok Seluruh Barang</strong></td>
+                    <td colspan="1" style="text-align: right;"><strong>{{ $totalStokSemuaBarang }}</strong></td>
+                </tr>
         </tbody>
     </table>
 
-    <h3>Total Stok: {{ $totalStokSemuaBarang }}</h3>
+    {{-- <h3>Total Stok: {{ $totalStokSemuaBarang }}</h3> --}}
 </body>
 </html>

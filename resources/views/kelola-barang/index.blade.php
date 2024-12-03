@@ -112,7 +112,7 @@
                                     <td>{{ $barang->nama_barang }}</td>
                                     <td>{{ $barang->no_catalog }}</td>
                                     <td>{{ $barang->jenisBarang->nama_jenis_barang ?? 'N/A' }}</td>
-                                    <td>{{ $barang->stok }}</td>
+                                    <td style="text-align: right;">{{ $barang->stok }}</td>
                                     <td>{{ $barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
                                     <td>{{ $barang->kadaluarsa }}</td>
                                     <td>{{ $barang->lokasi }}</td>
@@ -125,7 +125,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="8">Barang tidak ditemukan!</td>
+                                <td colspan="14">Barang tidak ditemukan!</td>
                             </tr>
                         @endif
                     </tbody>                    
@@ -134,10 +134,10 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div class="pagination d-flex justify-content-between mt-3">
+        <div class="pagination" style="margin-top: 20px;">
             <!-- Previous Button -->
             @if($all_barangs->currentPage() > 1)
-                <a href="{{ $all_barangs->previousPageUrl() }}" class="btn btn-primary">Previous</a>
+                <a href="{{ $all_barangs->previousPageUrl() }}" class="btn btn-primary" style="margin-right: 10px;">Previous</a>
             @endif
 
             <!-- Next Button -->

@@ -71,6 +71,7 @@
                             <th>Jumlah Diterima</th>
                             <th>Harga</th>
                             <th>Total Harga</th>
+                            <th>Harga Invoice</th>
                             <th colspan="3">Action</th>
                         </tr>
                     </thead>
@@ -93,9 +94,10 @@
                                     <td>{{ $barang->penerimaanBarang->nama_pengantar }}</td>
                                     <td>{{ $barang->penerimaanBarang->keterangan }}</td>
                                     <td>{{ $barang->barang->nama_barang ?? 'N/A' }}</td>
-                                    <td>{{ $barang->jumlah_diterima }}</td>
-                                    <td>{{ number_format($barang->harga , 0, ',', '.')}}</td>
-                                    <td>{{ number_format($barang->total_harga , 0, ',', '.')}}</td>
+                                    <td style="text-align: right;">{{ $barang->jumlah_diterima }}</td>
+                                    <td style="text-align: right;">{{ number_format($barang->harga , 0, ',', '.')}}</td>
+                                    <td style="text-align: right;">{{ number_format($barang->total_harga , 0, ',', '.')}}</td>
+                                    <td style="text-align: right;">{{ number_format($barang->penerimaanBarang->harga_invoice , 0, ',', '.')}}</td>
                                     <td><a href="/edit-penerimaan-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
                                     {{-- <td><a href="/delete-penerimaan-barang/{{ $barang->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
                                     <td>
@@ -113,10 +115,10 @@
                     </tbody>                    
                 </table>
             </div>
-            <div class="pagination d-flex justify-content-between mt-3">
+            <div class="pagination" style="margin-top: 20px;">
                 <!-- Previous Button -->
                 @if($all_detail_penerimaans->currentPage() > 1)
-                    <a href="{{ $all_detail_penerimaans->previousPageUrl() }}" class="btn btn-primary">Previous</a>
+                    <a href="{{ $all_detail_penerimaans->previousPageUrl() }}" class="btn btn-primary" style="margin-right: 10px;">Previous</a>
                 @endif
             
                 <!-- Next Button -->

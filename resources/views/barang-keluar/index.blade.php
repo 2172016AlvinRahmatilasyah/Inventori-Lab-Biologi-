@@ -92,6 +92,7 @@
                                 <th>Jumlah Keluar</th>
                                 <th>Harga</th>
                                 <th>Total Harga</th>
+                                <th>Harga Invoice</th>
                                 {{-- <th>Tanggal Ditambah</th>
                                 <th>Tanggal Diupdate</th> --}}
                                 <th colspan="3">Action</th>
@@ -115,9 +116,10 @@
                                         <td>{{ $barang->pengeluaranBarang->nama_pengambil }}</td>
                                         <td>{{ $barang->pengeluaranBarang->keterangan }}</td>
                                         <td>{{ $barang->barang->nama_barang ?? 'N/A' }}</td>
-                                        <td>{{ $barang->jumlah_keluar ?? 'N/A' }}</td>
-                                        <td>{{ number_format($barang->harga , 0, ',', '.')}}</td>
-                                        <td>{{ number_format($barang->total_harga , 0, ',', '.')}}</td>
+                                        <td style="text-align: right;">{{ $barang->jumlah_keluar ?? 'N/A' }}</td>
+                                        <td style="text-align: right;">{{ number_format($barang->harga , 0, ',', '.')}}</td>
+                                        <td style="text-align: right;">{{ number_format($barang->total_harga , 0, ',', '.')}}</td>
+                                        <td style="text-align: right;">{{ number_format($barang->pengeluaranBarang->harga_invoice , 0, ',', '.')}}</td>
                                         {{-- <td>{{ $master_barang->created_at }}</td>
                                         <td>{{ $master_barang->updated_at }}</td> --}}
                                         <td><a href="/edit-pengeluaran-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
@@ -132,16 +134,16 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="8">Data tidak ditemukan !</td>
+                                    <td colspan="9">Data tidak ditemukan !</td>
                                 </tr>
                             @endif
                         </tbody>
                     </table>
                 </div>
-                <div class="pagination d-flex justify-content-between mt-3">
+                <div class="pagination" style="margin-top: 20px;">
                     <!-- Previous Button -->
                     @if($all_detail_pengeluarans->currentPage() > 1)
-                        <a href="{{ $all_detail_pengeluarans->previousPageUrl() }}" class="btn btn-primary">Previous</a>
+                        <a href="{{ $all_detail_pengeluarans->previousPageUrl() }}" class="btn btn-primary" style="margin-right: 10px;">Previous</a>
                     @endif
                 
                     <!-- Next Button -->

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Foreign key
             $table->string('nama_pengambil', 255);
             $table->string('keterangan', 255);
+            $table->decimal('harga_invoice', 15, 2); 
             $table->timestamps();
         });
         Schema::create('detail_pengeluaran_barangs', function (Blueprint $table) {

@@ -14,7 +14,7 @@ class PenerimaanBarang extends Model
         'jenis_id',
         'nama_pengantar',
         'keterangan',
-
+        'harga_invoice',
     ];
 
     public function supkonpro()

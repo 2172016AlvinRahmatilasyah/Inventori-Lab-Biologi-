@@ -121,6 +121,16 @@
                     @enderror
                 </div>
 
+                <div class="mb-3">
+                    <label for="harga_invoice" class="form-label">Harga Invoice</label>
+                    <input type="text" name="harga_invoice" id="harga_invoice" 
+                           value="{{ old('harga_invoice') }}" class="form-control" 
+                           placeholder="Enter Harga Invoice" readonly>
+                    @error('harga_invoice')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>    
+                
                 <button type="submit" class="btn btn-primary w-100">Save</button>
                 
             </form>
@@ -179,16 +189,34 @@
         });
 
         // Calculate total harga when harga or jumlah diterima changes
+        // $(document).on('input', '.jumlah-diterima, .harga', function() {
+        //     var totalHarga = 0;
+        //     $('.barang-entry').each(function() {
+        //         var jumlahDiterima = $(this).find('.jumlah-diterima').val();
+        //         var harga = $(this).find('.harga').val().replace(/\./g, '');
+        //         if (jumlahDiterima && harga) {
+        //             totalHarga = jumlahDiterima * parseFloat(harga);
+        //             $(this).find('.total-harga').val(totalHarga.toLocaleString());
+        //         }
+        //     });
+        // });
         $(document).on('input', '.jumlah-diterima, .harga', function() {
             var totalHarga = 0;
+            var totalInvoice = 0;
+
+            // Loop untuk setiap barang entry
             $('.barang-entry').each(function() {
                 var jumlahDiterima = $(this).find('.jumlah-diterima').val();
                 var harga = $(this).find('.harga').val().replace(/\./g, '');
                 if (jumlahDiterima && harga) {
-                    totalHarga = jumlahDiterima * parseFloat(harga);
-                    $(this).find('.total-harga').val(totalHarga.toLocaleString());
+                    var total = jumlahDiterima * parseFloat(harga);
+                    $(this).find('.total-harga').val(total.toLocaleString());  // Set total harga untuk setiap barang
+                    totalInvoice += total;  // Tambahkan ke total harga invoice
                 }
             });
+
+            // Update input harga_invoice dengan total seluruh barang
+            $('#harga_invoice').val(totalInvoice.toLocaleString());  // Format angka dengan koma sebagai pemisah ribuan
         });
     });
 </script>
