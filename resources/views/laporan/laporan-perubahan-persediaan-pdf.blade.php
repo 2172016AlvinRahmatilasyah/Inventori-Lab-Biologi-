@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <title>Laporan Perubahan Persediaan</title>
     <style>
+        @page {
+            size: A4 landscape; /* Set the page size to A4 Landscape */
+            margin: 10mm;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -47,6 +51,7 @@
                 <th>Jumlah Keluar</th>
                 <th>Harga</th>
                 <th>Total Harga</th>
+                <th>Harga Invoice</th>
             </tr>
         </thead>
         <tbody>
@@ -63,6 +68,7 @@
                         <td class="text-right">{{ number_format($data->jumlah_keluar ?? 0, 0, ',', '.') }}</td>
                         <td class="text-right">{{ number_format($data->harga ?? 0, 0, ',', '.') }}</td>
                         <td class="text-right">{{ number_format($data->total_harga ?? 0, 0, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format( $data->PenerimaanBarang->harga_invoice ?? $data->PengeluaranBarang->harga_invoice ?? 0, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
             @else

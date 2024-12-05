@@ -72,6 +72,7 @@
                     <th>Jumlah Keluar</th>
                     <th>Harga</th>
                     <th>Total Harga</th>
+                    <th>Harga Invoice</th>
                     {{-- <th>Tanggal Ditambah</th>
                     <th>Tanggal Diupdate</th> --}}
                 </tr>
@@ -93,6 +94,7 @@
                             <td style="text-align: right;">{{ $item->jumlah_keluar }}</td>
                             <td style="text-align: right;">{{ number_format($item->harga, 0, ',', '.') ?? 'N/A'}}</td>
                             <td style="text-align: right;">{{ number_format($item->total_harga, 0, ',', '.') ?? 'N/A'}}</td>
+                            <td style="text-align: right;">{{ number_format($item->pengeluaranBarang->harga_invoice, 0, ',', '.') ?? 'N/A'}}</td>
                             {{-- <td>{{ $item->created_at }}</td>
                             <td>{{ $item->updated_at }}</td> --}}
                         </tr>
@@ -100,7 +102,7 @@
                     @endforeach
                 @else
                     <tr>
-                        <td colspan="13">Tidak Ada Transaksi Barang!</td>
+                        <td colspan="14">Tidak Ada Transaksi Barang!</td>
                     </tr>
                 @endif
             </tbody>

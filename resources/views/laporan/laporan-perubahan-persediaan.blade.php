@@ -73,6 +73,7 @@
                             <th>Jumlah Keluar</th>
                             <th>Harga</th>
                             <th>Total Harga</th>
+                            <th>Harga Invoice</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -91,6 +92,7 @@
                                     <td style="text-align: right;">{{ $data->jumlah_keluar ?? 0 }}</td>
                                     <td style="text-align: right;">{{ number_format($data->harga, 0, ',', '.') ?? 'N/A' }}</td>
                                     <td style="text-align: right;">{{ number_format($data->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
+                                    <td class="text-right">{{ number_format( $data->PenerimaanBarang->harga_invoice ?? $data->PengeluaranBarang->harga_invoice ?? 0, 0, ',', '.') }}</td>
                                 </tr>
                             @endforeach
                         @else

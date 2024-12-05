@@ -41,7 +41,7 @@
 
                     <div class="mb-3">
                         <label for="role" class="form-label">Role</label>
-                        <select name="role" id="role" class="form-control">
+                        <select name="role" id="role" class="form-control" disabled>
                             <option value="" disabled selected>Select role</option>
                             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
@@ -50,11 +50,9 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
-                    
-                    
 
                     <div class="mb-3">
-                        <label for="email" class="form-label">email</label>
+                        <label for="email" class="form-label">Email</label>
                         <input type="email" name="email" id="email" value="{{ old('email') }}"
                           class="form-control" placeholder="Enter email">
                         @error('email')
@@ -70,7 +68,7 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
-                                      
+
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" name="password" id="password" class="form-control" 
@@ -79,7 +77,7 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="password_confirmation" class="form-label">Confirm Password</label>
                         <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" 
@@ -99,12 +97,14 @@
     
             var roleSelect = document.getElementById('role');
     
+            // Set role based on URL and disable the select field
             if (currentUrl.includes('/kelola-user-add-user')) {
                 roleSelect.value = 'user';
+                roleSelect.disabled = true;
             } else if (currentUrl.includes('/kelola-user-add-admin')) {
                 roleSelect.value = 'admin';
+                roleSelect.disabled = true;
             }
         });
     </script>
-    
 @endsection
