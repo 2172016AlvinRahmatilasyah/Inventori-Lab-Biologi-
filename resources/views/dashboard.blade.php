@@ -109,7 +109,7 @@
                                 Saldo Awal Keseluruhan Barang
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Rp {{ number_format($totalSaldoAwal, 0, ',', '.') }}
+                                 {{ number_format($totalSaldoAwal, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
@@ -125,7 +125,7 @@
                                 Saldo Terima Keseluruhan Barang
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Rp {{ number_format($totalSaldoTerima, 0, ',', '.') }}
+                                {{ number_format($totalSaldoTerima, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
@@ -141,7 +141,7 @@
                                 Saldo Keluar Keseluruhan Barang
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                Rp {{ number_format($totalSaldoKeluar, 0, ',', '.') }}
+                                {{ number_format($totalSaldoKeluar, 0, ',', '.') }}
                             </div>
                         </div>
                     </div>
