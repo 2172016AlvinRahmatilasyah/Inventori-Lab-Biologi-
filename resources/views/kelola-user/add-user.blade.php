@@ -22,7 +22,7 @@
 <div class="container">
     <div class="container">
         <div class="card mx-auto" style="max-width: 500px;">
-            <div class="card-header text-center">Tambah User</div>
+            <div class="card-header text-center">Tambah {{ $role }}</div>
             @if (Session::has('fail'))
                 <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
             @endif

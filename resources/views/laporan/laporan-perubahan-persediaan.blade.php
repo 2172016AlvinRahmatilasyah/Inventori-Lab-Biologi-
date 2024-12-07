@@ -106,4 +106,28 @@
         </div>
     </div> 
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            const filterSelect = document.getElementById('filter');
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+
+            // Function to toggle date inputs based on the selected filter
+            function toggleDateInputs() {
+                if (filterSelect.value === 'custom_dates') {
+                    startDateInput.disabled = false;
+                    endDateInput.disabled = false;
+                } else {
+                    startDateInput.disabled = true;
+                    endDateInput.disabled = true;
+                }
+            }
+
+            // Initialize the date inputs based on the current selected filter
+            toggleDateInputs();
+
+            // Add event listener for filter changes
+            filterSelect.addEventListener('change', toggleDateInputs);
+    });
+</script>
 @endsection

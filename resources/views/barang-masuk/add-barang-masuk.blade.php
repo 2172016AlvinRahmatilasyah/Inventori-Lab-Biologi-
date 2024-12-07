@@ -101,7 +101,7 @@
                             @endforeach
                         </select>
                         <label for="jumlah_diterima" class="form-label">Jumlah Diterima</label>
-                        <input type="number" name="jumlah_diterima[]" class="form-control jumlah-diterima" placeholder="Enter jumlah">
+                        <input type="text" name="jumlah_diterima[]" class="form-control jumlah-diterima" placeholder="Enter jumlah">
                 
                         <label for="harga" class="form-label">Harga</label>
                         <input type="text" name="harga[]" class="form-control harga" placeholder="Enter harga">

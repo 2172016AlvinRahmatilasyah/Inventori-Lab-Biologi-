@@ -53,11 +53,11 @@
                             <td>{{ $saldo_awal->bulan }}</td>
                             <td style="text-align: right;">
                                 @if($type === 'saldo-awal')
-                                    {{ number_format($saldo_awal->saldo_awal, 0, ',', '.') }}
+                                    {{ $saldo_awal->saldo_awal, 0 }}
                                 @elseif($type === 'saldo-terima')
-                                    {{ number_format($saldo_awal->total_terima, 0, ',', '.') }}
+                                    {{ $saldo_awal->total_terima, 0 }}
                                 @elseif($type === 'saldo-keluar')
-                                    {{ number_format($saldo_awal->total_keluar, 0, ',', '.') }}
+                                    {{$saldo_awal->total_keluar, 0,  }}
                                 @endif
                             </td>
                             <td>{{ $saldo_awal->created_at }}</td>
