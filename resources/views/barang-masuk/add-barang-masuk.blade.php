@@ -132,7 +132,7 @@
                 </div>    
                 
                 <button type="submit" class="btn btn-primary w-100">Save</button>
-                
+                <div id="barang-container"></div>
             </form>
         </div>
     </div>
@@ -164,7 +164,7 @@
         });
         // Add new barang input field
         $('#add-barang-btn').click(function() {
-            $('#barang-container').append(`
+            var newBarangEntry = `
                 <div class="barang-entry mb-3">
                     <label for="barang_id" class="form-label">Nama Barang</label>
                     <select name="barang_id[]" class="form-control select2 barang-select">
@@ -183,9 +183,18 @@
                     
                     <label for="total_harga" class="form-label">Total Harga</label>
                     <input type="text" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga">
+                    
+                    <!-- Tombol Batal untuk menghapus input -->
+                    <button type="button" class="btn btn-danger mt-2 remove-barang-btn">Batal</button>
                 </div>
-            `);
+            `;
+            $('#barang-container').append(newBarangEntry);
             $('.select2').select2();
+
+            // Tombol untuk membatalkan dan menghapus input barang
+            $(document).on('click', '.remove-barang-btn', function() {
+                $(this).closest('.barang-entry').remove();
+            });
         });
 
         // Calculate total harga when harga or jumlah diterima changes

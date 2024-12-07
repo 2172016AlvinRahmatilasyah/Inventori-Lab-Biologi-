@@ -21,7 +21,7 @@
     </style>
 </head>
 <body>
-    <h1>Laporan Mendekati/Sudah Minimum</h1>
+    <h1>Laporan Stok Mendekati/Sudah Minimum</h1>
     <br>
     
     <p>Tanggal laporan dibuat: {{ $date }}</p>

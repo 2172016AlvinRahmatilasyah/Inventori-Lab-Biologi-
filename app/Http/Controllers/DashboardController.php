@@ -154,11 +154,13 @@ class DashboardController extends Controller
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangMasuk = DetailPenerimaanBarang::with('barang')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc') 
+            ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            })
+            ->orderBy('created_at', 'desc')
             ->get();
         $all_master_penerimaans = PenerimaanBarang::with('barang')
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween('tanggal', [$startDate, $endDate])
             ->get();
         // Siapkan data untuk laporan
         $data = [
@@ -186,10 +188,12 @@ class DashboardController extends Controller
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangMasuk = DetailPenerimaanBarang::with('barang')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc') 
+            ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            })
+            ->orderBy('created_at', 'desc')
             ->get();
-
+        
         // Siapkan data untuk laporan
         $data = [
             'title' => 'Laporan Barang Masuk',
@@ -221,8 +225,10 @@ class DashboardController extends Controller
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangKeluar = DetailPengeluaranBarang::with('barang')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc') 
+            ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         // Siapkan data untuk laporan
@@ -248,8 +254,10 @@ class DashboardController extends Controller
 
         // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
         $barangKeluar = DetailPengeluaranBarang::with('barang')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc') 
+            ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         // Siapkan data untuk laporan
@@ -314,9 +322,11 @@ class DashboardController extends Controller
             'PenerimaanBarang.supkonpro',
             'barang'
         ])
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->orderBy('created_at', 'desc') 
-        ->get();
+            ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate) {
+                $query->whereBetween('tanggal', [$startDate, $endDate]);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Query data Pengeluaran (Barang Keluar)
         $detailPengeluaran = DetailPengeluaranBarang::with([
@@ -325,8 +335,10 @@ class DashboardController extends Controller
             'PengeluaranBarang.supkonpro',
             'barang'
         ])
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->orderBy('created_at', 'desc') 
+        ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate) {
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+        })
+        ->orderBy('created_at', 'desc')
         ->get();
 
         // Gabungkan kedua data dan urutkan berdasarkan tanggal
@@ -354,7 +366,10 @@ class DashboardController extends Controller
             'PenerimaanBarang.supkonpro',
             'barang'
         ])
-        ->whereBetween('created_at', [$startDate, $endDate])
+        ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate) {
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+        })
+        ->orderBy('created_at', 'desc')
         ->get();
 
         // Mengambil data barang keluar sesuai rentang tanggal yang dipilih
@@ -364,9 +379,11 @@ class DashboardController extends Controller
             'PengeluaranBarang.supkonpro',
             'barang'
         ])
-        ->whereBetween('created_at', [$startDate, $endDate])
+        ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate) {
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+        })
+        ->orderBy('created_at', 'desc')
         ->get();
-
         // Gabungkan data barang masuk dan keluar
         $allData = $detailPenerimaan->merge($detailPengeluaran)->sortByDesc('created_at');
 
@@ -426,7 +443,7 @@ class DashboardController extends Controller
     public function showKadaluarsa(Request $request)
     {
         $perPage = $request->input('perPage', 25); 
-        $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', Carbon::now()->addDays(30)) // Example filter for approaching expiry
+        $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', Carbon::now()->addDays(60)) // Example filter for approaching expiry
             ->paginate($perPage)
             ->appends(request()->except('page'));
         return view('laporan.laporan-mendekati-kadaluarsa', compact('barangKadaluarsaMendekati'));
@@ -435,7 +452,7 @@ class DashboardController extends Controller
     public function downloadKadaluarsaPdf(Request $request)
     {
     
-        $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', Carbon::now()->addDays(30)) // Example filter for approaching expiry
+        $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', Carbon::now()->addDays(60)) // Example filter for approaching expiry
             ->get(); // Mengambil semua data tanpa pagination
 
         // Siapkan data untuk laporan

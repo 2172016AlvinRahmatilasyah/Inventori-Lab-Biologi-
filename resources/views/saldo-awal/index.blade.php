@@ -20,7 +20,7 @@
     <div class="card">
         <div class="card-header d-flex align-items-center">
             <h2>Data Saldo Awal</h2>
-            <a href="/add-saldo-awal" class="btn btn-success btn-sm ml-auto">Tambah Saldo Awal</a>
+            <a href="/add-saldo-awal" class="btn btn-success btn-sm ml-auto">Tutup Buku Saldo Awal</a>
         </div>
         
         @if(Session::has('success'))

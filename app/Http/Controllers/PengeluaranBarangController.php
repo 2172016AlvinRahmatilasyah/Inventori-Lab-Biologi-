@@ -207,7 +207,13 @@ class PengeluaranBarangController extends Controller
         
                 // Delete the detail record
                 $detail->delete();
-        
+
+                $remainingDetails = DetailPengeluaranBarang::where('master_pengeluaran_barang_id', $masterPengeluaran->id)->count();
+
+                if ($remainingDetails === 0) {
+                    $masterPengeluaran->delete();
+                }
+
                 // Now, adjust the total_terima and total_keluar on saldo_awals table
                 // Get the correct month and year from master pengeluaran barang
                 $tanggalMaster = \Carbon\Carbon::parse($masterPengeluaran->tanggal);
@@ -369,8 +375,8 @@ class PengeluaranBarangController extends Controller
         $request->validate([
             'masterPengeluaran_id' => 'required|exists:master_pengeluaran_barangs,id',
             'detail_pengeluaran_id' => 'required|exists:detail_pengeluaran_barangs,id',
-            'tanggal' => 'required|exists:master_pengeluaran_barangs,tanggal',
-            'invoice' => 'required|exists:master_pengeluaran_barangs,invoice',
+            // 'tanggal' => 'required|exists:master_pengeluaran_barangs,tanggal',
+            // 'invoice' => 'required|exists:master_pengeluaran_barangs,invoice',
             'jenis_id' => 'required|exists:jenis_pengeluaran_barangs,id',
             'supkonpro_id' => 'required|exists:supkonpros,id',
             'nama_pengambil' => 'required|string|max:255',
@@ -394,8 +400,8 @@ class PengeluaranBarangController extends Controller
 
             // Update pengeluaran master
             PengeluaranBarang::where('id', $detailPengeluaranBarang->master_pengeluaran_barang_id)->update([
-                'tanggal' => $request->tanggal,
-                'invoice' => $request->invoice,
+                // 'tanggal' => $request->tanggal,
+                // 'invoice' => $request->invoice,
                 'jenis_id' => $request->jenis_id,
                 'supkonpro_id' => $request->supkonpro_id,
                 'nama_pengambil' => $request->nama_pengambil,

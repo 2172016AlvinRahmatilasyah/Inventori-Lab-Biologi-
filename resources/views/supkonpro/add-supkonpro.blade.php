@@ -22,7 +22,7 @@
 <div class="container">
     <div class="container">
         <div class="card mx-auto" style="max-width: 500px;">
-            <div class="card-header text-center">Tambah Supkonproy</div>
+            <div class="card-header text-center">Tambah {{ $jenis }} baru</div>
             @if (Session::has('fail'))
                 <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
             @endif
@@ -77,7 +77,7 @@
 
                     <div class="mb-3">
                         <label for="jenis" class="form-label">Jenis</label>
-                        <select name="jenis" id="jenis" class="form-control">
+                        <select name="jenis" id="jenis" class="form-control" disabled>
                             <option value="" disabled selected>Select jenis</option>
                             <option value="supplier" {{ old('jenis') == 'supplier' ? 'selected' : '' }}>Supplier</option>
                             <option value="konsumen" {{ old('jenis') == 'konsumen' ? 'selected' : '' }}>Konsumen</option>

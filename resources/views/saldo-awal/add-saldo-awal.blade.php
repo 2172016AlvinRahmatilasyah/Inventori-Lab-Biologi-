@@ -100,7 +100,7 @@
                     @enderror
                 </div>             
                 
-                <div class="mb-3">
+                {{-- <div class="mb-3">
                     <label for="total_terima" class="form-label">Total Terima</label>
                     <input type="decimal" name="total_terima" id="total_terima" class="form-control" 
                            value="{{ old('total_terima') }}" placeholder="Enter total terima" 
@@ -128,7 +128,7 @@
                     @error('saldo_akhir')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
-                </div>
+                </div> --}}
                 
                 <button type="submit" class="btn btn-primary w-100">Save</button>
             </form>

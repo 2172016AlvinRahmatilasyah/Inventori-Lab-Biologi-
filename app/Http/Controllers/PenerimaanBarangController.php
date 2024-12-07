@@ -221,6 +221,14 @@ class PenerimaanBarangController extends Controller
             // Delete the detail record
             $detail->delete();
 
+            // Check if there are any remaining details for the master penerimaan
+            $remainingDetails = DetailPenerimaanBarang::where('master_penerimaan_barang_id', $masterPenerimaan->id)->count();
+
+            // If no more details exist for this master penerimaan, delete the master penerimaan
+            if ($remainingDetails === 0) {
+                $masterPenerimaan->delete();
+            }
+
             // Now, adjust the total_keluar on saldo_awals table
             // Get the correct month and year from master penerimaan barang
             $tanggalMaster = \Carbon\Carbon::parse($masterPenerimaan->tanggal);
@@ -254,6 +262,7 @@ class PenerimaanBarangController extends Controller
             return redirect('/master-barang-masuk')->with('fail', 'Gagal menghapus detail barang: ' . $e->getMessage());
         }
     }
+
 
     public function detailMasterBarang($id)
     {
@@ -386,8 +395,8 @@ class PenerimaanBarangController extends Controller
         $request->validate([
             'masterPenerimaan_id' => 'required|exists:master_penerimaan_barangs,id',
             'detail_penerimaan_id' => 'required|exists:detail_penerimaan_barangs,id',
-            'tanggal' => 'required|exists:master_penerimaan_barangs,tanggal',
-            'invoice' => 'required|exists:master_penerimaan_barangs,invoice',
+            // 'tanggal' => 'required|exists:master_penerimaan_barangs,tanggal',
+            // 'invoice' => 'required|exists:master_penerimaan_barangs,invoice',
             'jenis_id' => 'required|exists:jenis_penerimaan_barangs,id',
             'supkonpro_id' => 'required|exists:supkonpros,id',
             'nama_pengantar' => 'required|string|max:255',
@@ -412,8 +421,8 @@ class PenerimaanBarangController extends Controller
 
             // Update data di master penerimaan
             PenerimaanBarang::where('id', $detailPenerimaanBarang->master_penerimaan_barang_id)->update([
-                'tanggal' => $request->tanggal,
-                'invoice' => $request->invoice,
+                // 'tanggal' => $request->tanggal,
+                // 'invoice' => $request->invoice,
                 'jenis_id' => $request->jenis_id,
                 'supkonpro_id' => $request->supkonpro_id,
                 'nama_pengantar' => $request->nama_pengantar,

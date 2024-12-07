@@ -26,7 +26,7 @@
                 <input type="hidden" name="masterPengeluaran_id" value="{{ $masterPengeluaran->id }}">
                 <input type="hidden" name="detail_pengeluaran_id" value="{{ $detail_pengeluaran->id }}">
                 
-                <div class="mb-3">
+                {{-- <div class="mb-3">
                     <label for="tanggal" class="form-label">Tanggal Pengeluaran</label>
                     <input type="date" name="tanggal" id="tanggal" class="form-control" 
                         value="{{ $masterPengeluaran->tanggal }}">
@@ -43,7 +43,7 @@
                     @error('invoice')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
-                </div>
+                </div> --}}
 
                 <div class="mb-3">
                     <label for="jenis_id" class="form-label">Jenis Barang Keluar</label>

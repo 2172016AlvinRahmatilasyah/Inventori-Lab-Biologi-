@@ -26,27 +26,23 @@
                 <input type="hidden" name="masterPenerimaan_id" value="{{ $masterPenerimaan->id }}">
                 <input type="hidden" name="detail_penerimaan_id" value="{{ $detail_penerimaan->id }}">
 
-                <div class="mb-3">
+                {{-- <div class="mb-3">
                     <label for="tanggal" class="form-label">Tanggal Penerimaan</label>
                     <input type="date" name="tanggal" id="tanggal" class="form-control" 
-                        {{-- value="{{ isset($detail_penerimaan->penerimaanBarang) ? $detail_penerimaan->penerimaanBarang->tanggal : '' }}"> --}}
                         value="{{ $masterPenerimaan->tanggal }}">
                     @error('tanggal')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
                 
-
-                <!-- Input Invoice -->
                 <div class="mb-3">
                     <label for="invoice" class="form-label">Invoice</label>
                     <input type="text" name="invoice" id="invoice" class="form-control" readonly
-                    {{-- value="{{ isset($detail_penerimaan->penerimaanBarang) ? $detail_penerimaan->penerimaanBarang->invoice : '' }}" --}}
                     value="{{ $masterPenerimaan->invoice }}">
                     @error('invoice')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
-                </div>
+                </div> --}}
 
 
                 <div class="mb-3">

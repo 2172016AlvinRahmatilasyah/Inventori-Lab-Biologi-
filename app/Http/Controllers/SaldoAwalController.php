@@ -33,14 +33,14 @@ class SaldoAwalController extends Controller
             'tahun' => 'required|string',
             'bulan' => 'required|string|in:01,02,03,04,05,06,07,08,09,10,11,12',
             'saldo_awal' => 'required',
-            'total_terima' => 'required',
-            'total_keluar' => 'required',
-            'saldo_akhir' => 'required',
+            // 'total_terima' => 'required',
+            // 'total_keluar' => 'required',
+            // 'saldo_akhir' => 'required',
         ]);
         $saldo_awal = (float) str_replace(['.', ','], ['', '.'], $request->input('saldo_awal'));
-        $total_terima = (float) str_replace(['.', ','], ['', '.'], $request->input('total_terima'));
-        $total_keluar = (float) str_replace(['.', ','], ['', '.'], $request->input('total_keluar'));
-        $saldo_akhir = (float) str_replace(['.', ','], ['', '.'], $request->input('saldo_akhir'));
+        // $total_terima = (float) str_replace(['.', ','], ['', '.'], $request->input('total_terima'));
+        // $total_keluar = (float) str_replace(['.', ','], ['', '.'], $request->input('total_keluar'));
+        // $saldo_akhir = (float) str_replace(['.', ','], ['', '.'], $request->input('saldo_akhir'));
 
         try {
             $new_saldo_awal = new SaldoAwal();
@@ -48,9 +48,9 @@ class SaldoAwalController extends Controller
             $new_saldo_awal->tahun = $request->tahun;
             $new_saldo_awal->bulan = $request->bulan;
             $new_saldo_awal->saldo_awal = $saldo_awal;
-            $new_saldo_awal->total_terima = $total_terima;
-            $new_saldo_awal->total_keluar = $total_keluar;
-            $new_saldo_awal->saldo_akhir = $saldo_akhir;
+            $new_saldo_awal->total_terima = 0;
+            $new_saldo_awal->total_keluar = 0;
+            $new_saldo_awal->saldo_akhir = 0;
             $new_saldo_awal->save();
 
             return redirect('/saldo-awal')->with('success', 'Added Successfully');

@@ -21,7 +21,7 @@
 
     <div class="container">
         <div class="card mx-auto" style="max-width: 500px;">
-            <div class="card-header text-center">Edit Supkonproy</div>
+            <div class="card-header text-center">Edit {{ $jenis }}</div>
             @if (Session::has('fail'))
                 <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
             @endif
