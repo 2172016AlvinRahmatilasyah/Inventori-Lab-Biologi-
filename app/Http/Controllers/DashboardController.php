@@ -109,10 +109,20 @@ class DashboardController extends Controller
         $barangKadaluarsaMendekati = Barang::where('kadaluarsa', '<=', $twoMonthsLater)->get();
         $totalStok = Barang::sum('stok');
 
-        // Mengambil data saldo awal
+        // Ambil filter tahun dan bulan dari request
+        $tahun = $request->get('tahun');
+        $bulan = $request->get('bulan');
+
+        // Jika tahun dan bulan dipilih, filter berdasarkan tahun dan bulan
         $allSaldoAwals = SaldoAwal::with('barang')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->get();
+                ->where('tahun', $tahun)
+                ->where('bulan', $bulan)
+                ->get();
+
+        // // Mengambil data saldo awal
+        // $allSaldoAwals = SaldoAwal::with('barang')
+        //     ->whereBetween('created_at', [$startDate, $endDate])
+        //     ->get();
 
         // Menghitung total saldo
         $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
@@ -512,88 +522,95 @@ class DashboardController extends Controller
         return $pdf->download('laporan-total-stok-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
 
-    public function showSaldo($type, Request $request)
+    public function showSaldo($type, Request $request) 
     {
-        // Mengambil filter dari request
-        $filter = $request->get('filter', 'current_month');
+        // Filter berdasarkan tahun dan bulan
+        $tahun = $request->get('tahun');
+        $bulan = $request->get('bulan');
 
-        // Mendapatkan rentang tanggal berdasarkan filter
-        $dates = $this->getDateRange($request, $filter);
-        $startDate = $dates['startDate'];
-        $endDate = $dates['endDate'];
-        $startYear = $dates['startYear'];
-        $endYear = $dates['endYear'];
-        $startMonth = $dates['startMonth'];
-        $endMonth = $dates['endMonth'];
-        
-
-        // If the filter is based on a date range (e.g., 'last_30_days'), use that range
-        if (isset($startDate) && isset($endDate)) {
+        // Filter default jika tahun dan bulan tidak dipilih
+        if ($tahun && $bulan) {
             $allSaldoAwals = SaldoAwal::with('barang')
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->where('tahun', $tahun)
+                ->where('bulan', $bulan)
                 ->get();
         } else {
-            // Otherwise, filter by year and month
-            $allSaldoAwals = SaldoAwal::with('barang')
-                ->where('tahun', '>=', $startYear)
-                ->where('tahun', '<=', $endYear)
-                ->where('bulan', '>=', $startMonth)
-                ->where('bulan', '<=', $endMonth)
-                ->get();
+            // Filter default berdasarkan rentang waktu (jika ada)
+            $filter = $request->get('filter', 'current_month');
+            $dates = $this->getDateRange($request, $filter);
+            $startDate = $dates['startDate'];
+            $endDate = $dates['endDate'];
+
+            if (isset($startDate) && isset($endDate)) {
+                $allSaldoAwals = SaldoAwal::with('barang')
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+            } else {
+                $allSaldoAwals = SaldoAwal::with('barang')->get();
+            }
         }
+
         $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
         $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
         $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
-    
+
         // Mengirim data ke view
         return view('laporan.laporan-saldo-awal', 
-                    compact('allSaldoAwals', 'type', 'filter', 'totalSaldoAwal', 
-                            'totalSaldoTerima', 'totalSaldoKeluar', 'startDate'));
+                    compact('allSaldoAwals', 'type', 'tahun', 'bulan', 
+                            'totalSaldoAwal', 'totalSaldoTerima', 'totalSaldoKeluar'));
     }
-    
+
+
     public function downloadSaldoAwalPdf($type, Request $request)
     {
-        $filter = $request->get('filter', 'current_month');
+        // Ambil filter tahun dan bulan dari request
+        $tahun = $request->get('tahun');
+        $bulan = $request->get('bulan');
 
-        // Mendapatkan rentang tanggal berdasarkan filter
-        $dates = $this->getDateRange($request, $filter);
-        $startDate = $dates['startDate'];
-        $endDate = $dates['endDate'];
-        $startYear = $dates['startYear'];
-        $endYear = $dates['endYear'];
-        $startMonth = $dates['startMonth'];
-        $endMonth = $dates['endMonth'];
-
-        // If the filter is based on a date range (e.g., 'last_30_days'), use that range
-        if (isset($startDate) && isset($endDate)) {
+        // Jika tahun dan bulan dipilih, filter berdasarkan tahun dan bulan
+        if ($tahun && $bulan) {
             $allSaldoAwals = SaldoAwal::with('barang')
-                ->whereBetween('created_at', [$startDate, $endDate])
+                ->where('tahun', $tahun)
+                ->where('bulan', $bulan)
                 ->get();
         } else {
-            // Otherwise, filter by year and month
-            $allSaldoAwals = SaldoAwal::with('barang')
-                ->where('tahun', '>=', $startYear)
-                ->where('tahun', '<=', $endYear)
-                ->where('bulan', '>=', $startMonth)
-                ->where('bulan', '<=', $endMonth)
-                ->get();
+            // Jika tidak ada filter tahun dan bulan, gunakan rentang waktu berdasarkan filter
+            $filter = $request->get('filter', 'current_month');
+            $dates = $this->getDateRange($request, $filter);
+            $startDate = $dates['startDate'];
+            $endDate = $dates['endDate'];
+
+            if (isset($startDate) && isset($endDate)) {
+                $allSaldoAwals = SaldoAwal::with('barang')
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+            } else {
+                $allSaldoAwals = SaldoAwal::with('barang')->get();
+            }
         }
 
-        // Prepare additional data for the PDF
+        // Hitung total saldo awal, total terima, dan total keluar
+        $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
+        $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
+        $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
+
+        // Data tambahan untuk PDF
         $data = [
             'date' => Carbon::now()->toFormattedDateString(),
-            'filter' => $filter,
+            // 'filter' => $filter,
             'user' => Auth::user()->name,
-            'startDate' => $startDate->toFormattedDateString(),
-            'endDate' => $endDate->toFormattedDateString(),
+            'tahun' => $tahun,
+            'bulan' => $bulan,
+            'totalSaldoAwal' => $totalSaldoAwal,
+            'totalSaldoTerima' => $totalSaldoTerima,
+            'totalSaldoKeluar' => $totalSaldoKeluar,
         ];
 
-        // Load the view and pass all the data (merged compact variables with additional data)
-        $pdf = PDF::loadView('laporan.laporan-saldo-awal-pdf', array_merge(compact('allSaldoAwals', 'type', 'filter'), $data));
+        // Load view PDF
+        $pdf = PDF::loadView('laporan.laporan-saldo-awal-pdf', array_merge(compact('allSaldoAwals', 'type', 'tahun', 'bulan'), $data));
 
-        // Download the PDF with a specific name
+        // Download file PDF dengan nama yang sesuai
         return $pdf->download('laporan_saldo_awal_' . $type . '.pdf');
     }
-
 
 }

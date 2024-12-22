@@ -19,38 +19,47 @@
         <!-- Filter Form -->
         <div class="card-body">
             <form method="GET" action="{{ route('laporan-saldo', ['type' => $type]) }}">
-                    <div class="form-row align-items-center mt-4 mb-4">
-                        <div class="col-auto">
-                            <select name="filter" class="form-control" id="filter">
-                                <option value="current_month" {{ request('filter') == 'current_month' ? 'selected' : '' }}>Bulan Ini</option>
-                                <option value="current_year" {{ request('filter') == 'current_year' ? 'selected' : '' }}>Tahun Ini</option>
-                                <option value="last_30_days" {{ request('filter') == 'last_30_days' ? 'selected' : '' }}>30 Hari Terakhir</option>
-                                <option value="last_60_days" {{ request('filter') == 'last_60_days' ? 'selected' : '' }}>60 Hari Terakhir</option>
-                                <option value="last_90_days" {{ request('filter') == 'last_90_days' ? 'selected' : '' }}>90 Hari Terakhir</option>
-                                <option value="last_12_months" {{ request('filter') == 'last_12_months' ? 'selected' : '' }}>12 Bulan Terakhir</option>
-                                <option value="month_to_date" {{ request('filter') == 'month_to_date' ? 'selected' : '' }}>Awal Bulan Ini Hingga Tanggal Saat Ini</option>
-                                <option value="previous_month" {{ request('filter') == 'previous_month' ? 'selected' : '' }}>Bulan Lalu</option>
-                                <option value="previous_year" {{ request('filter') == 'previous_year' ? 'selected' : '' }}>Tahun Lalu</option>
-                                <option value="year_to_date" {{ request('filter') == 'year_to_date' ? 'selected' : '' }}>Tahun Ini Sampai Tanggal Saat Ini</option>
-                                <option value="custom_dates" {{ request('filter') == 'custom_dates' ? 'selected' : '' }}>Custom</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <input type="date" name="start_date" class="form-control" placeholder="Start Date" value="{{ request('start_date') }}" id="start_date" {{ request('filter') == 'custom_dates' ? '' : 'disabled' }}>
-                        </div>
-                        <div class="col-auto">
-                            <input type="date" name="end_date" class="form-control" placeholder="End Date" value="{{ request('end_date') }}" id="end_date" {{ request('filter') == 'custom_dates' ? '' : 'disabled' }}>
-                        </div>
-                        <div class="col-auto">
-                            <button type="submit" class="btn btn-primary">Filter</button>
-                        </div>
-                        <div class="col-auto">
-                            <!-- Tombol untuk Download PDF -->
-                            <a href="{{ route('laporan-saldo-awal-pdf', ['type' => $type])  }}?filter={{ request('filter') }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}" class="btn btn-danger">Download PDF</a>
-                        </div>
-                            {{-- <a href="{{ route('generateReport') }}?download_pdf=true" class="btn btn-success">Download PDF</a> --}}
-            </div>
-        </form>
+                <div class="form-row align-items-center mt-4 mb-4">
+                    <!-- Filter Tahun -->
+                    <div class="col-auto">
+                        <select name="tahun" class="form-control" id="tahun">
+                            <option value="">Pilih Tahun</option>
+                            @for ($i = 2020; $i <= now()->year+1; $i++)
+                                <option value="{{ $i }}" {{ request('tahun') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                            @endfor
+                        </select>
+                    </div>
+            
+                    <!-- Filter Bulan -->
+                    <div class="col-auto">
+                        <select name="bulan" class="form-control" id="bulan">
+                            <option value="">Pilih Bulan</option>
+                            <option value="01" {{ request('bulan') == '01' ? 'selected' : '' }}>Januari</option>
+                            <option value="02" {{ request('bulan') == '02' ? 'selected' : '' }}>Februari</option>
+                            <option value="03" {{ request('bulan') == '03' ? 'selected' : '' }}>Maret</option>
+                            <option value="04" {{ request('bulan') == '04' ? 'selected' : '' }}>April</option>
+                            <option value="05" {{ request('bulan') == '05' ? 'selected' : '' }}>Mei</option>
+                            <option value="06" {{ request('bulan') == '06' ? 'selected' : '' }}>Juni</option>
+                            <option value="07" {{ request('bulan') == '07' ? 'selected' : '' }}>Juli</option>
+                            <option value="08" {{ request('bulan') == '08' ? 'selected' : '' }}>Agustus</option>
+                            <option value="09" {{ request('bulan') == '09' ? 'selected' : '' }}>September</option>
+                            <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
+                            <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
+                            <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
+                        </select>
+                    </div>
+            
+                    <!-- Tombol Filter -->
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+            
+                    <!-- Tombol Download PDF -->
+                    <div class="col-auto">
+                        <a href="{{ route('laporan-saldo-awal-pdf', ['type' => $type]) }}?tahun={{ request('tahun') }}&bulan={{ request('bulan') }}" class="btn btn-danger">Download PDF</a>
+                    </div>
+                </div>
+            </form>            
     </div>
 
         <!-- Saldo Report Table -->
@@ -64,8 +73,8 @@
                             <th>Tahun</th>
                             <th>Bulan</th>
                             <th>{{ $type }}</th>
-                            <th>Tanggal Ditambah</th>
-                            <th>Tanggal Diupdate</th>
+                            {{-- <th>Tanggal Ditambah</th>
+                            <th>Tanggal Diupdate</th> --}}
                         </tr>
                     </thead>
                     <tbody>
@@ -85,13 +94,13 @@
                                             {{$saldo_awal->total_keluar, 0,  }}
                                         @endif
                                     </td>
-                                    <td>{{ $saldo_awal->created_at }}</td>
-                                    <td>{{ $saldo_awal->updated_at }}</td>
+                                    {{-- <td>{{ $saldo_awal->created_at }}</td>
+                                    <td>{{ $saldo_awal->updated_at }}</td> --}}
                                 </tr>
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="7">Data tidak ditemukan!</td>
+                                <td colspan="5">Data tidak ditemukan!</td>
                             </tr>
                         @endif
                     </tbody>

@@ -90,10 +90,9 @@ Route::middleware('auth')->group(function () {
     Route::get('saldoawals', [SaldoAwalController::class, 'loadAllSaldoAwals']);
     Route::get('add-saldo-awal', [SaldoAwalController::class, 'loadAddSaldoAwalForm']);
     Route::post('add-saldo-awal', [SaldoAwalController::class, 'AddSaldoAwal'])->name('AddSaldoAwal');
-    Route::get('get-previous-saldo-akhir', [SaldoAwalController::class, 'getSaldoAkhirSebelum'])
-                ->name('getSaldoAkhirSebelum');
-
-   
+    Route::get('get-saldo-awal-dan-transaksi', [SaldoAwalController::class, 'getSaldoAwalDanTransaksi'])->name('getSaldoAwalDanTransaksi');
+    Route::get('/detail-saldo-awal/{barang_id}', [SaldoAwalController::class, 'detailSaldoAwal'])->name('detailSaldoAwal');
+    
     Route::get('supkonpro/{jenis}', [SupkonproController::class, 'loadAllSupkonpros'])->name('supkonpro');
     Route::get('supkonpro-search/{jenis}', [SupkonproController::class, 'search'])->name('supkonpros.search');
     Route::get('supkonpros/{jenis}', [SupkonproController::class, 'loadAllSupkonpros']);

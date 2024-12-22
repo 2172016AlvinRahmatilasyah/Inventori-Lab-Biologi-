@@ -72,18 +72,23 @@
                                         <tr><td colspan="10" class="text-center">-----</td></tr>
                                     @endif
                                     <tr>
-                                        <td colspan="10" class="text-center"><strong>Barang: {{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</strong></td>
-                                    </tr>
+                                        <td colspan="10" class="text-center" style="background-color: #f8f9fa;">
+                                            <div class="justify-content-between align-items-center px-3">
+                                                <strong>Barang: {{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</strong>
+                                                <a href="{{ route('detailSaldoAwal', ['barang_id' => $saldo_awal->barang_id]) }}" class="btn btn-primary btn-sm">Detail Kartu Stok</a>
+                                            </div>
+                                        </td>
+                                    </tr>                                                                       
                                 @endif
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</td>
                                     <td>{{ $saldo_awal->tahun }}</td>
                                     <td>{{ $saldo_awal->bulan }}</td>
-                                    <td style="text-align: right;">{{ $saldo_awal->saldo_awal }}</td>
-                                    <td style="text-align: right;">{{ $saldo_awal->total_terima }}</td>
-                                    <td style="text-align: right;">{{ $saldo_awal->total_keluar }}</td>
-                                    <td style="text-align: right;">{{ $saldo_awal->saldo_akhir }}</td>
+                                    <td style="text-align: right;">{{ number_format($saldo_awal->saldo_awal, 2, '.', ',') }}</td>
+                                    <td style="text-align: right;">{{ number_format($saldo_awal->total_terima, 2, '.', ',') }}</td>
+                                    <td style="text-align: right;">{{ number_format($saldo_awal->total_keluar, 2, '.', ',') }}</td>
+                                    <td style="text-align: right;">{{ number_format($saldo_awal->saldo_akhir, 2, '.', ',') }}</td>
                                     <td>{{ $saldo_awal->created_at }}</td>
                                     <td>{{ $saldo_awal->updated_at }}</td>
                                 </tr>

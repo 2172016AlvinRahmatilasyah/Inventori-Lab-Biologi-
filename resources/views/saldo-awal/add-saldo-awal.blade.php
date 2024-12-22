@@ -89,46 +89,29 @@
                     @enderror
                 </div>
                 
-                
                 <div class="mb-3">
                     <label for="saldo_awal" class="form-label">Saldo Awal</label>
                     <input type="text" name="saldo_awal" id="saldo_awal" readonly class="form-control" 
-                           value="{{ old('saldo_awal') }}" placeholder="Enter saldo awal" readonly
-                    >
-                    @error('saldo_awal')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div>             
+                           value="{{ old('saldo_awal') }}" placeholder="Saldo awal akan muncul otomatis">
+                </div>
                 
-                {{-- <div class="mb-3">
+                <div class="mb-3">
                     <label for="total_terima" class="form-label">Total Terima</label>
-                    <input type="decimal" name="total_terima" id="total_terima" class="form-control" 
-                           value="{{ old('total_terima') }}" placeholder="Enter total terima" 
-                    >
-                    @error('total_terima')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
+                    <input type="text" name="total_terima" id="total_terima" readonly class="form-control"
+                           value="{{ old('total_terima') }}" placeholder="Total terima akan muncul otomatis">
                 </div>
                 
                 <div class="mb-3">
                     <label for="total_keluar" class="form-label">Total Keluar</label>
-                    <input type="decimal" name="total_keluar" id="total_keluar" class="form-control" 
-                           value="{{ old('total_keluar') }}" placeholder="Enter total keluar" 
-                    >
-                    @error('total_keluar')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div>
-                
+                    <input type="text" name="total_keluar" id="total_keluar" readonly class="form-control"
+                           value="{{ old('total_keluar') }}" placeholder="Total keluar akan muncul otomatis">
+                </div>                
+                              
                 <div class="mb-3">
                     <label for="saldo_akhir" class="form-label">Saldo Akhir</label>
-                    <input type="decimal" name="saldo_akhir" id="saldo_akhir" class="form-control" 
-                           value="{{ old('saldo_akhir') }}" placeholder="Enter saldo akhir" 
-                    >
-                    @error('saldo_akhir')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div> --}}
+                    <input type="text" name="saldo_akhir" id="saldo_akhir" readonly class="form-control" 
+                           value="{{ old('saldo_akhir') }}" placeholder="Saldo akhir akan dihitung otomatis">
+                </div>                
                 
                 <button type="submit" class="btn btn-primary w-100">Save</button>
             </form>
@@ -136,55 +119,63 @@
     </div>
 </div>
 <script>
-    $(document).ready(function() {
-        function calculateSaldoAkhir() {
-            let saldoAwal =  parseFloat(removeThousandsSeparator($('#saldo_awal').val())) || 0;
-            let totalTerima = parseFloat(removeThousandsSeparator($('#total_terima').val())) || 0;
-            let totalKeluar = parseFloat(removeThousandsSeparator($('#total_keluar').val())) || 0;
-            let saldoAkhir = saldoAwal + totalTerima - totalKeluar;
-            $('#saldo_akhir').val(formatNumber(saldoAkhir));
-        }
-
-        function removeThousandsSeparator(value) {
-            return value.replace(/\./g, '');
-        }
-
-        function formatNumber(value) {
-            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        $('#saldo_awal, #total_terima, #total_keluar').on('input', function() {
-            calculateSaldoAkhir();
-        });
-
-        $('#saldo_awal, #total_terima, #total_keluar, #saldo_akhir').on('blur', function() {
-            $(this).val(formatNumber(parseFloat(removeThousandsSeparator($(this).val())) || 0));
-        });
-
-        $('#barang_id, #bulan, #tahun').change(function() {
-            let barangId = $('#barang_id').val();
-            let bulan = $('#bulan').val();
-            let tahun = $('#tahun').val();
-
-            if (barangId && bulan && tahun) {
-                $.ajax({
-                    url: "{{ route('getSaldoAkhirSebelum') }}",
-                    type: "GET",
-                    data: { barang_id: barangId, bulan: bulan, tahun: tahun },
-                    success: function(response) {
-                        $('#saldo_awal').val(formatNumber(parseFloat(response.saldo_akhir) || 0));
-                        calculateSaldoAkhir();
-                    },
-                    error: function() {
-                        $('#saldo_awal').val(formatNumber(0));
-                        calculateSaldoAkhir();
-                    }
-                });
-            } else {
-                $('#saldo_awal').val(formatNumber(0)); // Reset to 0 if fields are incomplete
-                calculateSaldoAkhir();
-            }
-        });
+    $(document).on('submit', 'form', function () {
+        $('#saldo_awal').val($('#saldo_awal').val().replace(/,/g, ''));
+        $('#total_terima').val($('#total_terima').val().replace(/,/g, ''));
+        $('#total_keluar').val($('#total_keluar').val().replace(/,/g, ''));
+        $('#saldo_akhir').val($('#saldo_akhir').val().replace(/,/g, ''));
     });
+
+   function fetchSaldoAwalDanTransaksi() {
+        let barangId = $('#barang_id').val();
+        let bulan = $('#bulan').val();
+        let tahun = $('#tahun').val();
+
+        if (barangId && bulan && tahun) {
+            $.ajax({
+                url: "{{ route('getSaldoAwalDanTransaksi') }}",
+                type: "GET",
+                data: { barang_id: barangId, bulan: bulan, tahun: tahun },
+                success: function(response) {
+                    // Update nilai saldo awal, total terima, dan total keluar
+                    $('#saldo_awal').val(response.saldo_awal || 0);
+                    $('#total_terima').val(response.total_terima || 0);
+                    $('#total_keluar').val(response.total_keluar || 0);
+
+                    // Panggil fungsi untuk menghitung saldo akhir
+                    calculateSaldoAkhir();
+                },
+                error: function() {
+                    // Reset nilai jika terjadi error
+                    $('#saldo_awal').val(0);
+                    $('#total_terima').val(0);
+                    $('#total_keluar').val(0);
+                    calculateSaldoAkhir();
+                }
+            });
+        } else {
+            // Reset nilai jika input tidak lengkap
+            $('#saldo_awal').val(0);
+            $('#total_terima').val(0);
+            $('#total_keluar').val(0);
+            calculateSaldoAkhir();
+        }
+    }
+
+    // Panggil fetchSaldoAwalDanTransaksi setiap kali barang, bulan, atau tahun berubah
+    $('#barang_id, #bulan, #tahun').change(function() {
+        fetchSaldoAwalDanTransaksi();
+    });
+
+    function calculateSaldoAkhir() {
+        let saldoAwal = parseFloat($('#saldo_awal').val().replace(/,/g, '')) || 0;
+        let totalTerima = parseFloat($('#total_terima').val().replace(/,/g, '')) || 0;
+        let totalKeluar = parseFloat($('#total_keluar').val().replace(/,/g, '')) || 0;
+
+        let saldoAkhir = saldoAwal + totalTerima - totalKeluar;
+
+        // Format angka dengan 2 desimal
+        $('#saldo_akhir').val(saldoAkhir.toFixed(2));
+    }
 </script>
 @endsection

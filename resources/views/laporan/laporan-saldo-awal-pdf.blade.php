@@ -26,8 +26,9 @@
     
     <p>Tanggal laporan dibuat: {{ $date }}</p>
     <p>Pembuat: {{ $user }}</p>
-    <p>Berdasarkan: {{ $filter }}</p>
-    <p>Tanggal: {{ $startDate }} - {{ $endDate }}</p>
+    <p>Tahun: {{ $tahun }}</p>
+    <p>Bulan: {{ $bulan }}</p>
+    {{-- <p>Tanggal: {{ $startDate }} - {{ $endDate }}</p> --}}
     <br>
     
     <h3>Data {{ $type }}</h3>
@@ -39,8 +40,8 @@
                     <th>Tahun</th>
                     <th>Bulan</th>
                     <th>{{ $type }}</th>
-                    <th>Tanggal Ditambah</th>
-                    <th>Tanggal Diupdate</th>
+                    {{-- <th>Tanggal Ditambah</th>
+                    <th>Tanggal Diupdate</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -60,13 +61,13 @@
                                     {{$saldo_awal->total_keluar, 0,  }}
                                 @endif
                             </td>
-                            <td>{{ $saldo_awal->created_at }}</td>
-                            <td>{{ $saldo_awal->updated_at }}</td>
+                            {{-- <td>{{ $saldo_awal->created_at }}</td>
+                            <td>{{ $saldo_awal->updated_at }}</td> --}}
                         </tr>
                     @endforeach
                 @else
                     <tr>
-                        <td colspan="7">Data tidak ditemukan!</td>
+                        <td colspan="5">Data tidak ditemukan!</td>
                     </tr>
                 @endif
             </tbody>

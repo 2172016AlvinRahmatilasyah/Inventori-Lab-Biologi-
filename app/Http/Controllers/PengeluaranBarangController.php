@@ -138,34 +138,34 @@ class PengeluaranBarangController extends Controller
             $barang->stok -= $request->jumlah_keluar[$key];
             $barang->save();
             
-            // Update saldo_awals berdasarkan bulan dan barang_id
-            $tanggal = \Carbon\Carbon::parse($request->tanggal);
-            $bulan = $tanggal->month;  // Ambil bulan dari tanggal pengeluaran
-            $tahun = $tanggal->year;   // Ambil tahun dari tanggal pengeluaran
+            // // Update saldo_awals berdasarkan bulan dan barang_id
+            // $tanggal = \Carbon\Carbon::parse($request->tanggal);
+            // $bulan = $tanggal->month;  // Ambil bulan dari tanggal pengeluaran
+            // $tahun = $tanggal->year;   // Ambil tahun dari tanggal pengeluaran
 
-            // Cek apakah saldo_awals sudah ada untuk bulan dan tahun tersebut dan barang_id yang sama
-            $saldoAwal = SaldoAwal::where('barang_id', $barangId)
-                                ->where('bulan', $bulan)
-                                ->where('tahun', $tahun)  // Pastikan juga sesuai dengan tahun
-                                ->first();
+            // // Cek apakah saldo_awals sudah ada untuk bulan dan tahun tersebut dan barang_id yang sama
+            // $saldoAwal = SaldoAwal::where('barang_id', $barangId)
+            //                     ->where('bulan', $bulan)
+            //                     ->where('tahun', $tahun)  // Pastikan juga sesuai dengan tahun
+            //                     ->first();
 
-            if ($saldoAwal) {
-                // Jika saldo_awals sudah ada, update saldo_terima
-                $saldoAwal->total_keluar += str_replace(',', '', $request->jumlah_keluar[$key]);
-                $saldoAwal->saldo_akhir -= str_replace(',', '', $request->jumlah_keluar[$key]);
-                $saldoAwal->save();
-            } else {
-                // Jika saldo_awals belum ada, buat saldo baru
-                $saldoAwal = new SaldoAwal();
-                $saldoAwal->barang_id = $barangId;
-                $saldoAwal->bulan = $bulan;
-                $saldoAwal->tahun = $tahun;  // Set tahun
-                $saldoAwal->total_keluar = str_replace(',', '', $request->jumlah_keluar[$key]);
-                $saldoAwal->saldo_awal = 0; 
-                $saldoAwal->total_terima = 0; 
-                $saldoAwal->saldo_akhir -=  $saldoAwal->total_keluar; 
-                $saldoAwal->save();
-            }
+            // if ($saldoAwal) {
+            //     // Jika saldo_awals sudah ada, update saldo_terima
+            //     $saldoAwal->total_keluar += str_replace(',', '', $request->jumlah_keluar[$key]);
+            //     $saldoAwal->saldo_akhir -= str_replace(',', '', $request->jumlah_keluar[$key]);
+            //     $saldoAwal->save();
+            // } else {
+            //     // Jika saldo_awals belum ada, buat saldo baru
+            //     $saldoAwal = new SaldoAwal();
+            //     $saldoAwal->barang_id = $barangId;
+            //     $saldoAwal->bulan = $bulan;
+            //     $saldoAwal->tahun = $tahun;  // Set tahun
+            //     $saldoAwal->total_keluar = str_replace(',', '', $request->jumlah_keluar[$key]);
+            //     $saldoAwal->saldo_awal = 0; 
+            //     $saldoAwal->total_terima = 0; 
+            //     $saldoAwal->saldo_akhir -=  $saldoAwal->total_keluar; 
+            //     $saldoAwal->save();
+            // }
         }
 
         return redirect()->route('master-barang-keluar')->with('success', 'Barang Keluar berhasil ditambahkan.');
@@ -214,28 +214,28 @@ class PengeluaranBarangController extends Controller
                     $masterPengeluaran->delete();
                 }
 
-                // Now, adjust the total_terima and total_keluar on saldo_awals table
-                // Get the correct month and year from master pengeluaran barang
-                $tanggalMaster = \Carbon\Carbon::parse($masterPengeluaran->tanggal);
-                $bulan = $tanggalMaster->month;
-                $tahun = $tanggalMaster->year;
+                // // Now, adjust the total_terima and total_keluar on saldo_awals table
+                // // Get the correct month and year from master pengeluaran barang
+                // $tanggalMaster = \Carbon\Carbon::parse($masterPengeluaran->tanggal);
+                // $bulan = $tanggalMaster->month;
+                // $tahun = $tanggalMaster->year;
         
-                // Find the saldo_awal record based on barang_id, bulan, and tahun
-                $saldoAwal = SaldoAwal::where('barang_id', $detail->barang_id)
-                    ->where('bulan', $bulan)  // Correctly use month from master pengeluaran
-                    ->where('tahun', $tahun)  // Correctly use year from master pengeluaran
-                    ->first();
+                // // Find the saldo_awal record based on barang_id, bulan, and tahun
+                // $saldoAwal = SaldoAwal::where('barang_id', $detail->barang_id)
+                //     ->where('bulan', $bulan)  // Correctly use month from master pengeluaran
+                //     ->where('tahun', $tahun)  // Correctly use year from master pengeluaran
+                //     ->first();
         
-                if ($saldoAwal) {
-                    // Subtract jumlah_keluar from total_keluar (as we're deleting the record)
-                    $saldoAwal->total_keluar -= $detail->jumlah_keluar;
+                // if ($saldoAwal) {
+                //     // Subtract jumlah_keluar from total_keluar (as we're deleting the record)
+                //     $saldoAwal->total_keluar -= $detail->jumlah_keluar;
         
-                    // Recalculate saldo_akhir: total_terima - total_keluar
-                    $saldoAwal->saldo_akhir = $saldoAwal->total_terima - $saldoAwal->total_keluar;
+                //     // Recalculate saldo_akhir: total_terima - total_keluar
+                //     $saldoAwal->saldo_akhir = $saldoAwal->total_terima - $saldoAwal->total_keluar;
         
-                    // Save the updated saldo_awal record
-                    $saldoAwal->save();
-                }
+                //     // Save the updated saldo_awal record
+                //     $saldoAwal->save();
+                // }
         
                 // Commit the transaction
                 DB::commit();
@@ -420,22 +420,22 @@ class PengeluaranBarangController extends Controller
             $barang->stok -= $selisihJumlah;
             $barang->save();
 
-            // Update saldo_terima pada saldo_awals
-            $tanggal = \Carbon\Carbon::parse($request->tanggal);
-            $bulan = $tanggal->month;  // Ambil bulan dari tanggal pengeluaran
+            // // Update saldo_terima pada saldo_awals
+            // $tanggal = \Carbon\Carbon::parse($request->tanggal);
+            // $bulan = $tanggal->month;  // Ambil bulan dari tanggal pengeluaran
 
-            // Cek apakah saldo_awals sudah ada untuk bulan tersebut dan barang_id yang sama
-            $saldoAwal = SaldoAwal::where('barang_id', $request->barang_id)
-                                ->where('bulan', $bulan)
-                                ->first();
+            // // Cek apakah saldo_awals sudah ada untuk bulan tersebut dan barang_id yang sama
+            // $saldoAwal = SaldoAwal::where('barang_id', $request->barang_id)
+            //                     ->where('bulan', $bulan)
+            //                     ->first();
 
-            if ($saldoAwal) {
-                // Update saldo_awals berdasarkan selisih
-                $saldoAwal->total_keluar += $selisihJumlah; // Tambahkan selisih total_harga
-                $saldoAwal->saldo_akhir = $saldoAwal->saldo_awal + $saldoAwal->total_terima - $saldoAwal->total_keluar;
-                // Tambahkan selisih total_harga
-                $saldoAwal->save();
-            }
+            // if ($saldoAwal) {
+            //     // Update saldo_awals berdasarkan selisih
+            //     $saldoAwal->total_keluar += $selisihJumlah; // Tambahkan selisih total_harga
+            //     $saldoAwal->saldo_akhir = $saldoAwal->saldo_awal + $saldoAwal->total_terima - $saldoAwal->total_keluar;
+            //     // Tambahkan selisih total_harga
+            //     $saldoAwal->save();
+            // }
 
             return redirect('/master-barang-keluar/')->with('success', 'Edit Successfully');
         } catch (\Exception $e) {

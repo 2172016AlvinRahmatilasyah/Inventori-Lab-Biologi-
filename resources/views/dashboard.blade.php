@@ -97,7 +97,44 @@
             </div>
 
         </div>
-
+        
+        <form method="GET" action="" class="mb-4">
+            <div class="form-row align-items-center">
+                <!-- Dropdown Tahun -->
+                <div class="col-auto">
+                    <select name="tahun" class="form-control">
+                        <option value="" selected>Pilih Tahun</option>
+                        @for ($i = 2020; $i <= now()->year+1; $i++)
+                            <option value="{{ $i }}" {{ request('tahun') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+        
+                <!-- Dropdown Bulan -->
+                <div class="col-auto">
+                    <select name="bulan" class="form-control">
+                        <option value="" selected>Pilih Bulan</option>
+                        <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
+                        <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
+                        <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
+                        <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
+                        <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
+                        <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
+                        <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
+                        <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
+                        <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
+                        <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
+                        <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
+                        <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
+                    </select>
+                </div>
+        
+                <!-- Tombol Filter -->
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </form>
         <!-- Content Row -->
         <div class="row">
             <!-- Saldo Awal -->
