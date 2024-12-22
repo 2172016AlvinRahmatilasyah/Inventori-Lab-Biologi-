@@ -58,8 +58,8 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Id master</th>
-                            <th>Id detail</th>
+                            {{-- <th>Id master</th>
+                            <th>Id detail</th> --}}
                             <th>Invoice</th>
                             <th>Tanggal</th>
                             <th>SupKonProy</th>
@@ -83,9 +83,9 @@
                     
                             @foreach ($all_detail_penerimaans as $barang)
                                 <tr>
-                                    <td>{{ $offset + $loop->iteration }}</td> <!-- Menggunakan offset + iteration -->
-                                    <td>{{ $barang->penerimaanBarang->id ?? 'N/A' }}</td>
-                                    <td>{{ $barang->id }}</td>
+                                    <td>{{ $offset + $loop->iteration }}</td>
+                                    {{-- <td>{{ $barang->penerimaanBarang->id ?? 'N/A' }}</td>
+                                    <td>{{ $barang->id }}</td> --}}
                                     <td>{{ $barang->penerimaanBarang->invoice ?? 'N/A' }}</td>
                                     <td>{{ $barang->penerimaanBarang->tanggal ?? 'N/A' }}</td>
                                     <td>{{ $barang->penerimaanBarang->supkonpro->nama ?? 'N/A' }}</td>
@@ -109,7 +109,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="8">Data tidak ditemukan!</td>
+                                <td colspan="14">Data tidak ditemukan!</td>
                             </tr>
                         @endif
                     </tbody>                    

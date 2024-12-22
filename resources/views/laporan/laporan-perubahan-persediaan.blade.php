@@ -61,8 +61,8 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Id Master</th>
-                            <th>Id Detail</th>
+                            {{-- <th>Id Master</th>
+                            <th>Id Detail</th> --}}
                             <th>Invoice</th>
                             <th>Tanggal</th>
                             <th>SupKonProy</th>
@@ -80,8 +80,8 @@
                         @if(isset($allData) && count($allData) > 0)
                             @foreach ($allData as $data)
                                 <tr>
-                                    <td>{{ $data->PenerimaanBarang->id ?? $data->PengeluaranBarang->id ?? 'N/A' }}</td>
-                                    <td>{{ $data->id }}</td>
+                                    {{-- <td>{{ $data->PenerimaanBarang->id ?? $data->PengeluaranBarang->id ?? 'N/A' }}</td>
+                                    <td>{{ $data->id }}</td> --}}
                                     <td>{{ $data->PenerimaanBarang->invoice ?? $data->PengeluaranBarang->invoice ?? 'N/A' }}</td>
                                     <td>{{ $data->PenerimaanBarang->tanggal ?? $data->PengeluaranBarang->tanggal ?? 'N/A' }}</td>
                                     <td>{{ $data->PenerimaanBarang->supkonpro->nama ?? $data->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>

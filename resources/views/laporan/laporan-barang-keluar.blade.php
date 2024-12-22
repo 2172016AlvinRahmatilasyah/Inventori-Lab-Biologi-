@@ -59,8 +59,8 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Id master</th>
-                    <th>Id detail</th>
+                    {{-- <th>Id master</th>
+                    <th>Id detail</th> --}}
                     <th>Invoice</th>
                     <th>Tanggal</th>
                     <th>SupKonProy</th>
@@ -81,8 +81,8 @@
                 @if(isset($barangKeluar) && count($barangKeluar) > 0)
                 @foreach ($barangKeluar as $item)
                         <tr>
-                            <td>{{ $item->pengeluaranBarang->id ?? 'N/A' }}</td>
-                            <td>{{ $item->id }}</td>
+                            {{-- <td>{{ $item->pengeluaranBarang->id ?? 'N/A' }}</td>
+                            <td>{{ $item->id }}</td> --}}
                             <td>{{ $item->pengeluaranBarang->invoice ?? 'N/A'}}</td>
                             <td>{{ $item->pengeluaranBarang->tanggal ?? 'N/A'}}</td>
                             <td>{{ $item->pengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>

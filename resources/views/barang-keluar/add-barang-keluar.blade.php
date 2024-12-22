@@ -58,12 +58,13 @@
                     <label for="supkonpro_id" class="form-label">SupKonProy</label>
                     <select name="supkonpro_id" class="form-control select2" id="supkonpro_id">
                         <option value="">Pilih Jenis SupKonProy</option>
+                        <option value="none">None</option>
                         @foreach ($all_supkonpros as $supkonpro)
                             <option value="{{ $supkonpro->id }}" data-jenis="{{ $supkonpro->jenis }}">
                                 {{ $supkonpro->jenis }} (Nama: {{ $supkonpro->nama }}) (ID: {{ $supkonpro->id }})
                             </option>
                         @endforeach
-                    </select>
+                    </select>                    
                     @error('supkonpro_id')
                         <span class="text-danger">{{$message}}</span>
                     @enderror
@@ -220,6 +221,18 @@
 
             // Update input harga_invoice dengan total seluruh barang
             $('#harga_invoice').val(totalInvoice.toLocaleString());  // Format angka dengan koma sebagai pemisah ribuan
+        });
+
+        // Logika untuk menyembunyikan atau mengatur supkonpro_id saat jenis_id berubah
+        $('#jenis_id').on('change', function () {
+            var selectedJenis = $('#jenis_id option:selected').data('jenis');
+            
+            if (selectedJenis === 'Buang / Kadaluarsa') {
+                $('#supkonpro_id').val('none').trigger('change'); // Set nilai menjadi 'none'
+                $('#supkonpro-container').hide(); // Sembunyikan input
+            } else {
+                $('#supkonpro-container').show(); // Tampilkan kembali input
+            }
         });
     });
 </script>

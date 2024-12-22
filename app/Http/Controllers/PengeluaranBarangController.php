@@ -98,7 +98,7 @@ class PengeluaranBarangController extends Controller
     {
         $request->validate([
             'jenis_id' => 'required',
-            'supkonpro_id' => 'required',
+            'supkonpro_id' => 'nullable',
             'user_id' => 'required|exists:users,id',
             'nama_pengambil' => 'required|string',
             'barang_id' => 'required|array',
@@ -110,6 +110,11 @@ class PengeluaranBarangController extends Controller
             'keterangan' => 'required|string',
             'harga_invoice' => 'required',
         ]);
+
+        $jenisBarang = JenisPengeluaran::find($request->jenis_id);
+        if ($jenisBarang && $jenisBarang->jenis === 'Buang / Kadaluarsa') {
+            $request->merge(['supkonpro_id' => 0]);
+        }
 
         // Menyimpan data pengeluaran barang
         $barangKeluar = new PengeluaranBarang();
