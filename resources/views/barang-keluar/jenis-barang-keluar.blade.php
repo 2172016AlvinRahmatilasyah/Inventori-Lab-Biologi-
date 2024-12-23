@@ -55,7 +55,7 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Id</th>
+                                <th>No</th>
                                 <th>Jenis Pengeluaran</th>
                                 {{-- <th>Tanggal Ditambah</th>
                                 <th>Tanggal Diupdate</th> --}}
@@ -66,7 +66,7 @@
                             @if(isset($all_jenis_pengeluarans) && count($all_jenis_pengeluarans) > 0)
                                 @foreach ($all_jenis_pengeluarans as $jenis)
                                     <tr>
-                                        <td>{{ $jenis->id }}</td>
+                                        <td>{{ $loop->iteration }}</td>
                                         <td>{{ $jenis->jenis}}</td>
                                         {{-- <td>{{ $jenis->created_at }}</td>
                                         <td>{{ $jenis->updated_at }}</td> --}}

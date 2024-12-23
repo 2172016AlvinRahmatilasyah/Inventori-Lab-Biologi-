@@ -96,7 +96,6 @@ class PenerimaanBarangController extends Controller
         ));
     }
 
-
     public function addBarangMasuk(Request $request)
     {
         // Validasi input
@@ -106,7 +105,13 @@ class PenerimaanBarangController extends Controller
             'user_id' => 'required|exists:users,id',
             'nama_pengantar' => 'required|string',
             'barang_id' => 'required|array',
-            'jumlah_diterima' => 'required|array',
+            'jumlah_diterima' => ['required', 'array', function ($attribute, $value, $fail) {
+                foreach ($value as $jumlah_diterima) {
+                    if ($jumlah_diterima <= 0) {
+                        $fail('Jumlah diterima harus lebih dari 0.');
+                    }
+                }
+            }],
             'harga' => 'required|array',
             'total_harga' => 'required|array',
             'tanggal' => 'required|date',
@@ -173,7 +178,6 @@ class PenerimaanBarangController extends Controller
         return redirect()->route('master-barang-masuk')->with('success', 
                                     'Barang Masuk berhasil ditambahkan.');
     }
-
 
     public function generateInvoicePenerimaan(Request $request)
     {

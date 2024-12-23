@@ -234,6 +234,14 @@
                 $('#supkonpro-container').show(); // Tampilkan kembali input
             }
         });
+
+        $(document).on('input', '.jumlah-keluar', function() {
+            var value = $(this).val();
+            if (value <= 0) {
+                alert('Jumlah keluar harus lebih dari 0');
+                $(this).val(''); // Reset nilai input
+            }
+        });
     });
 </script>
 @endsection

@@ -227,6 +227,14 @@
             // Update input harga_invoice dengan total seluruh barang
             $('#harga_invoice').val(totalInvoice.toLocaleString());  // Format angka dengan koma sebagai pemisah ribuan
         });
+        $(document).on('input', '.jumlah-diterima', function() {
+            var value = $(this).val();
+            if (value <= 0) {
+                alert('Jumlah diterima harus lebih dari 0');
+                $(this).val(''); // Reset nilai input
+            }
+        });
+
     });
 </script>
 @endsection

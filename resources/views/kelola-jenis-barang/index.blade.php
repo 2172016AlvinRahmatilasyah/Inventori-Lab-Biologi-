@@ -60,7 +60,7 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Id</th>
+                                <th>No</th>
                                 <th>Nama Jenis Barang</th>
                                 <th>Satuan Stok</th>
                                 {{-- <th>Tanggal Ditambah</th>
@@ -72,7 +72,7 @@
                             @if(isset($all_jenis_barangs) && count($all_jenis_barangs) > 0)
                                 @foreach ($all_jenis_barangs as $jenisbarang)
                                     <tr>
-                                        <td>{{ $jenisbarang->id }}</td>
+                                        <td>{{ $loop->iteration }}</td>
                                         <td>{{ $jenisbarang->nama_jenis_barang }}</td>
                                         <td>{{ $jenisbarang->satuan_stok }}</td>
                                         {{-- <td>{{ $jenisbarang->created_at }}</td>

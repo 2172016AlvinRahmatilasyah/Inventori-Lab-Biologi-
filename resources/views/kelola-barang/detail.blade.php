@@ -50,8 +50,8 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Id master</th>
-                                <th>Id detail</th>
+                                {{-- <th>Id master</th>
+                                <th>Id detail</th> --}}
                                 <th>Invoice</th>
                                 <th>Tanggal</th>
                                 <th>SupKonProy</th>
@@ -71,8 +71,8 @@
                                 @foreach ($all_master_penerimaans as $master_barang)
                                     @foreach ($master_barang->detailpenerimaanbarang as $detail)
                                         <tr>
-                                            <td>{{ $master_barang->id }}</td>
-                                            <td>{{ $detail->id }}</td>
+                                            {{-- <td>{{ $master_barang->id }}</td>
+                                            <td>{{ $detail->id }}</td> --}}
                                             <td>{{ $master_barang->invoice }}</td>
                                             <td>{{ $master_barang->tanggal }}</td>
                                             <td>{{ $master_barang->supkonpro->nama ?? 'N/A' }}</td>
@@ -90,7 +90,7 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="12">Data tidak ditemukan!</td>
+                                    <td colspan="10">Data tidak ditemukan!</td>
                                 </tr>
                             @endif
                         </tbody>

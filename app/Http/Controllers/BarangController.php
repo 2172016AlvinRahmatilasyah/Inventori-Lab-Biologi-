@@ -49,8 +49,8 @@ class BarangController extends Controller
             'brand' => 'required|string',
             'nama_barang' => 'required|string',
             'no_catalog' => 'required|string',
-            'jenis_barang_id' => 'required|exists:jenis_barangs,id', // Pastikan jenis_barang_id valid
-            'stok' => 'required|numeric',
+            'jenis_barang_id' => 'required|exists:jenis_barangs,id', 
+            'stok' => ['required', 'gt:0'], 
             'kadaluarsa' => 'nullable|date',
             'lokasi' => 'required|string',
             'status_barang' => 'nullable|string',

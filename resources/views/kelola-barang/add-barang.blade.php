@@ -76,7 +76,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="stok" class="form-label">Stok</label>
-                    <input type="decimal" name="stok" id="stok" class="form-control" 
+                    <input type="decimal" name="stok" id="stok" class="form-control stok" 
                       value="{{ old('stok') }}" placeholder="Enter stok barang">
                     @error('stok')
                         <span class="text-danger">{{ $message }}</span>
@@ -147,6 +147,14 @@
                 $('#kadaluarsa-container').hide();  // Hide the kadaluarsa input
             } else {
                 $('#kadaluarsa-container').show();  // Show the kadaluarsa input
+            }
+        });
+
+        $(document).on('input', '.stok', function() {
+            var value = $(this).val();
+            if (value <= 0) {
+                alert('Jumlah stok harus lebih dari 0');
+                $(this).val(''); // Reset nilai input
             }
         });
     });

@@ -102,7 +102,13 @@ class PengeluaranBarangController extends Controller
             'user_id' => 'required|exists:users,id',
             'nama_pengambil' => 'required|string',
             'barang_id' => 'required|array',
-            'jumlah_keluar' => 'required|array',
+            'jumlah_keluar' => ['required', 'array', function ($attribute, $value, $fail) {
+                foreach ($value as $jumlah_keluar) {
+                    if ($jumlah_keluar <= 0) {
+                        $fail('Jumlah keluar harus lebih dari 0.');
+                    }
+                }
+            }],
             'harga' => 'required|array',
             'total_harga' => 'required|array',
             'tanggal' => 'required|date',
