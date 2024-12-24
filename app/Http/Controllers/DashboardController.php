@@ -7,11 +7,14 @@ use App\Models\Barang;
 use App\Models\barang as ModelsBarang;
 use App\Models\DetailPenerimaanBarang;
 use App\Models\DetailPengeluaranBarang;
+use App\Models\JenisPenerimaan;
+use App\Models\JenisPengeluaran;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Http\Request;
 use App\Models\PenerimaanBarang;
 use App\Models\PengeluaranBarang;
 use App\Models\SaldoAwal;
+use App\Models\supkonpro;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -154,32 +157,60 @@ class DashboardController extends Controller
 
     public function showBarangMasuk(Request $request)
     {
-        // Mengambil filter dari request
+        // Retrieve filter from the request
         $filter = $request->get('filter', 'current_month');
-
-        // Mendapatkan rentang tanggal berdasarkan filter
         $dates = $this->getDateRange($request, $filter);
+
         $startDate = $dates['startDate'];
         $endDate = $dates['endDate'];
 
-        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
-        $barangMasuk = DetailPenerimaanBarang::with('barang')
-            ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate) {
-                $query->whereBetween('tanggal', [$startDate, $endDate]);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $all_master_penerimaans = PenerimaanBarang::with('barang')
-            ->whereBetween('tanggal', [$startDate, $endDate])
-            ->get();
-        // Siapkan data untuk laporan
+        // Base query for DetailPenerimaanBarang with relationships
+        $query = DetailPenerimaanBarang::with('barang', 'penerimaanBarang.supkonpro', 'penerimaanBarang.jenispenerimaanbarang');
+
+        // Filter by date range
+        if ($startDate && $endDate) {
+            $query->whereHas('penerimaanBarang', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('tanggal', [$startDate, $endDate]);
+            });
+        }
+
+        // Filter by transaction type
+        if ($request->filled('transaction_type')) {
+            $query->whereHas('penerimaanBarang.jenispenerimaanbarang', function ($q) use ($request) {
+                $q->where('id', $request->transaction_type);
+            });
+        }
+
+        // Filter by supkonpro
+        if ($request->filled('supkonpro')) {
+            $query->whereHas('penerimaanBarang.supkonpro', function ($q) use ($request) {
+                $q->where('id', $request->supkonpro);
+            });
+        }
+
+        // Filter by product
+        if ($request->filled('product')) {
+            $query->where('barang_id', $request->product);
+        }
+
+        // Execute the query to retrieve filtered data
+        $barangMasuk = $query->orderBy('created_at', 'desc')->get();
+
+        // Retrieve options for filters
+        $transactionTypes = JenisPenerimaan::all();
+        $supkonpro = SupKonPro::all();
+        $products = Barang::all();
+
+        // Prepare data for the view
         $data = [
             'title' => 'Laporan Barang Masuk',
             'date' => Carbon::now()->toFormattedDateString(),
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangMasuk' => $barangMasuk,
-            'penerimaanBarang' => $all_master_penerimaans,
+            'transactionTypes' => $transactionTypes,
+            'supkonpro' => $supkonpro,
+            'products' => $products,
         ];
 
         return view('laporan.laporan-barang-masuk', $data);
@@ -188,31 +219,62 @@ class DashboardController extends Controller
 
     public function downloadBarangMasukPdf(Request $request)
     {
-        // Mengambil filter dari request
+        // Retrieve filter from the request
         $filter = $request->get('filter', 'current_month');
-
-        // Mendapatkan rentang tanggal berdasarkan filter
         $dates = $this->getDateRange($request, $filter);
+
         $startDate = $dates['startDate'];
         $endDate = $dates['endDate'];
 
-        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
-        $barangMasuk = DetailPenerimaanBarang::with('barang')
-            ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate) {
-                $query->whereBetween('tanggal', [$startDate, $endDate]);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
-        
-        // Siapkan data untuk laporan
+        // Base query for DetailPenerimaanBarang with relationships
+        $query = DetailPenerimaanBarang::with('barang', 'penerimaanBarang.supkonpro', 'penerimaanBarang.jenispenerimaanbarang');
+
+        // Filter by date range
+        if ($startDate && $endDate) {
+            $query->whereHas('penerimaanBarang', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('tanggal', [$startDate, $endDate]);
+            });
+        }
+
+        // Filter by transaction type
+        if ($request->filled('transaction_type')) {
+            $query->whereHas('penerimaanBarang.jenispenerimaanbarang', function ($q) use ($request) {
+                $q->where('id', $request->transaction_type);
+            });
+        }
+
+        // Filter by supkonpro
+        if ($request->filled('supkonpro')) {
+            $query->whereHas('penerimaanBarang.supkonpro', function ($q) use ($request) {
+                $q->where('id', $request->supkonpro);
+            });
+        }
+
+        // Filter by product
+        if ($request->filled('product')) {
+            $query->where('barang_id', $request->product);
+        }
+
+        // Execute the query to retrieve filtered data
+        $barangMasuk = $query->orderBy('created_at', 'desc')->get();
+
+        // Retrieve options for filters
+        $transactionTypes = JenisPenerimaan::all();
+        $supkonpro = SupKonPro::all();
+        $products = Barang::all();
+
+        // Prepare data for the view
         $data = [
             'title' => 'Laporan Barang Masuk',
             'date' => Carbon::now()->toFormattedDateString(),
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangMasuk' => $barangMasuk,
-            'startDate' => $startDate->toFormattedDateString(),
-            'endDate' => $endDate->toFormattedDateString(),
+            'transactionTypes' => $transactionTypes,
+            'supkonpro' => $supkonpro,
+            'products' => $products,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ];
 
         // Generate PDF
@@ -225,28 +287,61 @@ class DashboardController extends Controller
 
     public function showBarangKeluar(Request $request)
     {
-        // Mengambil filter dari request
+        // Retrieve filter from the request
         $filter = $request->get('filter', 'current_month');
-
-        // Mendapatkan rentang tanggal berdasarkan filter
         $dates = $this->getDateRange($request, $filter);
+
         $startDate = $dates['startDate'];
         $endDate = $dates['endDate'];
 
-        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
-        $barangKeluar = DetailPengeluaranBarang::with('barang')
-            ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate) {
-                $query->whereBetween('tanggal', [$startDate, $endDate]);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Base query for DetailPenerimaanBarang with relationships
+        $query = DetailPengeluaranBarang::with('barang', 'pengeluaranBarang.supkonpro', 
+                 'pengeluaranBarang.jenispengeluaranbarang');
 
-        // Siapkan data untuk laporan
+        // Filter by date range
+        if ($startDate && $endDate) {
+            $query->whereHas('pengeluaranBarang', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('tanggal', [$startDate, $endDate]);
+            });
+        }
+
+        // Filter by transaction type
+        if ($request->filled('transaction_type')) {
+            $query->whereHas('pengeluaranBarang.jenispengeluaranbarang', function ($q) use ($request) {
+                $q->where('id', $request->transaction_type);
+            });
+        }
+
+        // Filter by supkonpro
+        if ($request->filled('supkonpro')) {
+            $query->whereHas('pengeluaranBarang.supkonpro', function ($q) use ($request) {
+                $q->where('id', $request->supkonpro);
+            });
+        }
+
+        // Filter by product
+        if ($request->filled('product')) {
+            $query->where('barang_id', $request->product);
+        }
+
+        // Execute the query to retrieve filtered data
+        $barangKeluar = $query->orderBy('created_at', 'desc')->get();
+
+        // Retrieve options for filters
+        $transactionTypes = JenisPengeluaran::all();
+        $supkonpro = SupKonPro::all();
+        $products = Barang::all();
+
+        // Prepare data for the view
         $data = [
+            'title' => 'Laporan Barang Masuk',
             'date' => Carbon::now()->toFormattedDateString(),
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangKeluar' => $barangKeluar,
+            'transactionTypes' => $transactionTypes,
+            'supkonpro' => $supkonpro,
+            'products' => $products,
         ];
 
         return view('laporan.laporan-barang-keluar', $data);
@@ -254,32 +349,64 @@ class DashboardController extends Controller
 
     public function downloadBarangKeluarPdf(Request $request)
     {
-        // Mengambil filter dari request
+        // Retrieve filter from the request
         $filter = $request->get('filter', 'current_month');
-
-        // Mendapatkan rentang tanggal berdasarkan filter
         $dates = $this->getDateRange($request, $filter);
+
         $startDate = $dates['startDate'];
         $endDate = $dates['endDate'];
 
-        // Mengambil data barang masuk sesuai rentang tanggal yang dipilih
-        $barangKeluar = DetailPengeluaranBarang::with('barang')
-            ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate) {
-                $query->whereBetween('tanggal', [$startDate, $endDate]);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Base query for DetailPenerimaanBarang with relationships
+        $query = DetailPengeluaranBarang::with('barang', 'pengeluaranBarang.supkonpro', 
+                 'pengeluaranBarang.jenispengeluaranbarang');
 
-        // Siapkan data untuk laporan
+        // Filter by date range
+        if ($startDate && $endDate) {
+            $query->whereHas('pengeluaranBarang', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('tanggal', [$startDate, $endDate]);
+            });
+        }
+
+        // Filter by transaction type
+        if ($request->filled('transaction_type')) {
+            $query->whereHas('pengeluaranBarang.jenispengeluaranbarang', function ($q) use ($request) {
+                $q->where('id', $request->transaction_type);
+            });
+        }
+
+        // Filter by supkonpro
+        if ($request->filled('supkonpro')) {
+            $query->whereHas('pengeluaranBarang.supkonpro', function ($q) use ($request) {
+                $q->where('id', $request->supkonpro);
+            });
+        }
+
+        // Filter by product
+        if ($request->filled('product')) {
+            $query->where('barang_id', $request->product);
+        }
+
+        // Execute the query to retrieve filtered data
+        $barangKeluar = $query->orderBy('created_at', 'desc')->get();
+
+        // Retrieve options for filters
+        $transactionTypes = JenisPengeluaran::all();
+        $supkonpro = SupKonPro::all();
+        $products = Barang::all();
+
+        // Prepare data for the view
         $data = [
+            'title' => 'Laporan Barang Masuk',
             'date' => Carbon::now()->toFormattedDateString(),
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangKeluar' => $barangKeluar,
-            'startDate' => $startDate->toFormattedDateString(),
-            'endDate' => $endDate->toFormattedDateString(),
+            'transactionTypes' => $transactionTypes,
+            'supkonpro' => $supkonpro,
+            'products' => $products,
+            'startDate'=>$startDate,
+            'endDate'=>$endDate,
         ];
-
         // Generate PDF
         $pdf = PDF::loadView('laporan.laporan-barang-keluar-pdf', $data);
         

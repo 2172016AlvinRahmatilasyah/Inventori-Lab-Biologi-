@@ -102,7 +102,7 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="14">Tidak Ada Transaksi Barang Masuk!</td>
+                    <td colspan="12">Tidak Ada Transaksi Barang Masuk!</td>
                 </tr>
             @endif
         </tbody>

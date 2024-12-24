@@ -113,24 +113,32 @@ class SupkonproController extends Controller
         }
     }
 
-
-
     public function search(Request $request, $jenis)
     {
+        // Get the search query from the request
         $query = $request->input('query');
 
-        // Tambahkan kondisi untuk jenis
+        // Split the query into individual keywords for multi-word search
+        $keywords = explode(' ', $query);
+
+        // Perform the search with conditions for `jenis`
         $all_supkonpros = supkonpro::where('jenis', ucfirst($jenis))
-            ->where(function ($q) use ($query) {
-                $q->where('nama', 'like', "%$query%")
-                ->orWhere('alamat', 'like', "%$query%")
-                ->orWhere('kota', 'like', "%$query%")
-                ->orWhere('telepon', 'like', "%$query%")
-                ->orWhere('email', 'like', "%$query%")
-                ->orWhere('status', 'like', "%$query%");
+            ->where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->where(function ($subQuery) use ($word) {
+                        $subQuery->where('nama', 'like', "%$word%")
+                            ->orWhere('alamat', 'like', "%$word%")
+                            ->orWhere('kota', 'like', "%$word%")
+                            ->orWhere('telepon', 'like', "%$word%")
+                            ->orWhere('email', 'like', "%$word%")
+                            ->orWhere('status', 'like', "%$word%");
+                    });
+                }
             })
             ->get();
 
+        // Return the view with filtered results
         return view('supkonpro.index', compact('all_supkonpros', 'jenis'));
     }
+
 }

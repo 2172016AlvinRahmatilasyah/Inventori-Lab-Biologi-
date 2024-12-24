@@ -133,31 +133,39 @@ class BarangController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('query');
-        $jenis_barangs = jenis_barang::all(); // Ambil semua jenis barang untuk dropdown
+        $jenis_barangs = jenis_barang::all(); // Get all jenis_barang for dropdown
 
-        // Search dengan join untuk mencakup nama_jenis_barang dari tabel jenis_barang
-        $all_barangs = barang::where('nama_barang', 'like', "%$query%")
-            ->orWhereHas('jenisBarang', function ($q) use ($query) {
-                $q->where('nama_jenis_barang', 'like', "%$query%");
+        // Split the search query into individual words
+        $keywords = explode(' ', $query);
+
+        // Use a query builder for searching
+        $all_barangs = barang::with('jenisBarang') // Include relations
+            ->where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->where(function ($subQuery) use ($word) {
+                        $subQuery->where('nama_barang', 'like', "%$word%")
+                            ->orWhere('brand', 'like', "%$word%")
+                            ->orWhere('no_catalog', 'like', "%$word%")
+                            ->orWhere('stok', 'like', "%$word%")
+                            ->orWhere('kadaluarsa', 'like', "%$word%")
+                            ->orWhere('lokasi', 'like', "%$word%")
+                            ->orWhere('status_barang', 'like', "%$word%")
+                            ->orWhere('plate', 'like', "%$word%")
+                            ->orWhereHas('jenisBarang', function ($relatedQuery) use ($word) {
+                                $relatedQuery->where('nama_jenis_barang', 'like', "%$word%")
+                                    ->orWhere('satuan_stok', 'like', "%$word%");
+                            });
+                    });
+                }
             })
-            ->orWhereHas('jenisBarang', function ($q) use ($query) {
-                $q->where('satuan_stok', 'like', "%$query%");
-            })
-            ->orWhere('brand', 'like', "%$query%")
-            ->orWhere('no_catalog', 'like', "%$query%")
-            ->orWhere('stok', 'like', "%$query%")
-            ->orWhere('kadaluarsa', 'like', "%$query%")
-            ->orWhere('lokasi', 'like', "%$query%")
-            ->orWhere('status_barang', 'like', "%$query%")
-            ->orWhere('plate', 'like', "%$query%")
-            ->paginate(25) // Tambahkan pagination di sini jika ingin menampilkan data ter-paginasi
-            ->appends(request()->except('page')); // Mempertahankan parameter query
+            ->paginate(25) // Add pagination
+            ->appends(request()->except('page')); // Preserve query parameters
 
         return view('kelola-barang.index', compact('all_barangs', 'jenis_barangs'));
     }
 
-    
-     public function detailTransaksiBarang($id)
+
+    public function detailTransaksiBarang($id)
     {
         $barang = barang::findOrFail($id);
 

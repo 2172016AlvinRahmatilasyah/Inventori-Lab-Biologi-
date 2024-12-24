@@ -64,8 +64,12 @@
                         <td>{{ $data->PenerimaanBarang->supkonpro->nama ?? $data->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>
                         <td>{{ $data->PenerimaanBarang->user->name ?? $data->PengeluaranBarang->user->name ?? 'N/A' }}</td>
                         <td>{{ $data->PenerimaanBarang->jenispenerimaanbarang->jenis ?? $data->PengeluaranBarang->jenispengeluaranbarang->jenis ?? 'N/A' }}</td>
-                        <td class="text-right">{{ number_format($data->jumlah_diterima ?? 0, 0, ',', '.') }}</td>
-                        <td class="text-right">{{ number_format($data->jumlah_keluar ?? 0, 0, ',', '.') }}</td>
+                        <td class="text-right">
+                            {{ $data->jumlah_diterima == 0 ? '-' : number_format($data->jumlah_diterima ?? 0, 0, ',', '.') }}
+                        </td>
+                        <td class="text-right">
+                            {{ $data->jumlah_keluar == 0 ? '-' : number_format($data->jumlah_keluar ?? 0, 0, ',', '.') }}
+                        </td>                        
                         <td class="text-right">{{ number_format($data->harga ?? 0, 0, ',', '.') }}</td>
                         <td class="text-right">{{ number_format($data->total_harga ?? 0, 0, ',', '.') }}</td>
                         <td class="text-right">{{ number_format( $data->PenerimaanBarang->harga_invoice ?? $data->PengeluaranBarang->harga_invoice ?? 0, 0, ',', '.') }}</td>
@@ -73,7 +77,7 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="10">Data tidak ditemukan!</td>
+                    <td colspan="11">Data tidak ditemukan!</td>
                 </tr>
             @endif
         </tbody>

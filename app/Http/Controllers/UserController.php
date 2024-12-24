@@ -117,16 +117,23 @@ class UserController extends Controller
 
     public function search(Request $request, $role)
     {
+        // Get the search query from the request
         $query = $request->input('query');
 
+        // Split the query into individual keywords for multi-word search
+        $keywords = explode(' ', $query);
+
         $all_users = User::where('role', ucfirst($role))
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%$query%")
-                ->orWhere('email', 'like', "%$query%")
-                ->orWhere('phone_number', 'like', "%$query%");
+            ->where(function ($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->where(function ($subQuery) use ($word) {
+                        $subQuery->where('name', 'like', "%$word%")
+                            ->orWhere('email', 'like', "%$word%")
+                            ->orWhere('phone_number', 'like', "%$word%");
+                    });
+                }
             })
             ->get();
-
         return view('kelola-user.index', compact('all_users', 'role'));
     }
 

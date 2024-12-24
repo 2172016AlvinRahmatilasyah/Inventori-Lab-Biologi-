@@ -14,16 +14,22 @@
 
 <script src="{{ asset('template/vendor/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('template/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
-
-{{-- <script src="{{ asset('template/js/demo/datatables-demo.js') }}"></script> --}}
-{{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
+<style>
+    .form-row > .col-auto {
+        margin-bottom: 10px; /* Add spacing between rows */
+    }
+    .form-row {
+        gap: 10px; /* Add spacing between inputs */
+    }
+</style>
 <div class="container">
     <h1>Laporan Barang Masuk</h1>
 
     <form method="get" action="{{ route('laporan-barang-masuk') }}">
         <div class="form-row align-items-center mt-4 mb-4">
+            <!-- Existing Filter Options -->
             <div class="col-auto">
                 <select name="filter" class="form-control" id="filter">
                     <option value="current_month" {{ request('filter') == 'current_month' ? 'selected' : '' }}>Bulan Ini</option>
@@ -40,21 +46,63 @@
                 </select>
             </div>
             <div class="col-auto">
-                <input type="date" name="start_date" class="form-control" placeholder="Start Date" value="{{ request('start_date') }}" id="start_date" {{ request('filter') == 'custom_dates' ? '' : 'disabled' }}>
+                <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}" id="start_date" {{ request('filter') == 'custom_dates' ? '' : 'disabled' }}>
             </div>
             <div class="col-auto">
-                <input type="date" name="end_date" class="form-control" placeholder="End Date" value="{{ request('end_date') }}" id="end_date" {{ request('filter') == 'custom_dates' ? '' : 'disabled' }}>
+                <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}" id="end_date" {{ request('filter') == 'custom_dates' ? '' : 'disabled' }}>
             </div>
+            <!-- Filter by Transaction Type -->
+            <div class="col-auto">
+                <select name="transaction_type" class="form-control">
+                    <option value="">Pilih Jenis Transaksi</option>
+                    @foreach ($transactionTypes as $type)
+                        <option value="{{ $type->id }}" {{ request('transaction_type') == $type->id ? 'selected' : '' }}>
+                            {{ $type->jenis }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <!-- Filter by supkonpro -->
+            <div class="col-auto">
+                <select name="supkonpro" class="form-control">
+                    <!-- Explicitly set the default option -->
+                    <option value="" {{ request('supkonpro') === null ? 'selected' : '' }}>Pilih Supkonpro</option>
+                    @foreach ($supkonpro as $sup)
+                        <option value="{{ $sup->id }}" {{ (string) request('supkonpro') === (string) $sup->id ? 'selected' : '' }}>
+                            {{ $sup->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>                 
+            <!-- Filter by Product -->
+            <div class="col-auto">
+                <select name="product" class="form-control select2">
+                    <option value="">Pilih Barang</option>
+                    @foreach ($products as $product)
+                        <option value="{{ $product->id }}" {{ request('product') == $product->id ? 'selected' : '' }}>
+                            {{ $product->nama_barang }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <!-- Submit Filters -->
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Filter</button>
             </div>
             <div class="col-auto">
+                <button type="button" id="reset-filters" class="btn btn-secondary">Reset Filter</button>
+            </div>
+            <div class="col-auto">
                 <!-- Tombol untuk Download PDF -->
-                <a href="{{ route('laporan-barang-masuk-pdf') }}?filter={{ request('filter') }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}" class="btn btn-danger">Download PDF</a>
+                <a href="{{ route('laporan-barang-masuk-pdf') }}?filter={{ request('filter') }}
+                        &start_date={{ request('start_date') }}&end_date={{ request('end_date') }}
+                        &transaction_type={{ request('transaction_type')}}&supkonpro={{request('supkonpro')}}
+                        &product={{ request('product') }}" 
+                   class="btn btn-danger">Download PDF</a>
             </div>
         </div>
     </form>
-
+    
     <div class="mt-3">
         <div style="overflow-x: auto;">
             <table class="table table-bordered">
@@ -112,26 +160,52 @@
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-            const filterSelect = document.getElementById('filter');
-            const startDateInput = document.getElementById('start_date');
-            const endDateInput = document.getElementById('end_date');
+        // Initialize Select2 for all elements with the class 'select2'
+        $('.select2').select2({
+            placeholder: "Pilih Barang",
+            allowClear: true
+        });
 
-            // Function to toggle date inputs based on the selected filter
-            function toggleDateInputs() {
-                if (filterSelect.value === 'custom_dates') {
-                    startDateInput.disabled = false;
-                    endDateInput.disabled = false;
-                } else {
-                    startDateInput.disabled = true;
-                    endDateInput.disabled = true;
-                }
+        const filterSelect = document.getElementById('filter');
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        const transactionTypeSelect = document.querySelector('select[name="transaction_type"]');
+        const supkonproSelect = document.querySelector('select[name="supkonpro"]');
+        const productSelect = document.querySelector('select[name="product"]');
+
+        // Function to toggle date inputs based on the selected filter
+        function toggleDateInputs() {
+            if (filterSelect.value === 'custom_dates') {
+                startDateInput.disabled = false;
+                endDateInput.disabled = false;
+            } else {
+                startDateInput.disabled = true;
+                endDateInput.disabled = true;
             }
+        }
 
-            // Initialize the date inputs based on the current selected filter
+        // Initialize the date inputs based on the current selected filter
+        toggleDateInputs();
+
+        // Add event listener for filter changes
+        filterSelect.addEventListener('change', toggleDateInputs);
+
+        // Reset button functionality
+        document.getElementById('reset-filters').addEventListener('click', function () {
+            // Reset all filters to default values
+            filterSelect.value = 'current_month'; // Reset to default filter value
+            startDateInput.value = ''; // Clear start date
+            endDateInput.value = ''; // Clear end date
+            transactionTypeSelect.value = ''; // Reset transaction type
+            supkonproSelect.value = ''; // Reset Supkonpro filter
+            productSelect.value = ''; // Reset product filter
+
+            // Reset Select2 dropdowns
+            $('.select2').val(null).trigger('change');
+
+            // Reapply default toggle for date inputs
             toggleDateInputs();
-
-            // Add event listener for filter changes
-            filterSelect.addEventListener('change', toggleDateInputs);
+        });
     });
 </script>
 @endsection

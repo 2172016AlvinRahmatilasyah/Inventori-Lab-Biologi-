@@ -88,8 +88,8 @@
                                     <td>{{ $data->PenerimaanBarang->user->name ?? $data->PengeluaranBarang->user->name ?? 'N/A' }}</td>
                                     <td>{{ $data->PenerimaanBarang->jenispenerimaanbarang->jenis ?? $data->PengeluaranBarang->jenispengeluaranbarang->jenis ?? 'N/A' }}</td>
                                     <td>{{ $data->barang->nama_barang ?? 'N/A' }}</td>
-                                    <td style="text-align: right;">{{ $data->jumlah_diterima ?? 0 }}</td>
-                                    <td style="text-align: right;">{{ $data->jumlah_keluar ?? 0 }}</td>
+                                    <td style="text-align: right;">{{ $data->jumlah_diterima ?? '-' }}</td>
+                                    <td style="text-align: right;">{{ $data->jumlah_keluar ?? '-' }}</td>
                                     <td style="text-align: right;">{{ number_format($data->harga, 0, ',', '.') ?? 'N/A' }}</td>
                                     <td style="text-align: right;">{{ number_format($data->total_harga, 0, ',', '.') ?? 'N/A' }}</td>
                                     <td class="text-right">{{ number_format( $data->PenerimaanBarang->harga_invoice ?? $data->PengeluaranBarang->harga_invoice ?? 0, 0, ',', '.') }}</td>

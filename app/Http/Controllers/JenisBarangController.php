@@ -71,18 +71,26 @@ class JenisBarangController extends Controller
     }
 
     //  Method to handle search
-     public function search(Request $request)
-     {
-         $query = $request->input('query');
- 
-         // Cari berdasarkan nama, email, atau nomor telepon
-         $all_jenis_barangs = jenis_barang::where('nama_jenis_barang', 'like', "%$query%")
-             ->orWhere('satuan_stok', 'like', "%$query%")
-             ->get();
- 
-         // Return view dengan hasil pencarian
-         return view('kelola-jenis-barang.index', compact('all_jenis_barangs'));
-     }
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        // Split the search query into individual words
+        $keywords = explode(' ', $query);
+
+        // Build the query to match all keywords in the intended columns
+        $all_jenis_barangs = jenis_barang::where(function ($q) use ($keywords) {
+            foreach ($keywords as $word) {
+                $q->where(function ($subQuery) use ($word) {
+                    $subQuery->where('nama_jenis_barang', 'like', "%$word%")
+                            ->orWhere('satuan_stok', 'like', "%$word%");
+                });
+            }
+        })->get();
+
+        // Return view with search results
+        return view('kelola-jenis-barang.index', compact('all_jenis_barangs'));
+    }
 
     public function detailJenisBarang($id)
     {

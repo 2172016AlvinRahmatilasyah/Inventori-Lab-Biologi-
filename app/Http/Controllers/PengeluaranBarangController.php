@@ -42,42 +42,47 @@ class PengeluaranBarangController extends Controller
 
     public function BarangKeluarSearch(Request $request)
     {
-        // Ambil query pencarian dari input
+        // Get the search query from the input
         $query = $request->input('query');
-        
-        // Menentukan jumlah item per halaman (pagination)
+
+        // Set the number of items per page (pagination)
         $perPage = $request->input('perPage', 5);
 
-        // Lakukan pencarian berdasarkan berbagai field yang diinginkan
-        $all_detail_pengeluarans = detailPengeluaranBarang::whereHas('pengeluaranBarang', function ($q) use ($query) {
-            // Pencarian pada tabel master_penerimaan_barangs
-            $q->where('invoice', 'like', "%$query%")
-                ->orWhere('tanggal', 'like', "%$query%")
-                ->orWhere('keterangan', 'like', "%$query%")
-                ->orWhereHas('supkonpro', function ($q) use ($query) {
-                    $q->where('nama', 'like', "%$query%");  // Nama supkonpro
-                })
-                ->orWhereHas('user', function ($q) use ($query) {
-                    $q->where('name', 'like', "%$query%");  // Nama user
-                })
-                ->orWhereHas('jenispengeluaranbarang', function ($q) use ($query) {
-                    $q->where('jenis', 'like', "%$query%"); 
-                })
-                ->orWhere('nama_pengambil', 'like', "%$query%"); 
-        })
-        ->orWhereHas('barang', function ($q) use ($query) {
-            $q->where('nama_barang', 'like', "%$query%");  // Pencarian di tabel barang
-        })
-        
-        ->orWhere('jumlah_keluar', 'like', "%$query%")
-        ->orWhere('harga', 'like', "%$query%")
-        ->orWhere('total_harga', 'like', "%$query%")
-        ->paginate($perPage)  // Menggunakan paginate untuk hasil pencarian
-        ->appends(request()->except('page')); // Menjaga parameter lain seperti search atau filters
+        // Split the query into individual keywords
+        $keywords = explode(' ', $query);
 
+        // Perform the search
+        $all_detail_pengeluarans = detailPengeluaranBarang::where(function ($q) use ($keywords) {
+            foreach ($keywords as $word) {
+                $q->where(function ($subQuery) use ($word) {
+                    $subQuery->whereHas('pengeluaranBarang', function ($innerQuery) use ($word) {
+                        $innerQuery->where('invoice', 'like', "%$word%")
+                            ->orWhere('tanggal', 'like', "%$word%")
+                            ->orWhere('keterangan', 'like', "%$word%")
+                            ->orWhereHas('supkonpro', function ($relatedQuery) use ($word) {
+                                $relatedQuery->where('nama', 'like', "%$word%");
+                            })
+                            ->orWhereHas('user', function ($relatedQuery) use ($word) {
+                                $relatedQuery->where('name', 'like', "%$word%");
+                            })
+                            ->orWhereHas('jenispengeluaranbarang', function ($relatedQuery) use ($word) {
+                                $relatedQuery->where('jenis', 'like', "%$word%");
+                            })
+                            ->orWhere('nama_pengambil', 'like', "%$word%");
+                    })
+                    ->orWhereHas('barang', function ($innerQuery) use ($word) {
+                        $innerQuery->where('nama_barang', 'like', "%$word%");
+                    })
+                    ->orWhere('jumlah_keluar', 'like', "%$word%")
+                    ->orWhere('harga', 'like', "%$word%")
+                    ->orWhere('total_harga', 'like', "%$word%");
+                });
+            }
+        })
+        ->paginate($perPage) // Use pagination for results
+        ->appends(request()->except('page')); // Preserve other parameters like query and perPage
         return view('barang-keluar.index', compact('all_detail_pengeluarans'));
     }
-
 
     public function loadAddBarangKeluarForm()
     {

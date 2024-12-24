@@ -19,7 +19,7 @@
         <!-- Filter Form -->
         <div class="card-body">
             <form method="GET" action="{{ route('laporan-saldo', ['type' => $type]) }}">
-                <div class="form-row align-items-center mt-4 mb-4">
+                <div class="form-row align-items-center">
                     <!-- Filter Tahun -->
                     <div class="col-auto">
                         <select name="tahun" class="form-control" id="tahun">
