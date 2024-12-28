@@ -123,7 +123,7 @@ class PengeluaranBarangController extends Controller
         ]);
 
         $jenisBarang = JenisPengeluaran::find($request->jenis_id);
-        if ($jenisBarang && $jenisBarang->jenis === 'Buang / Kadaluarsa') {
+        if ($jenisBarang && $jenisBarang->id === 0) {
             $request->merge(['supkonpro_id' => 0]);
         }
 
@@ -188,19 +188,29 @@ class PengeluaranBarangController extends Controller
     }
 
     public function generateInvoicePengeluaran(Request $request)
-        {
-            $tanggal = $request->tanggal;
+    {
+        $tanggal = $request->tanggal;
 
-            // Ambil tanggal dalam format Y-m-d
-            $date = \Carbon\Carbon::parse($tanggal);
-
-            $count = PengeluaranBarang::whereDate('tanggal', $date->toDateString())->count();
-
-            // Nomor urut dimulai dari 1
-            $noUrut2 = str_pad($count + 1, 2, '0', STR_PAD_LEFT);  // Contoh: 01, 02, ...
-
-            return response()->json(['noUrut' => $noUrut2]);
+        // Validasi format tanggal
+        if (!$tanggal) {
+            return response()->json(['error' => 'Tanggal tidak valid'], 400);
         }
+
+        // Ambil tanggal dalam format Y-m-d
+        $date = \Carbon\Carbon::parse($tanggal);
+
+        // Hitung jumlah penerimaan barang yang sudah ada pada tanggal tersebut
+        $count = PengeluaranBarang::whereDate('tanggal', $date->toDateString())->count();
+
+        // Nomor urut dimulai dari 1
+        $noUrut = str_pad($count + 1, 2, '0', STR_PAD_LEFT); // Contoh: 01, 02, ...
+
+        // Format invoice: YYMMDD + noUrut
+        $formattedDate = $date->format('ymd'); // Format menjadi YYMMDD
+        $invoiceNumber = $formattedDate . $noUrut;
+
+        return response()->json(['invoice' => $invoiceNumber]);
+    }
 
     public function deletePengeluaranBarang($id)
     {
@@ -311,8 +321,10 @@ class PengeluaranBarangController extends Controller
 
     public function loadAllJenisPengeluaranBarang(){
         $all_jenis_pengeluarans= JenisPengeluaran::all();
-        
-        return view('barang-keluar.jenis-barang-keluar',compact('all_jenis_pengeluarans'));
+
+        $used_jenis_ids = DB::table('master_pengeluaran_barangs')->pluck('jenis_id')->toArray();
+
+        return view('barang-keluar.jenis-barang-keluar',compact('all_jenis_pengeluarans','used_jenis_ids'));
     }
 
     public function loadAddJenisBarangKeluarForm()
@@ -391,51 +403,40 @@ class PengeluaranBarangController extends Controller
         $request->validate([
             'masterPengeluaran_id' => 'required|exists:master_pengeluaran_barangs,id',
             'detail_pengeluaran_id' => 'required|exists:detail_pengeluaran_barangs,id',
-            // 'tanggal' => 'required|exists:master_pengeluaran_barangs,tanggal',
-            // 'invoice' => 'required|exists:master_pengeluaran_barangs,invoice',
-            'jenis_id' => 'required|exists:jenis_pengeluaran_barangs,id',
-            'supkonpro_id' => 'required|exists:supkonpros,id',
-            'nama_pengambil' => 'required|string|max:255',
-            'keterangan' => 'required|string',
             'barang_id' => 'required|exists:barangs,id',
             'jumlah_keluar' => 'required',
-            'harga' => 'required',  
-            'total_harga' => 'required', 
+            'harga' => 'required',
+            'total_harga' => 'required',
         ]);
-
+    
+        // Menghapus format angka (titik) untuk harga dan total_harga
         $harga = str_replace('.', '', $request->input('harga'));
         $total_harga = str_replace('.', '', $request->input('total_harga'));
-
+    
         try {
-            // Ambil data detail pengeluaran lama
-            $detailPengeluaranBarang = DetailPengeluaranBarang::findOrFail($request->detail_pengeluaran_id);
-
-            // Hitung selisih jumlah keluar
-            $selisihJumlah = $request->jumlah_keluar - $detailPengeluaranBarang->jumlah_keluar;
-            $selisihTotalHarga = $total_harga - $detailPengeluaranBarang->total_harga; // Hitung selisih total_harga
-
-            // Update pengeluaran master
-            PengeluaranBarang::where('id', $detailPengeluaranBarang->master_pengeluaran_barang_id)->update([
-                // 'tanggal' => $request->tanggal,
-                // 'invoice' => $request->invoice,
-                'jenis_id' => $request->jenis_id,
-                'supkonpro_id' => $request->supkonpro_id,
-                'nama_pengambil' => $request->nama_pengambil,
-                'keterangan' => $request->keterangan,
-            ]);
-        
-            // Update detail pengeluaran barang
+            $detailPengeluaranBarang = detailPengeluaranBarang::findOrFail($request->detail_pengeluaran_id);
+            $masterPengeluaran = PengeluaranBarang::findOrFail($request->masterPengeluaran_id);
+    
+            // Hitung selisih total harga
+            $selisihTotalHarga = $total_harga - $detailPengeluaranBarang->total_harga;
+    
             $detailPengeluaranBarang->update([
-                'jumlah_keluar' => $request->jumlah_keluar,
+                'jumlah_diterima' => $request->jumlah_keluar,
                 'harga' => $harga,
                 'total_harga' => $total_harga,
             ]);
-
-            // Update stok barang sesuai selisih jumlah keluar
+    
+            $masterPengeluaran->harga_invoice += $selisihTotalHarga;
+            $masterPengeluaran->save();
+    
             $barang = Barang::findOrFail($request->barang_id);
-            $barang->stok -= $selisihJumlah;
+            $selisihJumlah = $request->jumlah_keluar - $detailPengeluaranBarang->jumlah_keluar;
+            $barang->stok += $selisihJumlah;
             $barang->save();
-
+            return redirect('/master-barang-keluar/')->with('success', 'Edit Successfully');
+            } catch (\Exception $e) {
+                return redirect('/edit-pengeluaran-barang/' . $request->detail_pengeluaran_id)->with('fail', $e->getMessage());
+            }
             // // Update saldo_terima pada saldo_awals
             // $tanggal = \Carbon\Carbon::parse($request->tanggal);
             // $bulan = $tanggal->month;  // Ambil bulan dari tanggal pengeluaran
@@ -452,11 +453,6 @@ class PengeluaranBarangController extends Controller
             //     // Tambahkan selisih total_harga
             //     $saldoAwal->save();
             // }
-
-            return redirect('/master-barang-keluar/')->with('success', 'Edit Successfully');
-        } catch (\Exception $e) {
-            return redirect('/edit-pengeluaran-barang/' . $request->detail_pengeluaran_id)->with('fail', $e->getMessage());
-        }
     }
 
 }

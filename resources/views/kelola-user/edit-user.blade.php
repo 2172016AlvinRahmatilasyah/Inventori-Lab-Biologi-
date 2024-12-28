@@ -74,7 +74,8 @@
                     @enderror
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Save</button>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Save</button>
+                <button type="button" class="btn btn-danger w-100" onclick="history.back()">Cancel</button>
             </form>
         </div>
     </div>

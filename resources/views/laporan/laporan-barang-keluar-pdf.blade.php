@@ -43,6 +43,13 @@
         p {
             margin: 5px 0;
         }
+        tfoot {
+            font-weight: bold;
+            background-color: #f2f2f2; /* Warna latar belakang untuk pembeda */
+        }
+        tfoot th {
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -51,8 +58,14 @@
     
     <p>Tanggal laporan dibuat: {{ $date }}</p>
     <p>Pembuat: {{ $user }}</p>
-    <p>Berdasarkan: {{ $filter }}</p>
-    <p>Tanggal: {{ $startDate }} - {{ $endDate }}</p>
+    <p><strong>Filter yang Dipilih:</strong></p>
+    <ul>
+        <li>Filter Waktu: {{ $filter }}</li>
+        <li>Tanggal: {{ $startDate ? $startDate->format('d-m-Y') : '-' }} s/d {{ $endDate ? $endDate->format('d-m-Y') : '-' }}</li>
+        <li>Jenis Transaksi: {{ $selectedTransactionType }}</li>
+        <li>Supplier/Konsumen/Proyek: {{ $selectedSupkonpro }}</li>
+        <li>Barang: {{ $selectedProduct }}</li>
+    </ul>
     <br>
     
     <h3>Data Barang Keluar</h3>
@@ -61,6 +74,7 @@
                 <tr>
                     {{-- <th>Id master</th>
                     <th>Id detail</th> --}}
+                    <th>No</th>
                     <th>Invoice</th>
                     <th>Tanggal</th>
                     <th>SupKonProy</th>
@@ -83,6 +97,7 @@
                         <tr>
                             {{-- <td>{{ $item->PengeluaranBarang->id ?? 'N/A' }}</td>
                             <td>{{ $item->id }}</td> --}}
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->PengeluaranBarang->invoice ?? 'N/A'}}</td>
                             <td>{{ $item->PengeluaranBarang->tanggal ?? 'N/A'}}</td>
                             <td>{{ $item->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>
@@ -100,9 +115,18 @@
                         </tr>
                         </tr>
                     @endforeach
+                    <tfoot>
+                        <tr>
+                            <td colspan="9" style="text-align: right;">Total:</td>
+                            <td style="text-align: right;">{{ number_format($totalJumlahKeluar, 2, '.', ',') }}</td>
+                            <td></td> <!-- Kosongkan kolom harga -->
+                            <td></td> <!-- Kosongkan kolom total harga -->
+                            <td style="text-align: right;">{{ number_format($totalHargaInvoice, 0, ',', '.') }}</td>
+                        </tr>
+                    </tfoot>    
                 @else
                     <tr>
-                        <td colspan="12">Tidak Ada Transaksi Barang!</td>
+                        <td colspan="13">Tidak Ada Transaksi Barang!</td>
                     </tr>
                 @endif
             </tbody>

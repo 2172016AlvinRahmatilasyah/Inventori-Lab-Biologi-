@@ -5,35 +5,33 @@
 @section('content')
 <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('template/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-
-<!-- Core plugin JavaScript-->
 <script src="{{ asset('template/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-
-<!-- Custom scripts for all pages-->
 <script src="{{ asset('template/js/sb-admin-2.min.js') }}"></script>
-
 <script src="{{ asset('template/vendor/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('template/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
-
 <script src="{{ asset('template/js/demo/datatables-demo.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
-{{-- <script>
-    new AutoNumeric('#saldo_awal', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
-    new AutoNumeric('#total_terima', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
-    new AutoNumeric('#total_keluar', { decimalCharacter: ',', digitGroupSeparator: '.', decimalPlaces: 2 });
-
-    // Trigger penghitungan saldo akhir otomatis
-    $('#total_terima, #total_keluar').on('input', function() {
-        calculateSaldoAkhir();
-    });
-</script> --}}
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
+<style>
+    .select2-container .select2-selection--single {
+    height: calc(2.25rem + 2px); /* Menyesuaikan dengan tinggi input Bootstrap */
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown {
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+}
+
+</style>
 <div class="container">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <div class="card mx-auto" style="max-width: 500px;">
         <div class="card-header text-center">Tambah Saldo Awal</div>
         @if (Session::has('fail'))
@@ -44,20 +42,19 @@
                 @csrf
                 <div class="mb-3">
                     <label for="barang_id" class="form-label">Nama Barang</label>
-                    <select name="barang_id" class="form-control select2" id="barang_id" value="{{ old('barang_id') }}">
-                        <option value="">Pilih nama barang</option>
+                    <select name="barang_id" class="form-control select2" id="barang_id">
+                        <option value="">Pilih atau ketik nama barang</option>
                         @foreach ($barangs as $barang)
-                            <option value="{{ $barang->id }}" data-nama-barang="{{ $barang->nama_barang }}">
-                                {{ $barang->nama_barang }} (ID: {{ $barang->id }})
+                            <option value="{{ $barang->id }}">
+                                {{ $barang->nama_barang }}
                             </option>
                         @endforeach
                     </select>
-                    
                     @error('barang_id')
-                        <span class="text-danger">{{$message}}</span>
+                        <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
-
+                
                 <div class="mb-3">
                     <label for="tahun" class="form-label">Tahun</label>
                     <input type="text" name="tahun" id="tahun" class="form-control" 
@@ -119,63 +116,60 @@
     </div>
 </div>
 <script>
-    $(document).on('submit', 'form', function () {
-        $('#saldo_awal').val($('#saldo_awal').val().replace(/,/g, ''));
-        $('#total_terima').val($('#total_terima').val().replace(/,/g, ''));
-        $('#total_keluar').val($('#total_keluar').val().replace(/,/g, ''));
-        $('#saldo_akhir').val($('#saldo_akhir').val().replace(/,/g, ''));
-    });
+    $(document).ready(function () {
+        // Inisialisasi Select2 dengan pencarian
+        $('#barang_id').select2({
+            placeholder: "Pilih atau ketik nama barang", // Placeholder yang ditampilkan
+            allowClear: true, // Izinkan pengguna untuk menghapus pilihan
+            width: '100%', // Lebar penuh sesuai dengan container
+            theme: 'bootstrap-5', // Gunakan tema bootstrap-5 agar konsisten
+            dropdownParent: $('#barang_id').closest('.container'), // Dropdown muncul dalam container yang benar
+        });
 
-   function fetchSaldoAwalDanTransaksi() {
-        let barangId = $('#barang_id').val();
-        let bulan = $('#bulan').val();
-        let tahun = $('#tahun').val();
+        // Fetch saldo awal dan transaksi ketika barang dipilih
+        $('#barang_id, #bulan, #tahun').on('change', function () {
+            fetchSaldoAwalDanTransaksi();
+        });
 
-        if (barangId && bulan && tahun) {
-            $.ajax({
-                url: "{{ route('getSaldoAwalDanTransaksi') }}",
-                type: "GET",
-                data: { barang_id: barangId, bulan: bulan, tahun: tahun },
-                success: function(response) {
-                    // Update nilai saldo awal, total terima, dan total keluar
-                    $('#saldo_awal').val(response.saldo_awal || 0);
-                    $('#total_terima').val(response.total_terima || 0);
-                    $('#total_keluar').val(response.total_keluar || 0);
+        function fetchSaldoAwalDanTransaksi() {
+            const barangId = $('#barang_id').val();
+            const bulan = $('#bulan').val();
+            const tahun = $('#tahun').val();
 
-                    // Panggil fungsi untuk menghitung saldo akhir
-                    calculateSaldoAkhir();
-                },
-                error: function() {
-                    // Reset nilai jika terjadi error
-                    $('#saldo_awal').val(0);
-                    $('#total_terima').val(0);
-                    $('#total_keluar').val(0);
-                    calculateSaldoAkhir();
-                }
-            });
-        } else {
-            // Reset nilai jika input tidak lengkap
-            $('#saldo_awal').val(0);
-            $('#total_terima').val(0);
-            $('#total_keluar').val(0);
+            if (barangId && bulan && tahun) {
+                $.ajax({
+                    url: "{{ route('getSaldoAwalDanTransaksi') }}",
+                    type: "GET",
+                    data: { barang_id: barangId, bulan: bulan, tahun: tahun },
+                    success: function (response) {
+                        $('#saldo_awal').val(response.saldo_awal || 0);
+                        $('#total_terima').val(response.total_terima || 0);
+                        $('#total_keluar').val(response.total_keluar || 0);
+                        calculateSaldoAkhir();
+                    },
+                    error: function () {
+                        resetSaldoFields();
+                    }
+                });
+            } else {
+                resetSaldoFields();
+            }
+        }
+
+        function resetSaldoFields() {
+            $('#saldo_awal, #total_terima, #total_keluar').val(0);
             calculateSaldoAkhir();
         }
-    }
 
-    // Panggil fetchSaldoAwalDanTransaksi setiap kali barang, bulan, atau tahun berubah
-    $('#barang_id, #bulan, #tahun').change(function() {
-        fetchSaldoAwalDanTransaksi();
+        function calculateSaldoAkhir() {
+            const saldoAwal = parseFloat($('#saldo_awal').val()) || 0;
+            const totalTerima = parseFloat($('#total_terima').val()) || 0;
+            const totalKeluar = parseFloat($('#total_keluar').val()) || 0;
+
+            const saldoAkhir = saldoAwal + totalTerima - totalKeluar;
+            $('#saldo_akhir').val(saldoAkhir.toFixed(2));
+        }
     });
-
-    function calculateSaldoAkhir() {
-        let saldoAwal = parseFloat($('#saldo_awal').val().replace(/,/g, '')) || 0;
-        let totalTerima = parseFloat($('#total_terima').val().replace(/,/g, '')) || 0;
-        let totalKeluar = parseFloat($('#total_keluar').val().replace(/,/g, '')) || 0;
-
-        let saldoAkhir = saldoAwal + totalTerima - totalKeluar;
-
-        // Format angka dengan 2 desimal
-        $('#saldo_akhir').val(saldoAkhir.toFixed(2));
-    }
 </script>
+
 @endsection

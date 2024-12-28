@@ -25,51 +25,49 @@
                 @method('PUT') 
                 <input type="hidden" name="masterPengeluaran_id" value="{{ $masterPengeluaran->id }}">
                 <input type="hidden" name="detail_pengeluaran_id" value="{{ $detail_pengeluaran->id }}">
-                
-                {{-- <div class="mb-3">
+
+                <div class="mb-3">
                     <label for="tanggal" class="form-label">Tanggal Pengeluaran</label>
                     <input type="date" name="tanggal" id="tanggal" class="form-control" 
-                        value="{{ $masterPengeluaran->tanggal }}">
+                        value="{{ $masterPengeluaran->tanggal }}" disabled>
                     @error('tanggal')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
                 
-                <!-- Input Invoice -->
                 <div class="mb-3">
                     <label for="invoice" class="form-label">Invoice</label>
-                    <input type="text" name="invoice" id="invoice" class="form-control" readonly
+                    <input type="text" name="invoice" id="invoice" class="form-control" disabled
                     value="{{ $masterPengeluaran->invoice }}">
                     @error('invoice')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div> --}}
-
-                <div class="mb-3">
-                    <label for="jenis_id" class="form-label">Jenis Barang Keluar</label>
-                    <select name="jenis_id" class="form-control select2" id="jenis_id">
-                        <option value="">Pilih Jenis Barang Keluar</option>
-                        @foreach ($all_jenis_pengeluarans as $jenis_pengeluaran)
-                            <option value="{{ $jenis_pengeluaran->id }}" 
-                                {{ $masterPengeluaran->jenis_id == $jenis_pengeluaran->id ? 'selected' : '' }}>
-                                {{ $jenis_pengeluaran->jenis }} (ID: {{ $jenis_pengeluaran->id }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('jenis_pengeluaran_barang_id')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="mb-3">
-                    <label for="supkonpro_id" class="form-label">SupKonProy</label>
-                    <select name="supkonpro_id" class="form-control select2" id="supkonpro_id">
-                        <option value="">Pilih Jenis SupKonProy</option>
+                    <label for="jenis_id" class="form-label">Jenis Barang Keluar</label>
+                    <select name="jenis_id" class="form-control select2" id="jenis_id" disabled>
+                        <option value="">Pilih Jenis Barang Keluar</option>
+                        @foreach ($all_jenis_pengeluarans as $jenis_pengeluaran)
+                            <option value="{{ $jenis_pengeluaran->id }}" 
+                                {{ $masterPengeluaran->jenis_id == $jenis_pengeluaran->id ? 'selected' : '' }}>
+                                {{ $jenis_pengeluaran->jenis }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('jenis_id')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label for="supkonpro_id" class="form-label">Supplier/Konsumen/Proyek</label>
+                    <select name="supkonpro_id" class="form-control select2" id="supkonpro_id" disabled>
+                        <option value="">Pilih Jenis Supplier/Konsumen/Proyek</option>
                         @foreach ($all_supkonpros as $supkonpro)
                             <option value="{{ $supkonpro->id }}" 
                                 {{ $masterPengeluaran->supkonpro_id == $supkonpro->id ? 'selected' : '' }}>
                                 {{ $supkonpro->jenis }}  (Nama: {{ $supkonpro->nama }}) 
-                                (ID: {{ $supkonpro->id }})
                             </option>
                         @endforeach
                     </select>
@@ -80,39 +78,40 @@
                 
                 <div class="mb-3">
                     <label for="nama_pengambil" class="form-label">Nama Pengambil</label>
-                    <input type="text" name="nama_pengambil" id="nama_pengambil" value="{{ $masterPengeluaran->nama_pengambil }}"
+                    <input type="text" name="nama_pengambil" id="nama_pengambil" 
+                           value="{{ $masterPengeluaran->nama_pengambil }}" disabled
                            class="form-control" placeholder="Enter Nama Pengambil">
                     @error('nama_pengambil')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
-
-                <input type="hidden" name="barang_id" value="{{ optional($detail_pengeluaran)->barang_id }}">
-                <div class="mb-3">
-                    <label for="barang_id" class="form-label">Nama Barang</label>
-                    <select name="barang_id" class="form-control select2" id="barang_id" disabled>
-                        <option value="">Pilih Nama Barang</option>
-                        @foreach ($all_barangs as $barang)
-                            <option value="{{ $barang->id }}" 
-                                {{ $barang->id == optional($detail_pengeluaran)->barang_id ? 'selected' : '' }}>
-                                {{ $barang->nama_barang }} (ID: {{ $barang->id }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('barang_id')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div>
                 
-                <div class="mb-3">
-                    <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
-                    <input type="number" name="jumlah_keluar" id="jumlah_keluar" class="form-control" 
-                           value="{{ $detail_pengeluaran->jumlah_keluar }}"
-                           placeholder="Enter jumlah" step="any">
-                    @error('jumlah_keluar')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div>
+                <input type="hidden" name="barang_id" value="{{ optional($detail_pengeluaran)->barang_id }}">
+                    <div class="mb-3">
+                        <label for="barang_id" class="form-label">Nama Barang</label>
+                        <select name="barang_id" class="form-control select2" id="barang_id" disabled>
+                            <option value="">Pilih Nama Barang</option>
+                            @foreach ($all_barangs as $barang)
+                                <option value="{{ $barang->id }}" 
+                                    {{ $barang->id == optional($detail_pengeluaran)->barang_id ? 'selected' : '' }}>
+                                    {{ $barang->nama_barang }} (ID: {{ $barang->id }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('barang_id')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                     
+                    <div class="mb-3">
+                        <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
+                        <input type="number" name="jumlah_keluar" id="jumlah_keluar" class="form-control" 
+                               value="{{ old('jumlah_keluar', $detail_pengeluaran->jumlah_keluar) }}"
+                               placeholder="Enter jumlah" step="any" readonly>
+                        @error('jumlah_keluar')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
 
                 <div class="mb-3">
                     <label for="harga" class="form-label">Harga</label>
@@ -126,24 +125,30 @@
 
                 <div class="mb-3">
                     <label for="total_harga" class="form-label">Total Harga</label>
-                    <input type="text" name="total_harga" id="total_harga" class="form-control" 
-                         value="{{ number_format(($masterPengeluaran->detailpengeluaranbarang->first()->jumlah_keluar ?? 0) * ($masterPengeluaran->detailpengeluaranbarang->first()->harga ?? 0), 0, ',', '.') }}">
-                    @error('harga')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
+                    <input type="text" name="total_harga" id="total_harga" class="form-control"
+                        value="{{ number_format($detail_pengeluaran->total_harga ?? 0, 0, ',', '.') }}"
+                        data-lama="{{ $detail_pengeluaran->total_harga }}" readonly>
                 </div>
+                
+                <div class="mb-3">
+                    <label for="harga_invoice" class="form-label">Harga Invoice *Otomatis akan update setelah di save*</label>
+                    <input type="text" name="harga_invoice" id="harga_invoice" class="form-control" readonly
+                        value="{{ number_format($masterPengeluaran->harga_invoice ?? 0, 0, ',', '.') }}"
+                        data-lama="{{ $masterPengeluaran->harga_invoice }}">
+                </div>                
 
                 <div class="mb-3">
                     <label for="keterangan" class="form-label">Keterangan</label>
                     <input type="text" name="keterangan" id="keterangan" 
-                           value="{{ $masterPengeluaran->keterangan ?? '' }}"
+                           value="{{ $masterPengeluaran->keterangan ?? '' }}" disabled
                            class="form-control" placeholder="Enter keterangan">
                     @error('keterangan')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-100">Save</button>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Save</button>
+                <button type="button" class="btn btn-danger w-100" onclick="history.back()">Cancel</button>
             </form>
         </div>
     </div>
@@ -152,35 +157,51 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('.select2').select2();
+    $(document).ready(function () {
+        // Fungsi untuk menghitung total harga baru
+        function calculateTotalHarga() {
+            const jumlahKeluar = parseFloat($('#jumlah_keluar').val()) || 0; // Nilai default 0 jika kosong
+            const harga = parseFloat(removeThousandsSeparator($('#harga').val())) || 0; // Hilangkan separator ribuan
+            const totalHarga = jumlahKeluar * harga; // Hitung total harga
+            $('#total_harga').val(formatNumber(totalHarga)); // Update input total_harga
 
-        function calculateTotal() {
-            let jumlahKeluar = parseFloat($('#jumlah_keluar').val()) || 0;
-            let harga = parseFloat(removeThousandsSeparator($('#harga').val())) || 0;
-            let totalHarga = jumlahKeluar * harga;
-            $('#total_harga').val(formatNumber(totalHarga));
+            // Panggil fungsi untuk memperbarui harga_invoice
+            calculateHargaInvoice(totalHarga);
         }
 
+        // Fungsi untuk menghitung harga invoice baru
+        function calculateHargaInvoice(totalHargaBaru) {
+            const totalHargaLama = parseFloat(removeThousandsSeparator($('#total_harga').data('lama'))) || 0; // Ambil data lama
+            const hargaInvoiceLama = parseFloat(removeThousandsSeparator($('#harga_invoice').data('lama'))) || 0; // Ambil harga invoice lama
+
+            // Hitung harga invoice baru
+            const hargaInvoiceBaru = hargaInvoiceLama - totalHargaLama + totalHargaBaru;
+            $('#harga_invoice').val(formatNumber(hargaInvoiceBaru)); // Update input harga_invoice
+        }
+
+        // Fungsi untuk menghapus separator ribuan
         function removeThousandsSeparator(value) {
-            return value.replace(/\./g, '');
+            if (!value) return "0";
+            return value.replace(/\./g, ''); // Hapus semua titik
         }
 
+        // Fungsi untuk memformat angka dengan separator ribuan
         function formatNumber(value) {
             return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        $('#jumlah_keluar, #harga').on('input', function() {
-            calculateTotal();
+        // Event listener untuk menghitung ulang total harga dan harga invoice
+        $('#jumlah_keluar, #harga').on('input', function () {
+            calculateTotalHarga(); // Hitung ulang ketika input diubah
         });
 
-        $('#harga').on('blur', function() {
-            $(this).val(formatNumber(removeThousandsSeparator($(this).val())));
+        // Format angka saat input kehilangan fokus
+        $('#harga, #total_harga, #harga_invoice').on('blur', function () {
+            $(this).val(formatNumber(removeThousandsSeparator($(this).val()))); // Format ulang nilai
         });
-
-        $('#total_harga').on('blur', function() {
-            $(this).val(formatNumber(removeThousandsSeparator($(this).val())));
-        });
+    
+        // Panggil fungsi untuk memastikan input di-load dengan benar
+        calculateTotalHarga();
     });
 </script>
 @endsection

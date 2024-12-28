@@ -189,18 +189,27 @@ class PenerimaanBarangController extends Controller
 
     public function generateInvoicePenerimaan(Request $request)
     {
-            $tanggal = $request->tanggal;
+        $tanggal = $request->tanggal;
 
-            // Ambil tanggal dalam format Y-m-d
-            $date = \Carbon\Carbon::parse($tanggal);
+        // Validasi format tanggal
+        if (!$tanggal) {
+            return response()->json(['error' => 'Tanggal tidak valid'], 400);
+        }
 
-            // Ambil berapa banyak penerimaan barang yang sudah ada pada tanggal tersebut
-            $count = PenerimaanBarang::whereDate('tanggal', $date->toDateString())->count();
+        // Ambil tanggal dalam format Y-m-d
+        $date = \Carbon\Carbon::parse($tanggal);
 
-            // Nomor urut dimulai dari 1
-            $noUrut = str_pad($count + 1, 2, '0', STR_PAD_LEFT);  // Contoh: 01, 02, ...
+        // Hitung jumlah penerimaan barang yang sudah ada pada tanggal tersebut
+        $count = PenerimaanBarang::whereDate('tanggal', $date->toDateString())->count();
 
-            return response()->json(['noUrut' => $noUrut]);
+        // Nomor urut dimulai dari 1
+        $noUrut = str_pad($count + 1, 2, '0', STR_PAD_LEFT); // Contoh: 01, 02, ...
+
+        // Format invoice: YYMMDD + noUrut
+        $formattedDate = $date->format('ymd'); // Format menjadi YYMMDD
+        $invoiceNumber = $formattedDate . $noUrut;
+
+        return response()->json(['invoice' => $invoiceNumber]);
     }
 
     public function deletePenerimaanBarang($id)
@@ -313,9 +322,12 @@ class PenerimaanBarangController extends Controller
     }
 
     public function loadAllJenisPenerimaanBarang(){
-        $all_jenis_penerimaans= JenisPenerimaan::all();
-        
-        return view('barang-masuk.jenis-barang-masuk',compact('all_jenis_penerimaans'));
+        $all_jenis_penerimaans = JenisPenerimaan::all();
+
+        // Get IDs of jenis_penerimaan that are used in master_penerimaan_barangs
+        $used_jenis_ids = DB::table('master_penerimaan_barangs')->pluck('jenis_id')->toArray();
+
+        return view('barang-masuk.jenis-barang-masuk', compact('all_jenis_penerimaans', 'used_jenis_ids'));
     }
 
     public function loadAddJenisBarangMasukForm()
@@ -392,59 +404,51 @@ class PenerimaanBarangController extends Controller
             'all_barangs', 'detail_penerimaan'
         ));
     }
-
+    
     public function EditPenerimaanBarang(Request $request)
-    {
-        // Validasi data yang dikirimkan
-        $request->validate([
-            'masterPenerimaan_id' => 'required|exists:master_penerimaan_barangs,id',
-            'detail_penerimaan_id' => 'required|exists:detail_penerimaan_barangs,id',
-            // 'tanggal' => 'required|exists:master_penerimaan_barangs,tanggal',
-            // 'invoice' => 'required|exists:master_penerimaan_barangs,invoice',
-            'jenis_id' => 'required|exists:jenis_penerimaan_barangs,id',
-            'supkonpro_id' => 'required|exists:supkonpros,id',
-            'nama_pengantar' => 'required|string|max:255',
-            'keterangan' => 'required|string',
-            'barang_id' => 'required|exists:barangs,id',
-            'jumlah_diterima' => 'required',
-            'harga' => 'required',
-            'total_harga' => 'required',
-        ]);
+        {
+            $request->validate([
+                'masterPenerimaan_id' => 'required|exists:master_penerimaan_barangs,id',
+                'detail_penerimaan_id' => 'required|exists:detail_penerimaan_barangs,id',
+                'barang_id' => 'required|exists:barangs,id',
+                'jumlah_diterima' => 'required',
+                'harga' => 'required',
+                'total_harga' => 'required',
+            ]);
         
-        // Menghapus titik di harga dan total_harga jika ada
-        $harga = str_replace('.', '', $request->input('harga'));  // Menghapus titik dari harga
-        $total_harga = str_replace('.', '', $request->input('total_harga'));  // Menghapus titik dari total_harga
-
-        try {
-            // Ambil DetailPenerimaanBarang yang ingin diedit berdasarkan ID
-            $detailPenerimaanBarang = DetailPenerimaanBarang::findOrFail($request->detail_penerimaan_id);
-
-            // Hitung selisih jumlah diterima (untuk update stok barang)
-            $selisihJumlah = $request->jumlah_diterima - $detailPenerimaanBarang->jumlah_diterima;
-            $selisihTotalHarga = $total_harga - $detailPenerimaanBarang->total_harga; // Hitung selisih total_harga
-
-            // Update data di master penerimaan
-            PenerimaanBarang::where('id', $detailPenerimaanBarang->master_penerimaan_barang_id)->update([
-                // 'tanggal' => $request->tanggal,
-                // 'invoice' => $request->invoice,
-                'jenis_id' => $request->jenis_id,
-                'supkonpro_id' => $request->supkonpro_id,
-                'nama_pengantar' => $request->nama_pengantar,
-                'keterangan' => $request->keterangan,
-            ]);
-
-            // Update detail penerimaan barang
-            $detailPenerimaanBarang->update([
-                'jumlah_diterima' => $request->jumlah_diterima,
-                'harga' => $harga,  // Simpan harga tanpa titik
-                'total_harga' => $total_harga,  // Simpan total harga tanpa titik
-            ]);
-
-            // Update stok barang yang terkait
-            $barang = Barang::findOrFail($request->barang_id);
-            $barang->stok += $selisihJumlah; // Tambahkan selisih jumlah
-            $barang->save();
-
+            // Menghapus format angka (titik) untuk harga dan total_harga
+            $harga = str_replace('.', '', $request->input('harga'));
+            $total_harga = str_replace('.', '', $request->input('total_harga'));
+        
+            try {
+                // Ambil detail penerimaan yang akan diedit
+                $detailPenerimaanBarang = DetailPenerimaanBarang::findOrFail($request->detail_penerimaan_id);
+                $masterPenerimaan = PenerimaanBarang::findOrFail($request->masterPenerimaan_id);
+        
+                // Hitung selisih total harga
+                $selisihTotalHarga = $total_harga - $detailPenerimaanBarang->total_harga;
+        
+                // Update detail penerimaan barang
+                $detailPenerimaanBarang->update([
+                    'jumlah_diterima' => $request->jumlah_diterima,
+                    'harga' => $harga,
+                    'total_harga' => $total_harga,
+                ]);
+        
+                // Perbarui harga_invoice pada master penerimaan
+                $masterPenerimaan->harga_invoice += $selisihTotalHarga;
+                $masterPenerimaan->save();
+        
+                // Update stok barang
+                $barang = Barang::findOrFail($request->barang_id);
+                $selisihJumlah = $request->jumlah_diterima - $detailPenerimaanBarang->jumlah_diterima;
+                $barang->stok += $selisihJumlah;
+                $barang->save();
+        
+                return redirect('/master-barang-masuk/')->with('success', 'Edit Successfully');
+            } catch (\Exception $e) {
+                return redirect('/edit-penerimaan-barang/' . $request->detail_penerimaan_id)->with('fail', $e->getMessage());
+            }
             // // Update saldo_awal pada total_keluar
             // $tanggal = \Carbon\Carbon::parse($request->tanggal);
             // $bulan = $tanggal->month;
@@ -464,12 +468,6 @@ class PenerimaanBarangController extends Controller
             //     // Simpan perubahan
             //     $saldoAwal->save();
             // }
-
-            return redirect('/master-barang-masuk/')->with('success', 'Edit Successfully');
-        } catch (\Exception $e) {
-            return redirect('/edit-penerimaan-barang/' . $request->detail_penerimaan_id)->with('fail', $e->getMessage());
         }
-    }
 
-    
 }

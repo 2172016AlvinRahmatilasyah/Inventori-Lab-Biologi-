@@ -216,65 +216,81 @@ class DashboardController extends Controller
         return view('laporan.laporan-barang-masuk', $data);
     }
 
-
     public function downloadBarangMasukPdf(Request $request)
     {
         // Retrieve filter from the request
         $filter = $request->get('filter', 'current_month');
         $dates = $this->getDateRange($request, $filter);
-
+    
         $startDate = $dates['startDate'];
         $endDate = $dates['endDate'];
-
+    
         // Base query for DetailPenerimaanBarang with relationships
         $query = DetailPenerimaanBarang::with('barang', 'penerimaanBarang.supkonpro', 'penerimaanBarang.jenispenerimaanbarang');
-
+    
         // Filter by date range
         if ($startDate && $endDate) {
             $query->whereHas('penerimaanBarang', function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('tanggal', [$startDate, $endDate]);
             });
         }
-
+    
         // Filter by transaction type
+        $selectedTransactionType = null;
         if ($request->filled('transaction_type')) {
             $query->whereHas('penerimaanBarang.jenispenerimaanbarang', function ($q) use ($request) {
                 $q->where('id', $request->transaction_type);
             });
+    
+            // Get the selected transaction type
+            $selectedTransactionType = JenisPenerimaan::find($request->transaction_type);
         }
-
+    
         // Filter by supkonpro
+        $selectedSupkonpro = null;
         if ($request->filled('supkonpro')) {
             $query->whereHas('penerimaanBarang.supkonpro', function ($q) use ($request) {
                 $q->where('id', $request->supkonpro);
             });
+    
+            // Get the selected supkonpro
+            $selectedSupkonpro = SupKonPro::find($request->supkonpro);
         }
-
+    
         // Filter by product
+        $selectedProduct = null;
         if ($request->filled('product')) {
             $query->where('barang_id', $request->product);
+    
+            // Get the selected product
+            $selectedProduct = Barang::find($request->product);
         }
-
+    
         // Execute the query to retrieve filtered data
         $barangMasuk = $query->orderBy('created_at', 'desc')->get();
+    
+        // Kalkulasi total jumlah diterima dan total harga invoice
+        $totalJumlahDiterima = $barangMasuk->sum('jumlah_diterima');
+        $totalJumlahDiterima = number_format($totalJumlahDiterima, 2, '.', ''); // Format dengan dua angka desimal
+        
+        $totalHargaInvoice = $barangMasuk->reduce(function ($carry, $item) {
+            return $carry + ($item->penerimaanBarang->harga_invoice ?? 0);
+        }, 0);
 
-        // Retrieve options for filters
-        $transactionTypes = JenisPenerimaan::all();
-        $supkonpro = SupKonPro::all();
-        $products = Barang::all();
-
-        // Prepare data for the view
+        // Tambahkan ke data view
         $data = [
             'title' => 'Laporan Barang Masuk',
             'date' => Carbon::now()->toFormattedDateString(),
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangMasuk' => $barangMasuk,
-            'transactionTypes' => $transactionTypes,
-            'supkonpro' => $supkonpro,
-            'products' => $products,
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'selectedTransactionType' => $selectedTransactionType->jenis ?? '-',
+            'selectedSupkonpro' => $selectedSupkonpro->nama ?? '-',
+            'selectedProduct' => $selectedProduct->nama_barang ?? '-',
+            'totalJumlahDiterima' => $totalJumlahDiterima,
+            'totalHargaInvoice' => $totalHargaInvoice,
         ];
 
         // Generate PDF
@@ -282,8 +298,7 @@ class DashboardController extends Controller
         
         // Download PDF dengan nama file yang dinamis
         return $pdf->download('laporan-barang-masuk-' . Carbon::now()->format('Y-m-d') . '.pdf');
-    }
-
+    }    
 
     public function showBarangKeluar(Request $request)
     {
@@ -356,9 +371,7 @@ class DashboardController extends Controller
         $startDate = $dates['startDate'];
         $endDate = $dates['endDate'];
 
-        // Base query for DetailPenerimaanBarang with relationships
-        $query = DetailPengeluaranBarang::with('barang', 'pengeluaranBarang.supkonpro', 
-                 'pengeluaranBarang.jenispengeluaranbarang');
+        $query = DetailPengeluaranBarang::with('barang', 'pengeluaranBarang.supkonpro', 'pengeluaranBarang.jenispengeluaranbarang');
 
         // Filter by date range
         if ($startDate && $endDate) {
@@ -368,44 +381,60 @@ class DashboardController extends Controller
         }
 
         // Filter by transaction type
+        $selectedTransactionType = null;
         if ($request->filled('transaction_type')) {
             $query->whereHas('pengeluaranBarang.jenispengeluaranbarang', function ($q) use ($request) {
                 $q->where('id', $request->transaction_type);
             });
+
+            // Get the selected transaction type
+            $selectedTransactionType = JenisPengeluaran::find($request->transaction_type);
         }
 
         // Filter by supkonpro
+        $selectedSupkonpro = null;
         if ($request->filled('supkonpro')) {
             $query->whereHas('pengeluaranBarang.supkonpro', function ($q) use ($request) {
                 $q->where('id', $request->supkonpro);
             });
+
+            // Get the selected supkonpro
+            $selectedSupkonpro = SupKonPro::find($request->supkonpro);
         }
 
         // Filter by product
+        $selectedProduct = null;
         if ($request->filled('product')) {
             $query->where('barang_id', $request->product);
+
+            // Get the selected product
+            $selectedProduct = Barang::find($request->product);
         }
 
         // Execute the query to retrieve filtered data
-        $barangKeluar = $query->orderBy('created_at', 'desc')->get();
+        $barangKeluar= $query->orderBy('created_at', 'desc')->get();
 
-        // Retrieve options for filters
-        $transactionTypes = JenisPengeluaran::all();
-        $supkonpro = SupKonPro::all();
-        $products = Barang::all();
+        $totalJumlahKeluar = $barangKeluar->sum('jumlah_keluar');
+        $totalJumlahKeluar= number_format($totalJumlahKeluar, 2, '.', '');
+        
+        $totalHargaInvoice = $barangKeluar->reduce(function ($carry, $item) {
+            return $carry + ($item->pengeluaranBarang->harga_invoice ?? 0);
+        }, 0);
 
-        // Prepare data for the view
+        // Tambahkan ke data view
         $data = [
             'title' => 'Laporan Barang Masuk',
             'date' => Carbon::now()->toFormattedDateString(),
             'filter' => $filter,
             'user' => Auth::user()->name,
             'barangKeluar' => $barangKeluar,
-            'transactionTypes' => $transactionTypes,
-            'supkonpro' => $supkonpro,
-            'products' => $products,
-            'startDate'=>$startDate,
-            'endDate'=>$endDate,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'selectedTransactionType' => $selectedTransactionType->jenis ?? '-',
+            'selectedSupkonpro' => $selectedSupkonpro->nama ?? '-',
+            'selectedProduct' => $selectedProduct->nama_barang ?? '-',
+            'totalJumlahKeluar' => $totalJumlahKeluar,
+            'totalHargaInvoice' => $totalHargaInvoice,
         ];
         // Generate PDF
         $pdf = PDF::loadView('laporan.laporan-barang-keluar-pdf', $data);
@@ -485,7 +514,6 @@ class DashboardController extends Controller
         return view('laporan.laporan-perubahan-persediaan', compact('allData', 'filter'));
     }
 
-
     public function downloadPerubahanPersediaanPdf(Request $request)
     {
         // Mengambil filter dari request
@@ -521,19 +549,28 @@ class DashboardController extends Controller
         })
         ->orderBy('created_at', 'desc')
         ->get();
+
         // Gabungkan data barang masuk dan keluar
         $allData = $detailPenerimaan->merge($detailPengeluaran)->sortByDesc('created_at');
+
+        // Hitung total jumlah diterima, jumlah keluar, dan harga invoice
+        $totalJumlahDiterima = $detailPenerimaan->sum('jumlah_diterima');
+        $totalJumlahKeluar = $detailPengeluaran->sum('jumlah_keluar');
+        $totalHargaInvoice = $allData->reduce(function ($carry, $item) {
+            return $carry + ($item->PenerimaanBarang->harga_invoice ?? $item->PengeluaranBarang->harga_invoice ?? 0);
+        }, 0);
 
         // Siapkan data untuk laporan
         $data = [
             'date' => Carbon::now()->toFormattedDateString(),
             'filter' => $filter,
             'user' => Auth::user()->name,
-            'detailPenerimaan' => $detailPenerimaan,
-            'detailPengeluaran' => $detailPengeluaran,
             'startDate' => $startDate->toFormattedDateString(),
             'endDate' => $endDate->toFormattedDateString(),
             'allData' => $allData,
+            'totalJumlahDiterima' => $totalJumlahDiterima,
+            'totalJumlahKeluar' => $totalJumlahKeluar,
+            'totalHargaInvoice' => $totalHargaInvoice,
         ];
 
         // Generate PDF
@@ -542,7 +579,6 @@ class DashboardController extends Controller
         // Download PDF dengan nama file yang dinamis
         return $pdf->download('laporan-perubahan-persediaan-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
-
 
     public function showBarangStokMinimal(Request $request)
     {
@@ -623,16 +659,15 @@ class DashboardController extends Controller
 
     public function downloadTotalStokPdf(Request $request)
     {
-        // Mendapatkan nilai perPage dari request, default 25 jika tidak ada
-        $perPage = $request->input('perPage', 25);
-
-        // Mengambil data barang sesuai dengan jumlah per halaman
-        $allBarangs = Barang::with('jenisBarang')
-            ->paginate($perPage)
-            ->appends(request()->except('page', 'perPage')); // Menjaga parameter lainnya
+        // Set batas memori dan waktu eksekusi
+        ini_set('memory_limit', '1G');
+        ini_set('max_execution_time', '300'); // 300 detik atau 5 menit
 
         // Mendapatkan total stok seluruh barang
         $totalStokSemuaBarang = Barang::sum('stok');
+
+        // Mengambil seluruh data barang tanpa paginasi
+        $allBarangs = Barang::with('jenisBarang')->get();
 
         // Siapkan data untuk laporan
         $data = [
@@ -642,102 +677,93 @@ class DashboardController extends Controller
             'totalStokSemuaBarang' => $totalStokSemuaBarang,
         ];
 
-        // Generate PDF dengan view 'laporan-total-stok-pdf'
+        // Generate PDF
         $pdf = PDF::loadView('laporan.laporan-total-stok-pdf', $data);
         
-        // Download PDF dengan nama file yang dinamis
+        // Unduh file PDF
         return $pdf->download('laporan-total-stok-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
 
-    public function showSaldo($type, Request $request) 
+    public function showSaldo(Request $request) 
     {
-        // Filter berdasarkan tahun dan bulan
+        // Filter berdasarkan tahun, bulan, dan barang
         $tahun = $request->get('tahun');
         $bulan = $request->get('bulan');
+        $barangId = $request->get('barang_id'); // Filter berdasarkan barang_id
 
-        // Filter default jika tahun dan bulan tidak dipilih
-        if ($tahun && $bulan) {
-            $allSaldoAwals = SaldoAwal::with('barang')
-                ->where('tahun', $tahun)
-                ->where('bulan', $bulan)
-                ->get();
-        } else {
-            // Filter default berdasarkan rentang waktu (jika ada)
-            $filter = $request->get('filter', 'current_month');
-            $dates = $this->getDateRange($request, $filter);
-            $startDate = $dates['startDate'];
-            $endDate = $dates['endDate'];
-
-            if (isset($startDate) && isset($endDate)) {
-                $allSaldoAwals = SaldoAwal::with('barang')
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->get();
-            } else {
-                $allSaldoAwals = SaldoAwal::with('barang')->get();
-            }
+        // Filter data berdasarkan input
+        $query = SaldoAwal::with('barang');
+        if ($tahun) {
+            $query->where('tahun', $tahun);
+        }
+        if ($bulan) {
+            $query->where('bulan', $bulan);
+        }
+        if ($barangId) {
+            $query->where('barang_id', $barangId);
         }
 
+        $allSaldoAwals = $query->get();
+
+        // Hitung total
         $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
         $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
         $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
+
+        // Ambil daftar barang untuk filter
+        $barangs = Barang::all();
 
         // Mengirim data ke view
-        return view('laporan.laporan-saldo-awal', 
-                    compact('allSaldoAwals', 'type', 'tahun', 'bulan', 
-                            'totalSaldoAwal', 'totalSaldoTerima', 'totalSaldoKeluar'));
+        return view('laporan.laporan-saldo-awal', compact(
+            'allSaldoAwals', 'tahun', 'bulan', 'barangId', 
+            'barangs', 'totalSaldoAwal', 'totalSaldoTerima', 'totalSaldoKeluar'
+        ));
     }
 
-
-    public function downloadSaldoAwalPdf($type, Request $request)
+    public function downloadSaldoAwalPdf(Request $request)
     {
-        // Ambil filter tahun dan bulan dari request
+        // Ambil filter dari request
         $tahun = $request->get('tahun');
         $bulan = $request->get('bulan');
+        $barangId = $request->get('barang_id'); // Filter barang
 
-        // Jika tahun dan bulan dipilih, filter berdasarkan tahun dan bulan
-        if ($tahun && $bulan) {
-            $allSaldoAwals = SaldoAwal::with('barang')
-                ->where('tahun', $tahun)
-                ->where('bulan', $bulan)
-                ->get();
-        } else {
-            // Jika tidak ada filter tahun dan bulan, gunakan rentang waktu berdasarkan filter
-            $filter = $request->get('filter', 'current_month');
-            $dates = $this->getDateRange($request, $filter);
-            $startDate = $dates['startDate'];
-            $endDate = $dates['endDate'];
-
-            if (isset($startDate) && isset($endDate)) {
-                $allSaldoAwals = SaldoAwal::with('barang')
-                    ->whereBetween('created_at', [$startDate, $endDate])
-                    ->get();
-            } else {
-                $allSaldoAwals = SaldoAwal::with('barang')->get();
-            }
+        // Query data berdasarkan filter
+        $query = SaldoAwal::with('barang');
+        if ($tahun) {
+            $query->where('tahun', $tahun);
+        }
+        if ($bulan) {
+            $query->where('bulan', $bulan);
+        }
+        if ($barangId) {
+            $query->where('barang_id', $barangId);
         }
 
-        // Hitung total saldo awal, total terima, dan total keluar
+        $allSaldoAwals = $query->get();
+
+        // Hitung total
         $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
         $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
         $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
+        $totalSaldoAkhir = $allSaldoAwals->sum('saldo_akhir');
 
         // Data tambahan untuk PDF
         $data = [
             'date' => Carbon::now()->toFormattedDateString(),
-            // 'filter' => $filter,
             'user' => Auth::user()->name,
             'tahun' => $tahun,
             'bulan' => $bulan,
+            'barangId' => $barangId,
             'totalSaldoAwal' => $totalSaldoAwal,
             'totalSaldoTerima' => $totalSaldoTerima,
             'totalSaldoKeluar' => $totalSaldoKeluar,
+            'totalSaldoAkhir' => $totalSaldoAkhir,
+
         ];
 
-        // Load view PDF
-        $pdf = PDF::loadView('laporan.laporan-saldo-awal-pdf', array_merge(compact('allSaldoAwals', 'type', 'tahun', 'bulan'), $data));
-
-        // Download file PDF dengan nama yang sesuai
-        return $pdf->download('laporan_saldo_awal_' . $type . '.pdf');
+        // Generate PDF
+        $pdf = PDF::loadView('laporan.laporan-saldo-awal-pdf', array_merge(compact('allSaldoAwals', 'barangId', 'tahun', 'bulan'), $data));
+        return $pdf->download('laporan_saldo_awal.pdf');
     }
 
 }

@@ -20,7 +20,7 @@
             <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
         @endif
         <div class="card-body">
-            <form action="{{ route('AddJenisBarangMasuk') }}" method="post">
+            <form action="{{ route('AddJenisBarangMasuk') }}" method="post" id='jenisBarangMasukForm'>
                 @csrf
                 
                 <div class="mb-3">
@@ -32,12 +32,50 @@
                     @enderror
                 </div>
                 
-                <button type="submit" class="btn btn-primary w-100">Save</button>
+                <button type="button" id="openConfirmationModal" class="btn btn-primary w-100">Save</button>
             </form>
+        </div>
+    </div>
+</div>
+<!-- Modal Konfirmasi -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Konfirmasi Data</h5>
+            </div>
+            <div class="modal-body">
+                Apakah data yang Anda masukkan sudah yakin?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Edit</button>
+                <button type="button" id="confirmSaveBtn" class="btn btn-primary">OK</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Modal konfirmasi instance
+        var confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+        // Handle tombol "Save" untuk membuka modal
+        $('#openConfirmationModal').on('click', function () {
+            confirmationModal.show();
+        });
+
+        // Handle tombol "Edit" untuk menutup modal
+        $('#confirmationModal .btn-secondary').on('click', function () {
+            confirmationModal.hide(); // Gunakan Bootstrap 5 Modal API untuk menutup
+        });
+
+        // Handle tombol "OK" untuk submit form
+        $('#confirmSaveBtn').on('click', function () {
+            $('#jenisBarangMasukForm').submit(); // Submit form
+        });
+    });
+</script>
 @endsection

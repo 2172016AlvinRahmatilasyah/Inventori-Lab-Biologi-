@@ -19,7 +19,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
-    <div class="container">
+<div class="container">
         <div class="card mx-auto" style="max-width: 500px;">
             <div class="card-header text-center">Edit Jenis Barang Keluar</div>
             @if (Session::has('fail'))
@@ -41,7 +41,8 @@
                         @enderror
                     </div>
                 
-                <button type="submit" class="btn btn-primary w-100">Save</button>
+                    <button type="submit" class="btn btn-primary w-100 mb-2">Save</button>
+                    <button type="button" class="btn btn-danger w-100" onclick="history.back()">Cancel</button>
             </form>
         </div>
     </div>

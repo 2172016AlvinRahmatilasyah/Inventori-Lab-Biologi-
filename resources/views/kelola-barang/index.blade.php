@@ -120,7 +120,7 @@
                                     <td>{{ $barang->plate }}</td>
                                     <td><a href="/edit-barang/{{ $barang->id }}" class="btn btn-primary btn-sm">Edit</a></td>
                                     <td><a href="/detail-barang/{{ $barang->id }}" class="btn btn-info btn-sm">Detail</a></td>
-                                    <td><a href="/delete-barang/{{ $barang->id }}" class="btn btn-danger btn-sm">Delete</a></td>
+                                    <td><a href="/delete-barang/{{ $barang->id }}" class="btn btn-danger btn-sm"  onclick="return confirm('Apakah Anda yakin ingin menghapus ini?')">Delete</a></td>
                                 </tr>
                             @endforeach
                         @else

@@ -67,20 +67,21 @@
                                 @foreach ($all_jenis_penerimaans as $jenis_penerimaan)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $jenis_penerimaan->jenis}}</td>
-                                        {{-- <td>{{ $jenis_penerimaan->created_at }}</td>
-                                        <td>{{ $jenis_penerimaan->updated_at }}</td> --}}
+                                        <td>{{ $jenis_penerimaan->jenis }}</td>
                                         <td><a href="/edit-jenis-barang-masuk/{{ $jenis_penerimaan->id }}" class="btn btn-primary btn-sm">Edit</a></td>
-                                        <td><a href="/delete-jenis-barang-masuk/{{ $jenis_penerimaan->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
-                                    </tr>
+                                        <td>
+                                            @if(!in_array($jenis_penerimaan->id, $used_jenis_ids))
+                                                <a href="/delete-jenis-barang-masuk/{{ $jenis_penerimaan->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="8">Data tidak ditemukan !</td>
+                                    <td colspan="3">Data tidak ditemukan!</td>
                                 </tr>
                             @endif
-                        </tbody>
+                        </tbody>                        
                     </table>
                 </div>
             </div>

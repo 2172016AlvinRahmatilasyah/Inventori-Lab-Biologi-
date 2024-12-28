@@ -17,7 +17,7 @@
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
-    <div class="container-fluid">
+<div class="container-fluid">
         <div class="card">
             <div class="card-header d-flex align-items-center">
                 <h2>Daftar Jenis Barang Keluar</h2>
@@ -71,13 +71,17 @@
                                         {{-- <td>{{ $jenis->created_at }}</td>
                                         <td>{{ $jenis->updated_at }}</td> --}}
                                         <td><a href="/edit-jenis-barang-keluar/{{ $jenis->id }}" class="btn btn-primary btn-sm">Edit</a></td>
-                                        <td><a href="/delete-jenis-barang-keluar/{{ $jenis->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td>
-                                    </tr>
+                                        {{-- <td><a href="/delete-jenis-barang-keluar/{{ $jenis->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a></td> --}}
+                                        <td>
+                                            @if(!in_array($jenis->id, $used_jenis_ids))
+                                                <a href="/delete-jenis-barang-keluar/{{ $jenis->id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="8">Data tidak ditemukan !</td>
+                                    <td colspan="3">Data tidak ditemukan !</td>
                                 </tr>
                             @endif
                         </tbody>
@@ -85,7 +89,5 @@
                 </div>
             </div>
         </div>
-
-    </div>
-   
+</div>
 @endsection

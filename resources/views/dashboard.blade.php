@@ -139,11 +139,11 @@
         <div class="row">
             <!-- Saldo Awal -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <a href="{{ url('/laporan-saldo/saldo-awal') }}" style="text-decoration: none;">
+                <a href="{{ url('/laporan-saldo') }}" style="text-decoration: none;">
                     <div class="card border-left-info shadow h-100 py-2">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Saldo Awal Keseluruhan Barang
+                                Mutasi Saldo Awal/Kartu Stok
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                  {{ $totalSaldoAwal, 0, ',', '.' }}
@@ -153,7 +153,7 @@
                 </a>
             </div>
 
-            <!-- Saldo Terima -->
+            {{-- <!-- Saldo Terima -->
             <div class="col-xl-4 col-md-6 mb-4">
                 <a href="{{ url('/laporan-saldo/saldo-terima') }}" style="text-decoration: none;">
                     <div class="card border-left-success shadow h-100 py-2">
@@ -183,7 +183,7 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> --}}
         </div>
 
         <h1 class="h3 mb-2 text-gray-800">Informasi</h1>

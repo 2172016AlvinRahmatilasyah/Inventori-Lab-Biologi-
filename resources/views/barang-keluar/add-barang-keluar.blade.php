@@ -20,31 +20,31 @@
             <span class="alert alert-danger p-2">{{ Session::get('fail') }}</span>
         @endif
         <div class="card-body">
-            <form action="{{ route('AddBarangKeluar') }}" method="post">
+            <form action="{{ route('AddBarangKeluar') }}" method="post" id="barangKeluarForm">
                 @csrf
                 <!-- Input Tanggal -->
                 <div class="mb-3">
-                    <label for="tanggal" class="form-label">Tanggal Pengeluaran</label>
-                    <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ old('tanggal') }}" required>
+                    <label for="tanggal" class="form-label">Tanggal Penerimaan</label>
+                    <input type="date" name="tanggal" id="tanggal" class="form-control" 
+                           value="{{ old('tanggal', date('Y-m-d')) }}" required>
                     @error('tanggal')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
-
-                <!-- Input Invoice -->
+                
                 <div class="mb-3">
                     <label for="invoice" class="form-label">Invoice</label>
-                    <input type="text" name="invoice" id="invoice" class="form-control" readonly>
+                    <input type="text" name="invoice" id="invoice" class="form-control" readonly required>
                 </div>
 
                 <!-- Input Jenis Barang Keluar -->
                 <div class="mb-3">
                     <label for="jenis_id" class="form-label">Jenis Barang Keluar</label>
-                    <select name="jenis_id" class="form-control select2" id="jenis_id">
+                    <select name="jenis_id" class="form-control select2" id="jenis_id" required>
                         <option value="">Pilih Jenis Barang Keluar</option>
                         @foreach ($all_jenis_pengeluarans as $jenis_pengeluaran)
                             <option value="{{ $jenis_pengeluaran->id }}" data-jenis="{{ $jenis_pengeluaran->jenis }}">
-                                {{ $jenis_pengeluaran->jenis }} (ID: {{ $jenis_pengeluaran->id }})
+                                {{ $jenis_pengeluaran->jenis }}
                             </option>
                         @endforeach
                     </select>
@@ -55,16 +55,16 @@
 
                 <!-- SupKonPro -->
                 <div class="mb-3" id="supkonpro-container">
-                    <label for="supkonpro_id" class="form-label">SupKonProy</label>
-                    <select name="supkonpro_id" class="form-control select2" id="supkonpro_id">
-                        <option value="">Pilih Jenis SupKonProy</option>
-                        <option value="none">None</option>
+                    <label for="supkonpro_id" class="form-label">Supplier/Konsumen/Proyek</label>
+                    <select name="supkonpro_id" class="form-control select2" id="supkonpro_id" required>
+                        <option value="">Pilih Jenis Supplier/Konsumen/Proyek</option>
+                        <option value="0">Tidak Ada</option>
                         @foreach ($all_supkonpros as $supkonpro)
                             <option value="{{ $supkonpro->id }}" data-jenis="{{ $supkonpro->jenis }}">
-                                {{ $supkonpro->jenis }} (Nama: {{ $supkonpro->nama }}) (ID: {{ $supkonpro->id }})
+                                {{ $supkonpro->jenis }} {{ $supkonpro->nama }}
                             </option>
                         @endforeach
-                    </select>                    
+                    </select>                          
                     @error('supkonpro_id')
                         <span class="text-danger">{{$message}}</span>
                     @enderror
@@ -72,7 +72,7 @@
 
                 <div class="mb-3">
                     <label for="user_id" class="form-label">Nama</label>
-                    <select class="form-control" disabled>
+                    <select class="form-control" disabled required>
                         <option value="{{ $user->id }}" selected>{{ $user->name }}</option>
                     </select>
                     <input type="hidden" name="user_id" value="{{ $user->id }}">
@@ -85,40 +85,45 @@
                     <label for="nama_pengambil" class="form-label">Nama Pengambil</label>
                     <input type="text" name="nama_pengambil" id="nama_pengambil" 
                             value="{{ old('nama_pengambil') }}" class="form-control" 
-                            placeholder="Enter Nama Pengambil">
+                            placeholder="Enter Nama Pengambil" required>
                     @error('nama_pengambil')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <!-- Dynamic Barang Inputs -->
-                <div id="barang-container">
+                {{-- <div id="barang-container">
                     <div class="barang-entry mb-3">
                         <label for="barang_id" class="form-label">Nama Barang</label>
                         <select name="barang_id[]" class="form-control select2 barang-select">
                             <option value="">Pilih Nama Barang</option>
                             @foreach ($all_barangs as $barang)
                                 <option value="{{ $barang->id }}">
-                                    {{ $barang->nama_barang }} (ID: {{ $barang->id }})
+                                    Nama Barang:{{ $barang->nama_barang }} - 
+                                    Lokasi: {{ $barang->lokasi }} - 
+                                    Stok: {{ $barang->stok}}
                                 </option>
                             @endforeach
                         </select>
                         <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
-                        <input type="text" name="jumlah_keluar[]" class="form-control jumlah-keluar" placeholder="Enter jumlah">
+                        <input step="0.01" type="number" name="jumlah_keluar[]" class="form-control jumlah-keluar" placeholder="Enter jumlah">
                 
                         <label for="harga" class="form-label">Harga</label>
-                        <input type="text" name="harga[]" class="form-control harga" placeholder="Enter harga">
+                        <input step="0.01" type="number" name="harga[]" class="form-control harga" placeholder="Enter harga">
                 
                         <label for="total_harga" class="form-label">Total Harga</label>
-                        <input type="text" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga">
+                        <input step="0.01" type="number" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga">
                     </div>
-                </div>
+                </div> --}}
+                <div id="barang-container"></div>
         
-                <button type="button" id="add-barang-btn" class="btn btn-secondary mb-3">+ Barang</button>
+                <button type="button" id="add-barang-btn" class="btn btn-success mb-3">+ Barang</button>
                 
                 <div class="mb-3">
                     <label for="keterangan" class="form-label">Keterangan</label>
-                    <input type="text" name="keterangan" id="keterangan" value="{{ old('keterangan') }}" class="form-control" placeholder="Enter keterangan">
+                    <input type="text" name="keterangan" id="keterangan" 
+                           value="{{ old('keterangan') }}" class="form-control" 
+                           placeholder="Enter keterangan" required>
                     @error('keterangan')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -128,15 +133,31 @@
                     <label for="harga_invoice" class="form-label">Harga Invoice</label>
                     <input type="text" name="harga_invoice" id="harga_invoice" 
                            value="{{ old('harga_invoice') }}" class="form-control" 
-                           placeholder="Enter Harga Invoice" readonly>
+                           placeholder="Enter Harga Invoice" readonly required>
                     @error('harga_invoice')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>                
-
-                <button type="submit" class="btn btn-primary w-100">Save</button>
-                <div id="barang-container"></div>
+                <button type="button" id="openConfirmationModal" class="btn btn-primary w-100" style="display: none;">Save</button>
+                <p style="color: red;">*Tombol Save otomatis akan muncul jika sudah mengisi semua data</p>
             </form>
+        </div>
+    </div>
+</div>
+<!-- Modal Konfirmasi -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Konfirmasi Data</h5>
+            </div>
+            <div class="modal-body">
+                Apakah data yang Anda masukkan sudah yakin?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Edit</button>
+                <button type="button" id="confirmSaveBtn" class="btn btn-primary">OK</button>
+            </div>
         </div>
     </div>
 </div>
@@ -144,103 +165,195 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
+    $(document).on('change', '#jenis_id', function () {
+        const jenisId = $(this).val();
+        if (jenisId === '0') {
+            $('#supkonpro_id').val('0').trigger('change'); // Set supkonpro_id ke 0
+            $('#supkonpro_id').prop('disabled', true); // Nonaktifkan dropdown
+        } else {
+            $('#supkonpro_id').prop('disabled', false); // Aktifkan dropdown kembali
+            $('#supkonpro_id').val('').trigger('change'); // Reset nilai jika bukan 0
+        }
+    });
+
     $(document).ready(function() {
-        // Inisialisasi select2
+        // Inisialisasi Select2 untuk elemen awal
         $('.select2').select2();
 
-        // Ketika tanggal dipilih, format invoice otomatis
-        $('#tanggal').on('change', function() {
-            var tanggal = $(this).val();  // Format: YYYY-MM-DD
-            if (tanggal) {
-                // Format tanggal menjadi YYMMDD
-                var dateParts = tanggal.split('-');
-                var formattedDate = dateParts[2].slice(-2) + dateParts[1] + dateParts[0].slice(-2); // Format: DDMMYY
-
-                // Menghitung nomor urut berdasarkan tanggal yang dipilih
-                $.ajax({
-                    url: "{{ route('generateInvoicePengeluaran') }}",  // Pastikan ini sesuai dengan route yang benar
-                    method: "GET",
-                    data: { tanggal: tanggal },
-                    success: function(response) {
-                        var noUrut = response.noUrut;
-                        $('#invoice').val(formattedDate + noUrut);  // Gabungkan tanggal + nomor urut
-                    }
-                });
-            }
+        const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
+            keyboard: false,
+            backdrop: 'static',
         });
 
-        // Menambahkan input barang baru
-        $('#add-barang-btn').click(function() {
+        // Event Listener untuk Tombol Save
+        $('#openConfirmationModal').on('click', function (e) {
+            e.preventDefault(); // Mencegah aksi default
+            confirmationModal.show(); // Menampilkan modal konfirmasi
+        });
+
+        // Event Listener untuk Tombol Edit (Tutup Modal)
+        $('#confirmationModal .btn-secondary').on('click', function () {
+            confirmationModal.hide(); // Menutup modal
+        });
+
+        // Event Listener untuk Tombol OK (Submit Form)
+        $('#confirmSaveBtn').on('click', function () {
+            $('#barangKeluarForm').submit(); // Submit form
+        });
+        
+        // Fungsi untuk menghitung total harga per barang
+        function calculateTotalHarga() {
+            $('#barang-container .barang-entry').each(function () {
+                const jumlahKeluar = parseFloat($(this).find('.jumlah-keluar').val()) || 0;
+                const harga = parseFloat($(this).find('.harga').val()) || 0;
+                const totalHarga = jumlahKeluar * harga;
+
+                // Update input Total Harga
+                $(this).find('.total-harga').val(totalHarga.toFixed(2)); // Format dua desimal
+            });
+
+            // Panggil fungsi untuk menghitung total invoice
+            calculateHargaInvoice();
+        }
+
+        // Fungsi untuk menghitung harga invoice (total keseluruhan)
+        function calculateHargaInvoice() {
+            let totalInvoice = 0;
+
+            // Iterasi setiap entri barang untuk menjumlahkan total harga
+            $('#barang-container .barang-entry').each(function () {
+                const totalHarga = parseFloat($(this).find('.total-harga').val()) || 0;
+                totalInvoice += totalHarga;
+            });
+
+            // Update input Harga Invoice
+            $('#harga_invoice').val(totalInvoice.toFixed(2)); // Format dua desimal
+        }
+
+        // Tambahkan barang baru
+        $('#add-barang-btn').click(function () {
             var newBarangEntry = `
                 <div class="barang-entry mb-3">
                     <label for="barang_id" class="form-label">Nama Barang</label>
-                    <select name="barang_id[]" class="form-control select2 barang-select">
+                    <select name="barang_id[]" class="form-control select2 barang-select" required>
                         <option value="">Pilih Nama Barang</option>
                         @foreach ($all_barangs as $barang)
                             <option value="{{ $barang->id }}" data-id="{{ $barang->id }}">
-                                {{ $barang->nama_barang }} (ID: {{ $barang->id }})
+                                Barang {{ $barang->nama_barang }}, Lokasi {{ $barang->lokasi }}, Stok {{ $barang->stok }}
                             </option>
                         @endforeach
                     </select>
                     <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
-                    <input type="text" name="jumlah_keluar[]" class="form-control jumlah-keluar" placeholder="Enter jumlah">
-
+                    <input step="0.01" type="number" name="jumlah_keluar[]" class="form-control jumlah-keluar" placeholder="Enter jumlah" required>
                     <label for="harga" class="form-label">Harga</label>
-                    <input type="text" name="harga[]" class="form-control harga" placeholder="Enter harga">
-
+                    <input step="0.01" type="number" name="harga[]" class="form-control harga" placeholder="Enter harga" required>
                     <label for="total_harga" class="form-label">Total Harga</label>
-                    <input type="text" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga">
-                    <!-- Tombol Batal untuk menghapus input -->
+                    <input step="0.01" type="number" name="total_harga[]" class="form-control total-harga" readonly placeholder="Enter total harga" required>
                     <button type="button" class="btn btn-danger mt-2 remove-barang-btn">Batal</button>
                 </div>
             `;
+
+            // Tambahkan elemen baru ke DOM
             $('#barang-container').append(newBarangEntry);
+
+            // Hapus dan inisialisasi ulang Select2 untuk elemen baru
             $('.select2').select2();
 
-            // Tombol untuk membatalkan dan menghapus input barang
-            $(document).on('click', '.remove-barang-btn', function() {
-                $(this).closest('.barang-entry').remove();
-            });
+            // Validasi form ulang setelah elemen baru ditambahkan
+            validateForm();
         });
 
-        // Update harga total dan invoice ketika jumlah atau harga barang berubah
-        $(document).on('input', '.jumlah-keluar, .harga', function() {
-            var totalHarga = 0;
-            var totalInvoice = 0;
+        // Hapus barang entry
+        $(document).on('click', '.remove-barang-btn', function () {
+            $(this).closest('.barang-entry').remove();
+            validateForm(); // Validasi ulang setelah barang dihapus
+            calculateTotalHarga(); // Hitung ulang total harga setelah barang dihapus
+        });
 
-            // Loop untuk setiap barang entry
-            $('.barang-entry').each(function() {
-                var jumlahKeluar = $(this).find('.jumlah-keluar').val();
-                var harga = $(this).find('.harga').val().replace(/\./g, '');  // Remove period for thousands separator
-                if (jumlahKeluar && harga) {
-                    var total = jumlahKeluar * parseFloat(harga);
-                    $(this).find('.total-harga').val(total.toLocaleString());  // Set total harga untuk setiap barang
-                    totalInvoice += total;  // Tambahkan ke total harga invoice
+        // Event listener untuk perhitungan otomatis
+        $(document).on('input', '.jumlah-keluar, .harga', function () {
+            calculateTotalHarga(); // Hitung ulang total harga per barang dan total invoice
+        });
+
+        // Validasi form
+        function validateForm() {
+            let isValid = true;
+
+            // Validasi semua input dan select yang memiliki atribut required
+            $('#barangKeluarForm').find('input[required], select[required]').each(function () {
+                if ($(this).val() === '' || $(this).val() === null) {
+                    isValid = false; // Jika ada yang kosong, form tidak valid
                 }
             });
 
-            // Update input harga_invoice dengan total seluruh barang
-            $('#harga_invoice').val(totalInvoice.toLocaleString());  // Format angka dengan koma sebagai pemisah ribuan
-        });
+            // Validasi khusus untuk barang di dalam #barang-container
+            $('#barang-container .barang-entry').each(function () {
+                const barangId = $(this).find('select[name="barang_id[]"]').val();
+                const jumlahKeluar = $(this).find('input[name="jumlah_keluar[]"]').val();
+                const harga = $(this).find('input[name="harga[]"]').val();
 
-        // Logika untuk menyembunyikan atau mengatur supkonpro_id saat jenis_id berubah
-        $('#jenis_id').on('change', function () {
-            var selectedJenis = $('#jenis_id option:selected').data('jenis');
-            
-            if (selectedJenis === 'Buang / Kadaluarsa') {
-                $('#supkonpro_id').val('none').trigger('change'); // Set nilai menjadi 'none'
-                $('#supkonpro-container').hide(); // Sembunyikan input
+                // Jika salah satu input barang kosong, form tidak valid
+                if (!barangId || !jumlahKeluar || !harga) {
+                    isValid = false;
+                }
+            });
+
+            // Tampilkan atau sembunyikan tombol Save
+            if (isValid) {
+                $('#openConfirmationModal').show(); // Tampilkan tombol Save
             } else {
-                $('#supkonpro-container').show(); // Tampilkan kembali input
+                $('#openConfirmationModal').hide(); // Sembunyikan tombol Save
             }
+        }
+
+        // Validasi form setiap input berubah
+        $('#barangKeluarForm').on('input change', 'input, select', function () {
+            validateForm();
         });
 
-        $(document).on('input', '.jumlah-keluar', function() {
-            var value = $(this).val();
-            if (value <= 0) {
-                alert('Jumlah keluar harus lebih dari 0');
-                $(this).val(''); // Reset nilai input
+        // Validasi form saat halaman dimuat
+        validateForm();
+        
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputTanggal = document.getElementById('tanggal');
+        const inputInvoice = document.getElementById('invoice');
+
+        // Fungsi untuk memperbarui nomor invoice
+        function updateInvoice(tanggal) {
+            if (tanggal) {
+                $.ajax({
+                    url: "{{ route('generateInvoicePenerimaan') }}", // Rute backend
+                    method: "GET",
+                    data: { tanggal: tanggal },
+                    success: function (response) {
+                        if (response.invoice) {
+                            inputInvoice.value = response.invoice; // Isi field invoice
+                        } else {
+                            console.error("Nomor invoice tidak ditemukan dalam respons.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Terjadi kesalahan saat mengambil nomor invoice:", error);
+                    }
+                });
             }
+        }
+
+        // Tetapkan tanggal hari ini jika tidak ada nilai sebelumnya
+        if (!inputTanggal.value) {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            inputTanggal.value = `${year}-${month}-${day}`;
+        }
+
+        // Perbarui invoice saat tanggal berubah
+        updateInvoice(inputTanggal.value);
+        inputTanggal.addEventListener('change', function () {
+            updateInvoice(this.value);
         });
     });
 </script>

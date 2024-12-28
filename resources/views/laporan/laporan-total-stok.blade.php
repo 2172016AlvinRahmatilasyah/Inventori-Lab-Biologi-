@@ -34,10 +34,15 @@
                 </div>
 
                 <!-- Download PDF button -->
-                <div>
+                {{-- <div>
                     <form method="get" action="{{ route('laporan-total-stok-pdf') }}">
                         <input type="hidden" name="perPage" value="{{ request('perPage', 25) }}">
                         <button type="submit" class="btn btn-danger">Download PDF</button>
+                    </form>
+                </div> --}}
+                <div>
+                    <form method="get" action="{{ route('laporan-total-stok-pdf') }}">
+                        <button type="submit" class="btn btn-danger">Download Total Stok PDF</button>
                     </form>
                 </div>
             </div>
@@ -47,7 +52,7 @@
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Id</th>
+                            <th>No</th>
                             <th>Nama Barang</th>
                             <th>Jenis Barang</th>
                             <th>Satuan Stok</th>

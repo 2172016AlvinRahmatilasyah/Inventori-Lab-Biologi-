@@ -40,7 +40,10 @@ class BarangController extends Controller
     
     public function loadAddBarangForm(){
         $jenis_barangs = jenis_barang::all();
-        return view('kelola-barang.add-barang', compact('jenis_barangs'));
+        $lokasi_list = Barang::distinct()->pluck('lokasi')->toArray();
+        $status_list = Barang::distinct()->pluck('status_barang')->toArray();
+
+        return view('kelola-barang.add-barang', compact('jenis_barangs', 'lokasi_list', 'status_list'));
     }
 
     public function AddBarang(Request $request){
@@ -50,7 +53,7 @@ class BarangController extends Controller
             'nama_barang' => 'required|string',
             'no_catalog' => 'required|string',
             'jenis_barang_id' => 'required|exists:jenis_barangs,id', 
-            'stok' => ['required', 'gt:0'], 
+            'stok' => ['required', 'gt:-1'], 
             'kadaluarsa' => 'nullable|date',
             'lokasi' => 'required|string',
             'status_barang' => 'nullable|string',

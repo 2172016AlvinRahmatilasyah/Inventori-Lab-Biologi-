@@ -25,6 +25,13 @@
         .text-right {
             text-align: right;
         }
+        tfoot, th {
+            font-weight: bold;
+            background-color: #f2f2f2; /* Warna latar belakang untuk pembeda */
+        }
+        tfoot th {
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -65,14 +72,14 @@
                         <td>{{ $data->PenerimaanBarang->user->name ?? $data->PengeluaranBarang->user->name ?? 'N/A' }}</td>
                         <td>{{ $data->PenerimaanBarang->jenispenerimaanbarang->jenis ?? $data->PengeluaranBarang->jenispengeluaranbarang->jenis ?? 'N/A' }}</td>
                         <td class="text-right">
-                            {{ $data->jumlah_diterima == 0 ? '-' : number_format($data->jumlah_diterima ?? 0, 0, ',', '.') }}
+                            {{ $data->jumlah_diterima == 0 ? '-' : number_format($data->jumlah_diterima ?? 0, 2, ',', '.') }}
                         </td>
                         <td class="text-right">
-                            {{ $data->jumlah_keluar == 0 ? '-' : number_format($data->jumlah_keluar ?? 0, 0, ',', '.') }}
+                            {{ $data->jumlah_keluar == 0 ? '-' : number_format($data->jumlah_keluar ?? 0, 2, ',', '.') }}
                         </td>                        
                         <td class="text-right">{{ number_format($data->harga ?? 0, 0, ',', '.') }}</td>
                         <td class="text-right">{{ number_format($data->total_harga ?? 0, 0, ',', '.') }}</td>
-                        <td class="text-right">{{ number_format( $data->PenerimaanBarang->harga_invoice ?? $data->PengeluaranBarang->harga_invoice ?? 0, 0, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format($data->PenerimaanBarang->harga_invoice ?? $data->PengeluaranBarang->harga_invoice ?? 0, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
             @else
@@ -81,6 +88,16 @@
                 </tr>
             @endif
         </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="6" style="text-align: right;">Total:</th>
+                <th class="text-right">{{ number_format($totalJumlahDiterima, 2, ',', '.') }}</th>
+                <th class="text-right">{{ number_format($totalJumlahKeluar, 2, ',', '.') }}</th>
+                <th></th> <!-- Kosongkan kolom harga -->
+                <th></th> <!-- Kosongkan kolom total harga -->
+                <th class="text-right">{{ number_format($totalHargaInvoice, 0, ',', '.') }}</th>
+            </tr>
+        </tfoot>        
     </table>
 </body>
 </html>
