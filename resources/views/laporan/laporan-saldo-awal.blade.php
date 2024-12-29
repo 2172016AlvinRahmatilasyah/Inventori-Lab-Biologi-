@@ -65,7 +65,7 @@
                     <div class="col-auto">
                         <select name="tahun" class="form-control" id="tahun">
                             <option value="">Pilih Tahun</option>
-                            @for ($i = 2020; $i <= now()->year+1; $i++)
+                            @for ($i = 2023; $i <= now()->year+3; $i++)
                                 <option value="{{ $i }}" {{ request('tahun') == $i ? 'selected' : '' }}>{{ $i }}</option>
                             @endfor
                         </select>

@@ -321,12 +321,12 @@ class DashboardController extends Controller
         }
 
         // Filter by transaction type
-        if ($request->filled('transaction_type')) {
+        if (!is_null($request->transaction_type) && $request->transaction_type !== '') {
             $query->whereHas('pengeluaranBarang.jenispengeluaranbarang', function ($q) use ($request) {
                 $q->where('id', $request->transaction_type);
             });
         }
-
+        
         // Filter by supkonpro
         if ($request->filled('supkonpro')) {
             $query->whereHas('pengeluaranBarang.supkonpro', function ($q) use ($request) {

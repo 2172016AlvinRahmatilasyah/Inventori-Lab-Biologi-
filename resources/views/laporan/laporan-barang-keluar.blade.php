@@ -59,13 +59,13 @@
             <!-- Filter by Transaction Type -->
             <div class="col-auto">
                 <select name="transaction_type" class="form-control">
-                    <option value="">Pilih Jenis Transaksi</option>
+                    <option value="" {{ is_null(request('transaction_type')) || request('transaction_type') === '' ? 'selected' : '' }}>Pilih Jenis Transaksi</option>
                     @foreach ($transactionTypes as $type)
-                        <option value="{{ $type->id }}" {{ request('transaction_type') == $type->id ? 'selected' : '' }}>
+                        <option value="{{ $type->id }}" {{ (string) request('transaction_type') === (string) $type->id ? 'selected' : '' }}>
                             {{ $type->jenis }}
                         </option>
                     @endforeach
-                </select>
+                </select>            
             </div>
             <!-- Filter by supkonpro -->
             <div class="col-auto">
@@ -163,20 +163,20 @@
     </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+       document.addEventListener('DOMContentLoaded', function () {
+            const transactionTypeSelect = document.querySelector('select[name="transaction_type"]'); // Deklarasi satu kali di sini
+            const filterSelect = document.getElementById('filter');
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+            const supkonproSelect = document.querySelector('select[name="supkonpro"]');
+            const productSelect = document.querySelector('select[name="product"]');
+
             // Initialize Select2 for all elements with the class 'select2'
             $('.select2').select2({
                 placeholder: "Pilih Barang",
                 allowClear: true
             });
-    
-            const filterSelect = document.getElementById('filter');
-            const startDateInput = document.getElementById('start_date');
-            const endDateInput = document.getElementById('end_date');
-            const transactionTypeSelect = document.querySelector('select[name="transaction_type"]');
-            const supkonproSelect = document.querySelector('select[name="supkonpro"]');
-            const productSelect = document.querySelector('select[name="product"]');
-    
+
             // Function to toggle date inputs based on the selected filter
             function toggleDateInputs() {
                 if (filterSelect.value === 'custom_dates') {
@@ -187,27 +187,30 @@
                     endDateInput.disabled = true;
                 }
             }
-    
+
             // Initialize the date inputs based on the current selected filter
             toggleDateInputs();
-    
+
             // Add event listener for filter changes
             filterSelect.addEventListener('change', toggleDateInputs);
-    
+
             // Reset button functionality
             document.getElementById('reset-filters').addEventListener('click', function () {
-                // Reset all filters to default values
-                filterSelect.value = 'current_month'; // Reset to default filter value
-                startDateInput.value = ''; // Clear start date
-                endDateInput.value = ''; // Clear end date
-                transactionTypeSelect.value = ''; // Reset transaction type
-                supkonproSelect.value = ''; // Reset Supkonpro filter
-                productSelect.value = ''; // Reset product filter
-    
-                // Reset Select2 dropdowns
+                // Reset semua filter ke nilai default
+                filterSelect.value = 'current_month'; // Reset ke default "Bulan Ini"
+                startDateInput.value = ''; // Kosongkan start_date
+                endDateInput.value = ''; // Kosongkan end_date
+                transactionTypeSelect.value = ''; // Reset transaction_type ke default
+                transactionTypeSelect.dispatchEvent(new Event('change')); // Trigger change untuk update UI
+                supkonproSelect.value = ''; // Reset supkonpro
+                supkonproSelect.dispatchEvent(new Event('change'));
+                productSelect.value = ''; // Reset product
+                productSelect.dispatchEvent(new Event('change'));
+
+                // Reset Select2 dropdown
                 $('.select2').val(null).trigger('change');
-    
-                // Reapply default toggle for date inputs
+
+                // Nonaktifkan tanggal jika filter bukan "custom_dates"
                 toggleDateInputs();
             });
         });

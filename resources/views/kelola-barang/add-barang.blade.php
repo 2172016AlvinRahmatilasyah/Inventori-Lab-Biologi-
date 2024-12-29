@@ -69,7 +69,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="jenis_barang_id" class="form-label">Jenis Id Barang</label>
+                    <label for="jenis_barang_id" class="form-label">Jenis Barang</label>
                     <select name="jenis_barang_id" class="form-control select2" id="jenis_barang_id" 
                       value="{{old('jenis_barang_id')}}">
                         <option value="">Pilih Jenis Barang</option>
