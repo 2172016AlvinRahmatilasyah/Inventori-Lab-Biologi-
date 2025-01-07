@@ -172,7 +172,53 @@
     $(document).ready(function () {
         // Inisialisasi Select2 untuk elemen awal
         $('.select2').select2();
+        
+        function validateLabels() {
+            // Periksa semua label dalam form
+            $('form#barangMasukForm .form-label').each(function () {
+                const associatedInput = $(this).siblings('input, select');
+                
+                if (associatedInput.length > 0) {
+                    if (associatedInput.prop('readonly')) {
+                        $(this).css('color', 'black'); // Tetap hitam untuk input readonly
+                    } else if (associatedInput.val() === '' || associatedInput.val() === null) {
+                        $(this).css('color', 'red'); // Ubah warna label menjadi merah
+                    } else {
+                        $(this).css('color', 'black'); // Ubah warna label menjadi hitam
+                    }
+                }
+            });
+            
+            // Periksa input jumlah_diterima dan harga di setiap barang-entry
+            $('#barang-container .barang-entry').each(function () {
+                const jumlahDiterimaLabel = $(this).find('label[for="jumlah_diterima"]');
+                const jumlahDiterimaInput = $(this).find('input[name="jumlah_diterima[]"]');
+                const hargaLabel = $(this).find('label[for="harga"]');
+                const hargaInput = $(this).find('input[name="harga[]"]');
 
+                // Validasi jumlah_diterima
+                if (jumlahDiterimaInput.val() === '' || jumlahDiterimaInput.val() === null) {
+                    jumlahDiterimaLabel.css('color', 'red');
+                } else {
+                    jumlahDiterimaLabel.css('color', 'black');
+                }
+
+                // Validasi harga
+                if (hargaInput.val() === '' || hargaInput.val() === null) {
+                    hargaLabel.css('color', 'red');
+                } else {
+                    hargaLabel.css('color', 'black');
+                }
+            });
+        }
+        // Event listener untuk setiap input dan select
+        $('#barangMasukForm').on('input change', 'input, select', function () {
+            validateLabels(); // Panggil fungsi validasi label
+        });
+
+        // Validasi saat halaman dimuat
+        validateLabels();
+        
         const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
             keyboard: false,
             backdrop: 'static',
@@ -223,7 +269,6 @@
             $('#harga_invoice').val(totalInvoice.toFixed(2)); // Format dua desimal
         }
 
-        // Tambahkan barang baru
         $('#add-barang-btn').click(function () {
             var newBarangEntry = `
                 <div class="barang-entry mb-3">
@@ -248,19 +293,23 @@
 
             // Tambahkan elemen baru ke DOM
             $('#barang-container').append(newBarangEntry);
-
-            // Hapus dan inisialisasi ulang Select2 untuk elemen baru
-            $('.select2').select2();
-
-            // Validasi form ulang setelah elemen baru ditambahkan
-            validateForm();
+            $('.select2').select2(); // Inisialisasi ulang Select2 untuk elemen baru
+            validateLabels(); // Validasi label untuk elemen baru
         });
 
-        // Hapus barang entry
         $(document).on('click', '.remove-barang-btn', function () {
-            $(this).closest('.barang-entry').remove();
-            validateForm(); // Validasi ulang setelah barang dihapus
-            calculateTotalHarga(); // Hitung ulang total harga setelah barang dihapus
+            const $barangEntry = $(this).closest('.barang-entry'); // Ambil elemen barang-entry terkait
+
+            // Tampilkan dialog konfirmasi
+            const userConfirmed = confirm('Apakah Anda yakin ingin menghapus data ini? Pilih "OK" untuk menghapus atau "Cancel" untuk batal.');
+
+            if (userConfirmed) {
+                // Hapus data jika pengguna mengonfirmasi
+                $barangEntry.remove();
+                calculateTotalHarga(); // Hitung ulang total harga setelah barang dihapus
+                validateForm(); // Validasi ulang setelah barang dihapus
+            }
+            // Jika pengguna memilih batal, tidak ada yang terjadi dan data tetap ada
         });
 
         // Event listener untuk perhitungan otomatis
@@ -348,6 +397,32 @@
         inputTanggal.addEventListener('change', function () {
             updateInvoice(this.value);
         });
+
+        $(document).on('input', '.jumlah-diterima', function () {
+            const value = parseFloat($(this).val());
+            if (value <= 0 || isNaN(value)) {
+                $(this).val(''); // Kosongkan input jika nilainya tidak valid
+                alert('Jumlah Diterima harus lebih besar dari 0.');
+            }
+        });
+
+        $('#barangMasukForm').on('submit', function (e) {
+            let isValid = true;
+
+            $('.jumlah-diterima').each(function () {
+                const value = parseFloat($(this).val());
+                if (value <= 0 || isNaN(value)) {
+                    isValid = false;
+                    alert('Jumlah Diterima harus lebih besar dari 0.');
+                    return false; // Hentikan iterasi
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault(); // Batalkan submit form
+            }
+        });
+        
     });
 </script>
 @endsection

@@ -180,6 +180,50 @@
         // Inisialisasi Select2 untuk elemen awal
         $('.select2').select2();
 
+        function validateLabels() {
+            // Periksa semua label dalam form
+            $('form#barangKeluarForm .form-label').each(function () {
+                const associatedInput = $(this).siblings('input, select');
+                
+                if (associatedInput.length > 0) {
+                    if (associatedInput.prop('readonly')) {
+                        $(this).css('color', 'black'); // Tetap hitam untuk input readonly
+                    } else if (associatedInput.val() === '' || associatedInput.val() === null) {
+                        $(this).css('color', 'red'); // Ubah warna label menjadi merah
+                    } else {
+                        $(this).css('color', 'black'); // Ubah warna label menjadi hitam
+                    }
+                }
+            });
+            
+            $('#barang-container .barang-entry').each(function () {
+                const jumlahKeluarLabel = $(this).find('label[for="jumlah_keluar"]');
+                const jumlahKeluarInput = $(this).find('input[name="jumlah_keluar[]"]');
+                const hargaLabel = $(this).find('label[for="harga"]');
+                const hargaInput = $(this).find('input[name="harga[]"]');
+
+                if (jumlahKeluarInput.val() === '' || jumlahKeluarInput.val() === null) {
+                    jumlahKeluarLabel.css('color', 'red');
+                } else {
+                    jumlahKeluarLabel.css('color', 'black');
+                }
+
+                // Validasi harga
+                if (hargaInput.val() === '' || hargaInput.val() === null) {
+                    hargaLabel.css('color', 'red');
+                } else {
+                    hargaLabel.css('color', 'black');
+                }
+            });
+        }
+        // Event listener untuk setiap input dan select
+        $('#barangKeluarForm').on('input change', 'input, select', function () {
+            validateLabels(); // Panggil fungsi validasi label
+        });
+
+        // Validasi saat halaman dimuat
+        validateLabels();
+
         const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'), {
             keyboard: false,
             backdrop: 'static',
@@ -255,19 +299,23 @@
 
             // Tambahkan elemen baru ke DOM
             $('#barang-container').append(newBarangEntry);
-
-            // Hapus dan inisialisasi ulang Select2 untuk elemen baru
-            $('.select2').select2();
-
-            // Validasi form ulang setelah elemen baru ditambahkan
-            validateForm();
+            $('.select2').select2(); // Inisialisasi ulang Select2 untuk elemen baru
+            validateLabels(); // Validasi label untuk elemen baru
         });
 
-        // Hapus barang entry
         $(document).on('click', '.remove-barang-btn', function () {
-            $(this).closest('.barang-entry').remove();
-            validateForm(); // Validasi ulang setelah barang dihapus
-            calculateTotalHarga(); // Hitung ulang total harga setelah barang dihapus
+            const $barangEntry = $(this).closest('.barang-entry'); // Ambil elemen barang-entry terkait
+
+            // Tampilkan dialog konfirmasi
+            const userConfirmed = confirm('Apakah Anda yakin ingin menghapus data ini? Pilih "OK" untuk menghapus atau "Cancel" untuk batal.');
+
+            if (userConfirmed) {
+                // Hapus data jika pengguna mengonfirmasi
+                $barangEntry.remove();
+                calculateTotalHarga(); // Hitung ulang total harga setelah barang dihapus
+                validateForm(); // Validasi ulang setelah barang dihapus
+            }
+            // Jika pengguna memilih batal, tidak ada yang terjadi dan data tetap ada
         });
 
         // Event listener untuk perhitungan otomatis
@@ -354,6 +402,31 @@
         updateInvoice(inputTanggal.value);
         inputTanggal.addEventListener('change', function () {
             updateInvoice(this.value);
+        });
+
+        $(document).on('input', '.jumlah-keluar', function () {
+            const value = parseFloat($(this).val());
+            if (value <= 0 || isNaN(value)) {
+                $(this).val(''); // Kosongkan input jika nilainya tidak valid
+                alert('Jumlah Keluar harus lebih besar dari 0.');
+            }
+        });
+
+        $('#barangKeluarForm').on('submit', function (e) {
+            let isValid = true;
+
+            $('.jumlah-keluar').each(function () {
+                const value = parseFloat($(this).val());
+                if (value <= 0 || isNaN(value)) {
+                    isValid = false;
+                    alert('Jumlah Keluar harus lebih besar dari 0.');
+                    return false; // Hentikan iterasi
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault(); // Batalkan submit form
+            }
         });
     });
 </script>
