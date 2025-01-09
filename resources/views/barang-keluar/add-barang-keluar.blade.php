@@ -24,7 +24,7 @@
                 @csrf
                 <!-- Input Tanggal -->
                 <div class="mb-3">
-                    <label for="tanggal" class="form-label">Tanggal Penerimaan</label>
+                    <label for="tanggal" class="form-label">Tanggal Pengeluaran</label>
                     <input type="date" name="tanggal" id="tanggal" class="form-control" 
                            value="{{ old('tanggal', date('Y-m-d')) }}" required>
                     @error('tanggal')

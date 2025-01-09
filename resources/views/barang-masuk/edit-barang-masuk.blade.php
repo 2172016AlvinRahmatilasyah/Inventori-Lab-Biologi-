@@ -158,6 +158,39 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
     $(document).ready(function () {
+        function validateInput(input) {
+            // Regular expression untuk angka dengan satu titik desimal
+            const regex = /^[0-9]+(\.[0-9]{1,2})?$/;
+            return regex.test(input);
+        }
+
+        // Mengonversi input ke format angka dengan pemisah ribuan
+        function formatNumber(value) {
+            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Event listener ketika input harga berubah
+       $('#harga').on('input', function () {
+            let input = $(this).val();
+        
+            // Hapus titik ribuan untuk validasi
+            let cleanInput = input.replace(/\./g, '');
+            
+            if (cleanInput === "") {
+                // Jika input kosong, tidak perlu menampilkan alert
+                return;
+            }
+        
+            if (validateInput(cleanInput)) {
+                // Jika input valid, tampilkan hasil dengan pemisah ribuan
+                $(this).val(formatNumber(cleanInput));
+            } else {
+                // Jika input tidak valid, kembalikan input sebelumnya
+                alert("Hanya angka yang diperbolehkan, dengan format desimal yang benar.");
+                $(this).val(input);  
+            }
+        });
+        
         // Fungsi untuk menghitung total harga baru
         function calculateTotalHarga() {
             const jumlahDiterima = parseFloat($('#jumlah_diterima').val()) || 0; // Nilai default 0 jika kosong
