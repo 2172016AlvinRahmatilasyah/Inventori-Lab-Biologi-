@@ -282,7 +282,7 @@
                     <select name="barang_id[]" class="form-control select2 barang-select" required>
                         <option value="">Pilih Nama Barang</option>
                         @foreach ($all_barangs as $barang)
-                            <option value="{{ $barang->id }}" data-id="{{ $barang->id }}">
+                            <option value="{{ $barang->id }}" data-stok="{{ $barang->stok }}">
                                 Barang {{ $barang->nama_barang }}, Lokasi {{ $barang->lokasi }}, Stok {{ $barang->stok }}
                             </option>
                         @endforeach
@@ -362,6 +362,25 @@
         // Validasi form saat halaman dimuat
         validateForm();
         
+        $(document).on('change', '.barang-select', function () {
+            const selectedOption = $(this).find(':selected');
+            const barangId = selectedOption.val();
+            const stok = selectedOption.data('stok'); // Ambil data stok dari atribut data
+
+            const jumlahKeluarInput = $(this).closest('.barang-entry').find('.jumlah-keluar');
+
+            // Jika jenis barang keluar memiliki id = 0, set jumlah_keluar = stok
+            const jenisId = $('#jenis_id').val();
+            if (jenisId === '0' && barangId) {
+                jumlahKeluarInput.val(stok); // Set jumlah keluar ke stok
+                jumlahKeluarInput.prop('readonly', true); // Buat readonly
+            } else {
+                jumlahKeluarInput.prop('readonly', false); // Biarkan editable jika bukan id = 0
+            }
+
+            calculateTotalHarga(); // Hitung ulang total harga
+        });
+
     });
 
     document.addEventListener('DOMContentLoaded', function () {
