@@ -98,7 +98,7 @@
 
         </div>
         
-        <form method="GET" action="" class="mb-4">
+        {{-- <form method="GET" action="" class="mb-4">
             <div class="form-row align-items-center">
                 <!-- Dropdown Tahun -->
                 <div class="col-auto">
@@ -134,7 +134,7 @@
                     <button type="submit" class="btn btn-primary">Filter</button>
                 </div>
             </div>
-        </form>
+        </form> --}}
         <!-- Content Row -->
         <div class="row">
             <!-- Saldo Awal -->
@@ -143,16 +143,27 @@
                     <div class="card border-left-info shadow h-100 py-2">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Mutasi Saldo Awal/Kartu Stok
+                                Laporan Mutasi Barang
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{-- <div class="h5 mb-0 font-weight-bold text-gray-800">
                                  {{ $totalSaldoAwal, 0, ',', '.' }}
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </a>
             </div>
 
+            <div class="col-xl-4 col-md-6 mb-4">
+                <a href="{{ route('laporan-kartu-stok') }}" style="text-decoration: none;">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Laporan Kartu Stok
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
             {{-- <!-- Saldo Terima -->
             <div class="col-xl-4 col-md-6 mb-4">
                 <a href="{{ url('/laporan-saldo/saldo-terima') }}" style="text-decoration: none;">

@@ -32,11 +32,11 @@ class barang extends Model
     
     public function detailpenerimaanbarang()
     {
-        return $this->hasMany(DetailPenerimaanBarang::class, 'master_penerimaan_barang_id');
+        return $this->hasMany(DetailPenerimaanBarang::class, 'barang_id');
     }
     public function detailpengeluaranbarang()
     {
-        return $this->hasMany(DetailPengeluaranBarang::class, 'master_pengeluaran_barang_id');
+        return $this->hasMany(DetailPengeluaranBarang::class, 'barang_id');
     }
 
     public function jenisPenerimaanBarang()

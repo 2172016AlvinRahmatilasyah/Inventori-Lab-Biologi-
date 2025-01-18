@@ -54,13 +54,18 @@ Route::middleware('auth')->group(function () {
                 ->name('laporan-total-stok');
     Route::get('laporan-total-stok-pdf', [DashboardController::class, 
                 'downloadTotalStokPdf'])->name('laporan-total-stok-pdf');
-    //laporan saldo awal
     // Route::get('/laporan-saldo/{type}', [DashboardController::class, 'showSaldo'])->name('laporan-saldo');
     // Route::get('/laporan-saldo-awal-pdf/{type}', [DashboardController::class, 
     //             'downloadSaldoAwalPdf'])->name('laporan-saldo-awal-pdf');
+    //laporan mutasi saldo awal
     Route::get('/laporan-saldo', [DashboardController::class, 'showSaldo'])->name('laporan-saldo');
     Route::get('/laporan-saldo-awal-pdf', [DashboardController::class, 
                 'downloadSaldoAwalPdf'])->name('laporan-saldo-awal-pdf');
+    //laporan kartu stok
+    Route::get('/laporan-kartu-stok', [DashboardController::class, 
+     'showKartuStok'])->name('laporan-kartu-stok');
+    Route::get('laporan-kartu-stok-pdf', [DashboardController::class, 
+        'downloadKartuStokPdf'])->name('laporan-kartu-stok-pdf');
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

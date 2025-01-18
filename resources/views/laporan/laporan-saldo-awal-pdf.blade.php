@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Saldo Awal/Kartu Stok</title>
+    <title>Laporan Mutasi Barang</title>
     <style>
         table {
             width: 100%;
@@ -20,11 +20,11 @@
         }
         tfoot, th {
             font-weight: bold;
-            background-color: #f2f2f2; /* Warna latar belakang untuk pembeda */
+            background-color: #f2f2f2;
         }
         th {
             font-weight: bold;
-            background-color: #f2f2f2; /* Warna latar belakang untuk pembeda */
+            background-color: #f2f2f2;
         }
         tfoot th {
             padding: 10px;
@@ -35,24 +35,25 @@
     </style>
 </head>
 <body>
-    <h1>Laporan Saldo Awal/Kartu Stok</h1>
+    <h1>Laporan Mutasi Barang</h1>
     <br>
     
+    <p> Periode: {{ $startDate }} - {{ $endDate }}</p>
     <p>Tanggal laporan dibuat: {{ $date }}</p>
     <p>Pembuat: {{ $user }}</p>
+    <br>
+    
     <p><strong>Filter:</strong></p>
     <ul>
         <li>Tahun: {{ $tahun ?? 'Semua Tahun' }}</li>
         <li>Bulan: {{ $bulan ?? 'Semua Bulan' }}</li>
-        <li>Barang: {{ $barangId ? $allSaldoAwals->first()->barang->nama_barang ?? 'Tidak Ditemukan' : 'Semua Barang' }}</li>
     </ul>
-    <br>
-    
     <h3>Data Saldo Awal</h3>
     <table>
         <thead>
             <tr>
                 <th>No</th>
+                <th>No Catalog</th>
                 <th>Nama Barang</th>
                 <th>Tahun</th>
                 <th>Bulan</th>
@@ -63,10 +64,11 @@
             </tr>
         </thead>
         <tbody>
-            @if ($allSaldoAwals && $allSaldoAwals->count() > 0)
+            @if ($allSaldoAwals->isNotEmpty())
                 @foreach ($allSaldoAwals as $saldo_awal)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
+                        <td>{{ $saldo_awal->barang->no_catalog ?? 'N/A' }}</td>
                         <td>{{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</td>
                         <td>{{ $saldo_awal->tahun }}</td>
                         <td>{{ $saldo_awal->bulan }}</td>
@@ -76,21 +78,12 @@
                         <td class="text-right">{{ number_format($saldo_awal->saldo_akhir, 2, '.', ',') }}</td>
                     </tr>
                 @endforeach
-                <tfoot>
-                    <tr>
-                        <td colspan="4" style="text-align: right;"><strong>Total:</strong></td>
-                        <td class="text-right"><strong>{{ number_format($totalSaldoAwal, 2, '.', ',') }}</strong></td>
-                        <td class="text-right"><strong>{{ number_format($totalSaldoTerima, 2, '.', ',') }}</strong></td>
-                        <td class="text-right"><strong>{{ number_format($totalSaldoKeluar, 2, '.', ',') }}</strong></td>
-                        <td class="text-right"><strong>{{ number_format($totalSaldoAkhir, 2, '.', ',') }}</strong></td>
-                    </tr>
-                </tfoot>
             @else
                 <tr>
-                    <td colspan="8">Data tidak ditemukan!</td>
+                    <td colspan="9">Data tidak ada!</td>
                 </tr>
             @endif
         </tbody>
-    </table>
+    </table>              
 </body>
 </html>

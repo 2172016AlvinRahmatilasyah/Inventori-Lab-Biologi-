@@ -180,6 +180,30 @@
         // Inisialisasi Select2 untuk elemen awal
         $('.select2').select2();
 
+        const barangMap = {};
+        
+        // Proses setiap option barang
+        $('.barang-select option').each(function() {
+            const barangId = $(this).val();
+            const barangNama = $(this).text().split(',')[0]; // Ambil nama barang
+            const tanggalKadaluwarsa = new Date($(this).data('tanggal-kadaluwarsa'));
+
+            // Simpan barang berdasarkan nama dan pilih barang dengan kadaluarsa paling dekat
+            if (!barangMap[barangNama] || new Date(barangMap[barangNama].data('tanggal-kadaluwarsa')) > tanggalKadaluwarsa) {
+                barangMap[barangNama] = $(this);
+            }
+        });
+
+        // Hanya menampilkan barang yang kadaluarsanya paling dekat
+        $('.barang-select option').each(function() {
+            const barangNama = $(this).text().split(',')[0]; // Ambil nama barang
+            if (barangMap[barangNama] !== $(this)) {
+                $(this).hide(); // Sembunyikan barang jika tidak yang kadaluarsa paling dekat
+            } else {
+                $(this).show(); // Tampilkan barang yang kadaluarsa paling dekat
+            }
+        });
+
         function validateLabels() {
             // Periksa semua label dalam form
             $('form#barangKeluarForm .form-label').each(function () {
@@ -282,8 +306,10 @@
                     <select name="barang_id[]" class="form-control select2 barang-select" required>
                         <option value="">Pilih Nama Barang</option>
                         @foreach ($all_barangs as $barang)
-                            <option value="{{ $barang->id }}" data-stok="{{ $barang->stok }}">
-                                Barang {{ $barang->nama_barang }}, Lokasi {{ $barang->lokasi }}, Stok {{ $barang->stok }}
+                            <option value="{{ $barang->id }}" 
+                                    data-stok="{{ $barang->stok }}" 
+                                    data-tanggal-kadaluwarsa="{{ $barang->kadaluarsa }}">
+                                Barang {{ $barang->nama_barang }}, Lokasi {{ $barang->lokasi }}, Stok {{ $barang->stok }}, Kadaluarsa {{ $barang->kadaluarsa }}
                             </option>
                         @endforeach
                     </select>

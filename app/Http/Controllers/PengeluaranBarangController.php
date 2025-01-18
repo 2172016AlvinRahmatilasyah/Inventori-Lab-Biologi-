@@ -91,7 +91,9 @@ class PengeluaranBarangController extends Controller
         $all_users = User::all();
         $all_jenis_pengeluarans = JenisPengeluaran::all();
         $user = Auth::user(); 
-        $all_barangs = barang::all();
+        $all_barangs = Barang::all()->groupBy('nama_barang')->map(function ($barangGroup) {
+            return $barangGroup->sortBy('kadaluarsa')->first();  // Ambil barang dengan kadaluarsa paling dekat
+        });
         
         return view('barang-keluar.add-barang-keluar', compact(
             'all_master_pengeluarans', 'all_supkonpros', 'all_users', 'all_jenis_pengeluarans', 'user',

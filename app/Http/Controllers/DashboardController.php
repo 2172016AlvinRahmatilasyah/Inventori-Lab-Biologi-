@@ -686,13 +686,13 @@ class DashboardController extends Controller
 
     public function showSaldo(Request $request) 
     {
-        // Filter berdasarkan tahun, bulan, dan barang
         $tahun = $request->get('tahun');
         $bulan = $request->get('bulan');
         $barangId = $request->get('barang_id'); // Filter berdasarkan barang_id
 
-        // Filter data berdasarkan input
-        $query = SaldoAwal::with('barang');
+        // Query data berdasarkan filter
+        $query = SaldoAwal::with('barang.jenisBarang'); // Memuat relasi barang dan jenisBarang
+
         if ($tahun) {
             $query->where('tahun', $tahun);
         }
@@ -700,35 +700,55 @@ class DashboardController extends Controller
             $query->where('bulan', $bulan);
         }
         if ($barangId) {
+            // Ensure filtering by barang_id is applied properly
             $query->where('barang_id', $barangId);
         }
 
+        // Get filtered data
         $allSaldoAwals = $query->get();
 
-        // Hitung total
+        // Calculate totals
         $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
         $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
         $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
 
-        // Ambil daftar barang untuk filter
+        // Get available barangs for filter dropdown
         $barangs = Barang::all();
 
-        // Mengirim data ke view
         return view('laporan.laporan-saldo-awal', compact(
-            'allSaldoAwals', 'tahun', 'bulan', 'barangId', 
-            'barangs', 'totalSaldoAwal', 'totalSaldoTerima', 'totalSaldoKeluar'
+            'allSaldoAwals', 'tahun', 'bulan', 'barangId', 'barangs',
+            'totalSaldoAwal', 'totalSaldoTerima', 'totalSaldoKeluar'
         ));
     }
 
     public function downloadSaldoAwalPdf(Request $request)
-    {
-        // Ambil filter dari request
+    {   
+        // Mendapatkan filter dari request, jika tidak ada gunakan 'current_month'
+        $filter = $request->get('filter', 'current_month');
+    
+        // Mendapatkan tahun dan bulan dari request
         $tahun = $request->get('tahun');
         $bulan = $request->get('bulan');
-        $barangId = $request->get('barang_id'); // Filter barang
-
+        $barangId = $request->get('barang_id'); // Filter berdasarkan barang_id
+    
+        // Tangani tanggal berdasarkan filter tahun dan bulan
+        if ($tahun && $bulan) {
+            // Format bulan menjadi dua digit
+            $bulan = str_pad($bulan, 2, '0', STR_PAD_LEFT);
+            
+            // Tetapkan rentang tanggal berdasarkan tahun dan bulan yang difilter
+            $startDate = Carbon::createFromFormat('Y-m-d', "{$tahun}-{$bulan}-01")->startOfMonth();
+            $endDate = Carbon::createFromFormat('Y-m-d', "{$tahun}-{$bulan}-01")->endOfMonth();
+        } else {
+            // Jika tahun dan bulan tidak disediakan, gunakan rentang tanggal dari fungsi getDateRange
+            $dates = $this->getDateRange($request, $filter);
+            $startDate = $dates['startDate'];
+            $endDate = $dates['endDate'];
+        }
+    
         // Query data berdasarkan filter
-        $query = SaldoAwal::with('barang');
+        $query = SaldoAwal::with('barang.jenisBarang'); // Memuat relasi barang dan jenisBarang
+    
         if ($tahun) {
             $query->where('tahun', $tahun);
         }
@@ -736,18 +756,23 @@ class DashboardController extends Controller
             $query->where('bulan', $bulan);
         }
         if ($barangId) {
+            // Ensure filtering by barang_id is applied properly
             $query->where('barang_id', $barangId);
         }
-
+    
+        // Get filtered data
         $allSaldoAwals = $query->get();
-
-        // Hitung total
+    
+        // Calculate totals
         $totalSaldoAwal = $allSaldoAwals->sum('saldo_awal');
         $totalSaldoTerima = $allSaldoAwals->sum('total_terima');
         $totalSaldoKeluar = $allSaldoAwals->sum('total_keluar');
-        $totalSaldoAkhir = $allSaldoAwals->sum('saldo_akhir');
-
-        // Data tambahan untuk PDF
+        $totalSaldoAkhir = $totalSaldoAwal + $totalSaldoTerima - $totalSaldoKeluar;
+    
+        // Get available barangs for filter dropdown
+        $barangs = Barang::all();
+    
+        // Data untuk PDF
         $data = [
             'date' => Carbon::now()->toFormattedDateString(),
             'user' => Auth::user()->name,
@@ -758,12 +783,216 @@ class DashboardController extends Controller
             'totalSaldoTerima' => $totalSaldoTerima,
             'totalSaldoKeluar' => $totalSaldoKeluar,
             'totalSaldoAkhir' => $totalSaldoAkhir,
+            'allSaldoAwals' => $allSaldoAwals,
+            'barangs' => $barangs,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ];
+    
+        // Generate PDF
+        $pdf = PDF::loadView('laporan.laporan-saldo-awal-pdf', $data);
+    
+        return $pdf->download('laporan_saldo_awal.pdf');
+    }
+    
+
+    public function showKartuStok(Request $request)
+    {
+        // Mendapatkan filter dari request, jika tidak ada gunakan 'current_month'
+        $filter = $request->get('filter', 'current_month');
+
+        // Mendapatkan rentang tanggal berdasarkan filter yang dipilih
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
+
+        // Filter berdasarkan Tahun dan Bulan jika ada
+        $tahun = $request->get('tahun');
+        $bulan = $request->get('bulan');
+        $barangId = $request->get('barang_id');
+
+        // Ambil saldo awal dari tabel saldo_awals berdasarkan barang_id, tahun, dan bulan
+        $saldoAwal = 0;
+        if ($barangId && $tahun && $bulan) {
+            // Menggunakan kolom tahun dan bulan untuk pencarian
+            $saldoAwalData = SaldoAwal::where('barang_id', $barangId)
+                ->where('tahun', $tahun)
+                ->where('bulan', $bulan)
+                ->first();
+
+            $saldoAwal = $saldoAwalData ? $saldoAwalData->saldo_awal : 0;
+        }
+
+        // Query untuk Barang Masuk (Penerimaan)
+        $detailPenerimaan = DetailPenerimaanBarang::with([
+            'PenerimaanBarang.jenisPenerimaanBarang',
+            'PenerimaanBarang.user',
+            'PenerimaanBarang.supkonpro',
+            'barang'
+        ])
+        ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate, $tahun, $bulan) {
+            // Filter berdasarkan tanggal
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+            
+            // Filter berdasarkan Tahun dan Bulan jika ada
+            if ($tahun) {
+                $query->whereYear('tanggal', $tahun);
+            }
+            if ($bulan) {
+                $query->whereMonth('tanggal', $bulan);
+            }
+        })
+        ->when($barangId, function ($query) use ($barangId) {
+            return $query->where('barang_id', $barangId);
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        // Query untuk Barang Keluar (Pengeluaran)
+        $detailPengeluaran = DetailPengeluaranBarang::with([
+            'PengeluaranBarang.jenisPengeluaranBarang',
+            'PengeluaranBarang.user',
+            'PengeluaranBarang.supkonpro',
+            'barang'
+        ])
+        ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate, $tahun, $bulan) {
+            // Filter berdasarkan tanggal
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+
+            // Filter berdasarkan Tahun dan Bulan jika ada
+            if ($tahun) {
+                $query->whereYear('tanggal', $tahun);
+            }
+            if ($bulan) {
+                $query->whereMonth('tanggal', $bulan);
+            }
+        })
+        ->when($barangId, function ($query) use ($barangId) {
+            return $query->where('barang_id', $barangId);
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        // Gabungkan data Barang Masuk dan Barang Keluar
+        $allData = $detailPenerimaan->merge($detailPengeluaran)->sortByDesc('created_at');
+
+        // Ambil list barang untuk dropdown
+        $barangs = Barang::all();
+
+        // Return view dengan data yang sudah difilter
+        return view('laporan.laporan-kartu-stok', 
+        compact('allData', 'filter', 'barangs', 'tahun', 'bulan', 'barangId', 'saldoAwal',
+                'startDate', 'endDate'));
+    }
+
+    public function downloadKartuStokPdf(Request $request)
+    {
+        // Mendapatkan filter dari request, jika tidak ada gunakan 'current_month'
+        $filter = $request->get('filter', 'current_month');
+
+        // Mendapatkan rentang tanggal berdasarkan filter yang dipilih
+        $dates = $this->getDateRange($request, $filter);
+        $startDate = $dates['startDate'];
+        $endDate = $dates['endDate'];
+
+        // Filter berdasarkan Tahun dan Bulan jika ada
+        $tahun = $request->get('tahun');
+        $bulan = $request->get('bulan');
+        $barangId = $request->get('barang_id');
+
+        // Ambil saldo awal dari tabel saldo_awals berdasarkan barang_id, tahun, dan bulan
+        $saldoAwal = 0;
+        if ($barangId && $tahun && $bulan) {
+            // Menggunakan kolom tahun dan bulan untuk pencarian
+            $saldoAwalData = SaldoAwal::where('barang_id', $barangId)
+                ->where('tahun', $tahun)
+                ->where('bulan', $bulan)
+                ->first();
+
+            $saldoAwal = $saldoAwalData ? $saldoAwalData->saldo_awal : 0;
+        }
+
+        // Query untuk Barang Masuk (Penerimaan)
+        $detailPenerimaan = DetailPenerimaanBarang::with([
+            'PenerimaanBarang.jenisPenerimaanBarang',
+            'PenerimaanBarang.user',
+            'PenerimaanBarang.supkonpro',
+            'barang'
+        ])
+        ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate, $tahun, $bulan) {
+            // Filter berdasarkan tanggal
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+            
+            // Filter berdasarkan Tahun dan Bulan jika ada
+            if ($tahun) {
+                $query->whereYear('tanggal', $tahun);
+            }
+            if ($bulan) {
+                $query->whereMonth('tanggal', $bulan);
+            }
+        })
+        ->when($barangId, function ($query) use ($barangId) {
+            return $query->where('barang_id', $barangId);
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        // Query untuk Barang Keluar (Pengeluaran)
+        $detailPengeluaran = DetailPengeluaranBarang::with([
+            'PengeluaranBarang.jenisPengeluaranBarang',
+            'PengeluaranBarang.user',
+            'PengeluaranBarang.supkonpro',
+            'barang'
+        ])
+        ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate, $tahun, $bulan) {
+            // Filter berdasarkan tanggal
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+
+            // Filter berdasarkan Tahun dan Bulan jika ada
+            if ($tahun) {
+                $query->whereYear('tanggal', $tahun);
+            }
+            if ($bulan) {
+                $query->whereMonth('tanggal', $bulan);
+            }
+        })
+        ->when($barangId, function ($query) use ($barangId) {
+            return $query->where('barang_id', $barangId);
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        // Gabungkan data Barang Masuk dan Barang Keluar
+        $allData = $detailPenerimaan->merge($detailPengeluaran)->sortByDesc('created_at');
+
+        // Ambil list barang untuk dropdown
+        $barangs = Barang::all();
+
+        
+        // Siapkan data untuk laporan
+        $data = [
+            'date' => Carbon::now()->toFormattedDateString(),
+            'filter' => $filter,
+            'user' => Auth::user()->name,
+            'startDate' => $startDate->toFormattedDateString(),
+            'endDate' => $endDate->toFormattedDateString(),
+            'allData' => $allData,
+            // 'totalJumlahDiterima' => $totalJumlahDiterima,
+            // 'totalJumlahKeluar' => $totalJumlahKeluar,
+            // 'totalHargaInvoice' => $totalHargaInvoice,
+            'barangs' => $barangs,
+            'tahun'=>$tahun,
+            'bulan'=>$bulan,
+            'barangId'=>$barangId,
+            'saldoAwal'=>$saldoAwal,
+            'bulan'=>$bulan,
 
         ];
 
         // Generate PDF
-        $pdf = PDF::loadView('laporan.laporan-saldo-awal-pdf', array_merge(compact('allSaldoAwals', 'barangId', 'tahun', 'bulan'), $data));
-        return $pdf->download('laporan_saldo_awal.pdf');
+        $pdf = PDF::loadView('laporan.laporan-kartu-stok-pdf', $data);
+        
+        // Download PDF dengan nama file yang dinamis
+        return $pdf->download('laporan-kartu-stok-' . Carbon::now()->format('Y-m-d') . '.pdf');
     }
-
 }

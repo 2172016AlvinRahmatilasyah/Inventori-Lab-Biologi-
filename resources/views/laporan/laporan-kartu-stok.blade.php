@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan Saldo Bulan Ini')
+@section('title', 'Laporan Kartu Stok')
 
 @section('content')
 <script src="{{ asset('template/vendor/jquery/jquery.min.js') }}"></script>
@@ -54,12 +54,13 @@
 <div class="container-fluid">
     <div class="card">
         <div class="card-header d-flex align-items-center">
-            <h2>Laporan Mutasi Barang</h2>
+            <h2>Laporan Kartu Stok</h2>
         </div>
-        
+
         <!-- Filter Form -->
         <div class="card-body">
-            <form method="GET" action="{{ route('laporan-saldo') }}">
+            <!-- Filter Form -->
+            <form method="get" action="{{ route('laporan-kartu-stok') }}">
                 @csrf 
                 <div class="form-row align-items-center">
                     <!-- Filter Tahun -->
@@ -71,7 +72,7 @@
                             @endfor
                         </select>
                     </div>
-            
+
                     <!-- Filter Bulan -->
                     <div class="col-auto">
                         <select name="bulan" class="form-control" id="bulan">
@@ -90,7 +91,9 @@
                             <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
                         </select>
                     </div>
-                    {{-- <div class="col-auto">
+
+                    <!-- Filter Barang -->
+                    <div class="col-auto">
                         <select name="barang_id" class="form-control select2" id="barang_id">
                             <option value="">Pilih atau ketik nama barang</option>
                             @foreach ($barangs as $barang)
@@ -100,77 +103,76 @@
                             @endforeach
                         </select>
                     </div>
-                     --}}
-                    <!-- Tombol Filter -->
+
+                    <!-- Filter Button -->
                     <div class="col-auto">
                         <button type="submit" class="btn btn-primary">Filter</button>
                     </div>
-            
-                    <!-- Tombol Download PDF -->
+
+                    <!-- PDF Button -->
                     <div class="col-auto">
-                        <a href="{{ route('laporan-saldo-awal-pdf') }}?tahun={{ request('tahun') }}&bulan={{ request('bulan') }}&barang_id={{ request('barang_id') }}" class="btn btn-danger">Download PDF</a>
+                        <a href="{{ route('laporan-kartu-stok-pdf') }}?tahun={{ request('tahun') }}&bulan={{ request('bulan') }}&barang_id={{ request('barang_id') }}" class="btn btn-danger">Download PDF</a>
                     </div>
                 </div>
-            </form>            
-    </div>
+            </form>
+        </div>
 
-        <!-- Saldo Report Table -->
+        <!-- Data Table for Combined Barang Masuk and Barang Keluar -->
         <div class="card-body">
+            <h5>Periode: {{ $startDate->format('d F Y') }} sampai {{ $endDate->format('d F Y') }}</h5>
+            @if($allData->isNotEmpty())
+                <h5>No Catalog: {{ $allData->first()->barang ? $allData->first()->barang->no_catalog : 'Data Tidak Tersedia' }}</h5>
+                <h5>Nama Barang: {{ $allData->first()->barang ? $allData->first()->barang->nama_barang : 'Data Tidak Tersedia' }}</h5>  
+            @else
+                <h5>Data Tidak Tersedia</h5>
+            @endif
+            <h5>Saldo Awal: {{ $saldoAwal ?? 0 }}</h5>
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>No Catalog</th>
-                            <th>Nama Barang</th>
-                            <th>Satuan</th>
-                            <th>Tahun</th>
-                            <th>Bulan</th>
-                            <th>Saldo Awal</th>
-                            <th>Total Terima</th>
-                            <th>Total Keluar</th>
+                            <th>Tanggal</th>
+                            <th>Invoice</th>
+                            <th>SupKonProy</th>
+                            <th>Jumlah Masuk</th>
+                            <th>Jumlah Keluar</th>
                             <th>Saldo Akhir</th>
-                            {{-- <th>Tanggal Ditambah</th>
-                            <th>Tanggal Diupdate</th> --}}
                         </tr>
                     </thead>
                     <tbody>
-                        @if($allSaldoAwals && $allSaldoAwals->count() > 0)
-                            @foreach ($allSaldoAwals as $saldo_awal)
+                        @if(isset($allData) && count($allData) > 0)
+                            @php
+                                // Set saldo awal untuk baris pertama
+                                $saldoAkhir = $saldoAwal;
+                            @endphp
+                            @foreach ($allData as $data)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $saldo_awal->barang->no_catalog ?? 'N/A' }}</td>
-                                    <td>{{ $saldo_awal->barang->nama_barang ?? 'N/A' }}</td>
-                                    <td>{{ 'Jenis ' . $saldo_awal->barang->jenisBarang->nama_jenis_barang . ', Satuan stok ' . $saldo_awal->barang->jenisBarang->satuan_stok ?? 'N/A' }}</td>
-                                    <td>{{ $saldo_awal->tahun }}</td>
-                                    <td>{{ $saldo_awal->bulan }}</td>
-                                    <td style="text-align: right;">{{ $saldo_awal->saldo_awal }}</td>
-                                    <td style="text-align: right;">{{ $saldo_awal->total_terima }}</td>
-                                    <td style="text-align: right;">{{ $saldo_awal->total_keluar }}</td>
-                                    <td style="text-align: right;">{{ $saldo_awal->saldo_akhir }}</td>
-                                    {{-- <td style="text-align: right;">
-                                        @if($type === 'saldo-awal')
-                                            {{ $saldo_awal->saldo_awal, 0 }}
-                                        @elseif($type === 'saldo-terima')
-                                            {{ $saldo_awal->total_terima, 0 }}
-                                        @elseif($type === 'saldo-keluar')
-                                            {{$saldo_awal->total_keluar, 0,  }}
-                                        @endif
-                                    </td> --}}
-                                    {{-- <td>{{ $saldo_awal->created_at }}</td>
-                                    <td>{{ $saldo_awal->updated_at }}</td> --}}
+                                    <td>{{ $data->PenerimaanBarang->tanggal ?? $data->PengeluaranBarang->tanggal ?? 'N/A' }}</td>
+                                    <td>{{ $data->PenerimaanBarang->invoice ?? $data->PengeluaranBarang->invoice ?? 'N/A' }}</td>
+                                    <td>{{ $data->PenerimaanBarang->supkonpro->nama ?? $data->PengeluaranBarang->supkonpro->nama ?? 'N/A' }}</td>
+                                    <td style="text-align: right;">{{ $data->jumlah_diterima ?? 0 }}</td>
+                                    <td style="text-align: right;">{{ $data->jumlah_keluar ?? 0 }}</td>
+                                    <td style="text-align: right;">
+                                        @php
+                                            // Hitung saldo akhir berdasarkan saldo awal + jumlah diterima - jumlah keluar
+                                            $saldoAkhir = $saldoAkhir + ($data->jumlah_diterima ?? 0) - ($data->jumlah_keluar ?? 0);
+                                        @endphp
+                                        {{ number_format($saldoAkhir, 2) }}
+                                    </td>
                                 </tr>
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="8">Data tidak ditemukan!</td>
+                                <td colspan="7">Data tidak ada!</td>
                             </tr>
-                        @endif
+                        @endif                        
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+        </div>        
+    </div> 
 </div>
 <script>
     $(document).ready(function() {
@@ -179,6 +181,7 @@
             allowClear: true
         });
     });
+    
     document.addEventListener('DOMContentLoaded', function () {
             const filterSelect = document.getElementById('filter');
             const startDateInput = document.getElementById('start_date');
