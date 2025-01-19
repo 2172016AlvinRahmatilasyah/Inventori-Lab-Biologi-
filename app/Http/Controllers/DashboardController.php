@@ -830,11 +830,8 @@ class DashboardController extends Controller
             'PenerimaanBarang.supkonpro',
             'barang'
         ])
-        ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate, $tahun, $bulan) {
-            // Filter berdasarkan tanggal
-            $query->whereBetween('tanggal', [$startDate, $endDate]);
-            
-            // Filter berdasarkan Tahun dan Bulan jika ada
+        ->whereHas('penerimaanBarang', function($query) use ($tahun, $bulan) {
+            // Filter berdasarkan Tahun dan Bulan langsung pada kolom tanggal
             if ($tahun) {
                 $query->whereYear('tanggal', $tahun);
             }
@@ -855,11 +852,8 @@ class DashboardController extends Controller
             'PengeluaranBarang.supkonpro',
             'barang'
         ])
-        ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate, $tahun, $bulan) {
-            // Filter berdasarkan tanggal
-            $query->whereBetween('tanggal', [$startDate, $endDate]);
-
-            // Filter berdasarkan Tahun dan Bulan jika ada
+        ->whereHas('pengeluaranBarang', function($query) use ($tahun, $bulan) {
+            // Filter berdasarkan Tahun dan Bulan langsung pada kolom tanggal
             if ($tahun) {
                 $query->whereYear('tanggal', $tahun);
             }
@@ -887,7 +881,7 @@ class DashboardController extends Controller
 
     public function downloadKartuStokPdf(Request $request)
     {
-        // Mendapatkan filter dari request, jika tidak ada gunakan 'current_month'
+        /// Mendapatkan filter dari request, jika tidak ada gunakan 'current_month'
         $filter = $request->get('filter', 'current_month');
 
         // Mendapatkan rentang tanggal berdasarkan filter yang dipilih
@@ -919,11 +913,8 @@ class DashboardController extends Controller
             'PenerimaanBarang.supkonpro',
             'barang'
         ])
-        ->whereHas('penerimaanBarang', function($query) use ($startDate, $endDate, $tahun, $bulan) {
-            // Filter berdasarkan tanggal
-            $query->whereBetween('tanggal', [$startDate, $endDate]);
-            
-            // Filter berdasarkan Tahun dan Bulan jika ada
+        ->whereHas('penerimaanBarang', function($query) use ($tahun, $bulan) {
+            // Filter berdasarkan Tahun dan Bulan langsung pada kolom tanggal
             if ($tahun) {
                 $query->whereYear('tanggal', $tahun);
             }
@@ -944,11 +935,8 @@ class DashboardController extends Controller
             'PengeluaranBarang.supkonpro',
             'barang'
         ])
-        ->whereHas('pengeluaranBarang', function($query) use ($startDate, $endDate, $tahun, $bulan) {
-            // Filter berdasarkan tanggal
-            $query->whereBetween('tanggal', [$startDate, $endDate]);
-
-            // Filter berdasarkan Tahun dan Bulan jika ada
+        ->whereHas('pengeluaranBarang', function($query) use ($tahun, $bulan) {
+            // Filter berdasarkan Tahun dan Bulan langsung pada kolom tanggal
             if ($tahun) {
                 $query->whereYear('tanggal', $tahun);
             }
@@ -967,7 +955,6 @@ class DashboardController extends Controller
 
         // Ambil list barang untuk dropdown
         $barangs = Barang::all();
-
         
         // Siapkan data untuk laporan
         $data = [
